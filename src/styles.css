@@ -1,0 +1,437 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap");
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Dopamine + Neobrutal design system.
+ * Hard offset shadows, thick black borders, vibrant flat colors.
+ */
+
+@theme inline {
+  --radius-sm: 12px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 20px;
+  --radius-3xl: 20px;
+  --radius-4xl: 20px;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-purple: var(--purple);
+  --color-shadow-dark: var(--shadow-dark);
+  --color-shadow-light: var(--shadow-light);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-black: var(--brand-black);
+  --color-brand-white: var(--brand-white);
+  --color-brand-bg: var(--brand-bg);
+}
+
+:root {
+  --radius: 20px;
+
+  /* Brand palette */
+  --brand-yellow: #ffe14d;
+  --brand-orange: #ff6b35;
+  --brand-pink: #ff6b9d;
+  --brand-black: #0a0a0a;
+  --brand-white: #ffffff;
+  --brand-bg: #fffdf0;
+
+  /* Semantic mapping */
+  --background: #fffdf0;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #ff6b35;
+  --primary-foreground: #ffffff;
+  --secondary: #ffe14d;
+  --secondary-foreground: #0a0a0a;
+  --muted: #fffdf0;
+  --muted-foreground: rgba(10, 10, 10, 0.65);
+  --accent: #ff6b9d;
+  --accent-foreground: #ffffff;
+  --destructive: #ff3b30;
+  --destructive-foreground: #ffffff;
+  --border: #0a0a0a;
+  --input: #ffffff;
+  --ring: #ff6b35;
+  --success: #2ecc71;
+  --warning: #ffe14d;
+  --info: #ff6b9d;
+  --purple: #ff6b9d;
+  --shadow-dark: #0a0a0a;
+  --shadow-light: #ffffff;
+  --chart-1: #ff6b35;
+  --chart-2: #ffe14d;
+  --chart-3: #ff6b9d;
+  --chart-4: #0a0a0a;
+  --chart-5: #2ecc71;
+  --sidebar: #ffe14d;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #ff6b35;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: #0a0a0a;
+  --sidebar-ring: #ff6b35;
+}
+
+/* Dark theme removed — Loopr is light-only by design. */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body,
+  #root {
+    background-color: var(--color-background);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family:
+      "Baloo 2",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-weight: 600;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Baloo 2", cursive;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font-family: "Baloo 2", cursive;
+    font-weight: 600;
+  }
+}
+
+/* === Neobrutal utilities === */
+@layer utilities {
+  /* Card variants — neobrutal: thick black border + hard offset shadow */
+  .neu-raised {
+    background-color: var(--brand-yellow);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .neu-raised-sm {
+    background-color: var(--brand-white);
+    border: 2px solid var(--brand-black);
+    border-radius: 12px;
+    box-shadow: 0 3px 0 var(--brand-black);
+  }
+  .neu-raised-lg {
+    background-color: var(--brand-white);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 8px 0 var(--brand-black);
+  }
+  .neu-inset {
+    background-color: var(--brand-white);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: inset 0 4px 0 var(--brand-black);
+  }
+  .neu-inset-sm {
+    background-color: var(--brand-white);
+    border: 2px solid var(--brand-black);
+    border-radius: 12px;
+  }
+  .neu-pressable {
+    background-color: var(--brand-yellow);
+    border: 3px solid var(--brand-black);
+    border-radius: 12px;
+    box-shadow: 0 5px 0 var(--brand-black);
+    color: var(--brand-black);
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+  }
+  .neu-pressable:hover {
+    box-shadow: 0 2px 0 var(--brand-black);
+    transform: translateY(3px);
+  }
+  .neu-pressable:active {
+    box-shadow: none;
+    transform: translateY(5px);
+  }
+  .neu-input {
+    background-color: var(--brand-white);
+    border: 2.5px solid var(--brand-black);
+    border-radius: 12px;
+    box-shadow: 0 4px 0 var(--brand-black);
+    color: var(--brand-black);
+    font-family: "Baloo 2", cursive;
+    font-weight: 600;
+    outline: none;
+    transition:
+      box-shadow 0.1s ease,
+      border-color 0.1s ease;
+  }
+  .neu-input:focus {
+    box-shadow: 0 4px 0 var(--brand-orange);
+    border-color: var(--brand-orange);
+  }
+  .neu-active {
+    box-shadow: none;
+    transform: translateY(5px);
+  }
+  .neu-risk-glow {
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow:
+      0 6px 0 var(--brand-black),
+      inset 6px 0 0 var(--destructive);
+    background-color: var(--brand-white);
+  }
+  .accent-strip-blue {
+    background: var(--brand-pink);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .accent-strip-green {
+    background: var(--success);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .accent-strip-amber {
+    background: var(--brand-yellow);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .accent-strip-red {
+    background: var(--destructive);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .accent-strip-purple {
+    background: var(--brand-pink);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+
+  /* Brutal building blocks */
+  .brutal-card {
+    background: var(--brand-white);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .brutal-card-yellow {
+    background: var(--brand-yellow);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+  }
+  .brutal-card-orange {
+    background: var(--brand-orange);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+    color: var(--brand-white);
+  }
+  .brutal-card-pink {
+    background: var(--brand-pink);
+    border: 3px solid var(--brand-black);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--brand-black);
+    color: var(--brand-white);
+  }
+
+  .brutal-btn {
+    background: var(--brand-orange);
+    border: 3px solid var(--brand-black);
+    border-radius: 12px;
+    box-shadow: 0 5px 0 var(--brand-black);
+    color: var(--brand-white);
+    font-family: "Baloo 2", cursive;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+  }
+  .brutal-btn:hover {
+    box-shadow: 0 2px 0 var(--brand-black);
+    transform: translateY(3px);
+  }
+  .brutal-btn:active {
+    box-shadow: none;
+    transform: translateY(5px);
+  }
+
+  .brutal-btn-secondary {
+    background: var(--brand-yellow);
+    color: var(--brand-black);
+    border: 3px solid var(--brand-black);
+    border-radius: 12px;
+    box-shadow: 0 5px 0 var(--brand-black);
+    font-family: "Baloo 2", cursive;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+  }
+  .brutal-btn-secondary:hover {
+    box-shadow: 0 2px 0 var(--brand-black);
+    transform: translateY(3px);
+  }
+  .brutal-btn-secondary:active {
+    box-shadow: none;
+    transform: translateY(5px);
+  }
+
+  .brutal-badge {
+    background: var(--brand-orange);
+    border: 2px solid var(--brand-black);
+    border-radius: 999px;
+    color: var(--brand-white);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 12px;
+    box-shadow: 0 3px 0 var(--brand-black);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .brutal-progress {
+    border: 2px solid var(--brand-black);
+    border-radius: 999px;
+    background: var(--brand-white);
+    height: 14px;
+    overflow: hidden;
+  }
+  .brutal-progress-fill {
+    background: linear-gradient(90deg, var(--brand-pink), var(--brand-orange));
+    border-radius: 999px;
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+
+  .brutal-divider {
+    border: 0;
+    border-top: 2px solid var(--brand-black);
+  }
+}
+
+@keyframes lt-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes lt-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes lt-bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes lt-spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes lt-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--brand-orange);
+  }
+  70% {
+    box-shadow: 0 0 0 18px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.animate-fade-up {
+  animation: lt-fade-up 0.7s ease-out both;
+}
+.animate-float {
+  animation: lt-float 6s ease-in-out infinite;
+}
+.animate-bar-grow {
+  transform-origin: bottom;
+  animation: lt-bar-grow 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-spin-slow {
+  animation: lt-spin-slow 24s linear infinite;
+}
+.animate-pulse-ring {
+  animation: lt-pulse-ring 2.4s ease-out infinite;
+}
