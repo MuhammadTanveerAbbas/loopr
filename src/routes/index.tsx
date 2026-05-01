@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/lib/auth";
 import {
   ArrowRight,
   Brain,
@@ -63,6 +64,23 @@ function useReveal<T extends HTMLElement>() {
 }
 
 function Landing() {
+  const { user, loading } = useAuth();
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      nav({ to: "/dashboard" });
+    }
+  }, [user, loading, nav]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="brutal-card px-5 py-3 text-sm font-bold">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-background">
       <Header />

@@ -35,7 +35,7 @@ export function Sidebar() {
   }: {
     to: string;
     label: string;
-    icon: ComponentType<{ className?: string }>;
+    icon: ComponentType<{ className?: string; strokeWidth?: number | string }>;
   }) => {
     const active = loc.pathname === to || loc.pathname.startsWith(to + "/");
     return (

@@ -8,6 +8,7 @@ import {
   useDraggable,
   useDroppable,
   DragOverlay,
+  type DragStartEvent,
   type DragEndEvent,
   PointerSensor,
   useSensor,
@@ -38,8 +39,8 @@ function Pipeline() {
     return map;
   }, [leads]);
 
-  const onDragStart = (e: { active: { id: string } }) => {
-    const lead = leads.find((l) => l.id === e.active.id);
+  const onDragStart = (e: DragStartEvent) => {
+    const lead = leads.find((l) => l.id === String(e.active.id));
     if (lead) setActiveLead(lead);
   };
   const onDragEnd = (e: DragEndEvent) => {
