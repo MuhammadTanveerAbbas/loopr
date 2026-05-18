@@ -117,7 +117,7 @@
   --sidebar-ring: #ff6b35;
 }
 
-/* Dark theme removed — Loopr is light-only by design. */
+/* Dark theme removed  Loopr is light-only by design. */
 
 @layer base {
   * {
@@ -160,7 +160,7 @@
 
 /* === Neobrutal utilities === */
 @layer utilities {
-  /* Card variants — neobrutal: thick black border + hard offset shadow */
+  /* Card variants  neobrutal: thick black border + hard offset shadow */
   .neu-raised {
     background-color: var(--brand-yellow);
     border: 3px solid var(--brand-black);

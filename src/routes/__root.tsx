@@ -2,6 +2,7 @@ import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanst
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 import appCss from "../styles.css?url";
 
@@ -18,7 +19,7 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
       {
         name: "description",
         content:
-          "Loopr by The MVP Guy. Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings — built for high-touch outbound.",
+          "Loopr by The MVP Guy. Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings  built for high-touch outbound.",
       },
     ],
     links: [
@@ -26,10 +27,45 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
   }),
+  errorComponent: ErrorBoundary,
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFound,
 });
+
+function ErrorBoundary({ error }: { error: Error }) {
+  const isAuthError = error.message?.includes("Unauthorized") || error.message?.includes("auth");
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <div className="brutal-card p-10 text-center max-w-md">
+        <div className="mx-auto w-16 h-16 rounded-full bg-[var(--destructive)] border-[3px] border-black flex items-center justify-center mb-4">
+          <AlertTriangle className="h-8 w-8 text-white" strokeWidth={3} />
+        </div>
+        <h1 className="text-2xl font-extrabold text-foreground">
+          {isAuthError ? "Session Expired" : "Something went wrong"}
+        </h1>
+        <p className="mt-2 text-foreground/70 text-sm">
+          {isAuthError
+            ? "Your session has expired. Please sign in again."
+            : "An unexpected error occurred. Please try again."}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="brutal-btn inline-flex items-center gap-2 mt-6 px-5 py-2.5 text-sm"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Reload
+        </button>
+        {isAuthError && (
+          <a href="/auth" className="block mt-4 text-sm font-bold underline">
+            Go to sign in
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function NotFound() {
   return (

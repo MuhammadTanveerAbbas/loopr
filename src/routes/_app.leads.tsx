@@ -10,6 +10,7 @@ import {
   type Lead,
 } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuBadge } from "@/components/ui/neu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
 import { useAuth } from "@/lib/auth";
 import { Plus, Search, Trash2, X, Download } from "lucide-react";
@@ -17,13 +18,38 @@ import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/leads")({
-  head: () => ({ meta: [{ title: "Leads — Loopr" }] }),
+  head: () => ({ meta: [{ title: "Leads  Loopr" }] }),
   component: LeadsPage,
 });
 
 function LeadsPage() {
   const { user } = useAuth();
-  const { data: leads = [] } = useLeads();
+  const { data, isLoading } = useLeads();
+  const leads = data?.leads ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="neu-raised p-4 rounded-xl">
+              <Skeleton className="h-5 w-40 mb-2" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const update = useUpdateLead();
   const create = useCreateLead();
   const del = useDeleteLead();
@@ -37,7 +63,8 @@ function LeadsPage() {
     if (search) {
       const s = search.toLowerCase();
       r = r.filter(
-        (l) => l.name.toLowerCase().includes(s) || (l.company ?? "").toLowerCase().includes(s),
+        (l: Lead) =>
+          l.name.toLowerCase().includes(s) || (l.company ?? "").toLowerCase().includes(s),
       );
     }
     if (stageFilter !== "all") r = r.filter((l) => l.stage === stageFilter);
@@ -231,7 +258,7 @@ function LeadsPage() {
                     </td>
                     <td className="px-3 py-2.5 text-center">
                       {ds === null ? (
-                        <span className="text-muted-foreground text-xs">—</span>
+                        <span className="text-muted-foreground text-xs"></span>
                       ) : (
                         <span
                           className={`text-xs font-semibold ${ds >= 5 ? "text-destructive" : "text-muted-foreground"}`}
@@ -248,7 +275,7 @@ function LeadsPage() {
                           e.target.value !== (l.next_action ?? "") &&
                           update.mutate({ id: l.id, patch: { next_action: e.target.value } })
                         }
-                        placeholder="—"
+                        placeholder=""
                         className="bg-transparent w-full text-sm text-foreground outline-none focus:neu-input focus:px-2 focus:rounded-lg placeholder:text-muted-foreground"
                       />
                     </td>

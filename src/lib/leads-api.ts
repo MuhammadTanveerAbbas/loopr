@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
 export type Touch = Database["public"]["Tables"]["lead_touches"]["Row"];
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export const STAGES = [
   "Contacted",
@@ -27,16 +29,61 @@ export const STAGE_COLOR: Record<string, "blue" | "amber" | "green" | "purple" |
     Lost: "red",
   };
 
-export function useLeads() {
+export interface LeadFilters {
+  stage?: string;
+  minScore?: number;
+  search?: string;
+}
+
+export interface PaginatedLeads {
+  leads: Lead[];
+  total: number;
+  hasMore: boolean;
+}
+
+const DEFAULT_PAGE_SIZE = 50;
+
+export function useLeads(options?: { pageSize?: number }) {
+  const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE;
+
   return useQuery({
-    queryKey: ["leads"],
+    queryKey: ["leads", pageSize],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("leads")
-        .select("*")
-        .order("updated_at", { ascending: false });
+        .select("*", { count: "exact" })
+        .order("updated_at", { ascending: false })
+        .limit(pageSize);
       if (error) throw error;
-      return data as Lead[];
+      return {
+        leads: data as Lead[],
+        total: count ?? 0,
+        hasMore: (data?.length ?? 0) >= pageSize,
+      } as PaginatedLeads;
+    },
+  });
+}
+
+export function useLeadsInfinite() {
+  const qc = useQueryClient();
+  const [page, setPage] = useState(0);
+  const pageSize = DEFAULT_PAGE_SIZE;
+
+  return useQuery({
+    queryKey: ["leads", "infinite", page],
+    queryFn: async () => {
+      const from = page * pageSize;
+      const { data, error, count } = await supabase
+        .from("leads")
+        .select("*", { count: "exact" })
+        .order("updated_at", { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      return {
+        leads: data as Lead[],
+        total: count ?? 0,
+        hasMore: from + pageSize < (count ?? 0),
+      } as PaginatedLeads;
     },
   });
 }
@@ -103,7 +150,6 @@ export function useAddTouch() {
     mutationFn: async (t: Database["public"]["Tables"]["lead_touches"]["Insert"]) => {
       const { data, error } = await supabase.from("lead_touches").insert(t).select().single();
       if (error) throw error;
-      // bump lead last_contact + has_reply if reply
       const patch: Partial<Lead> = { last_contact: new Date().toISOString() };
       if (t.type === "reply_received") patch.has_reply = true;
       if (t.sentiment) patch.last_sentiment = t.sentiment;
@@ -113,6 +159,22 @@ export function useAddTouch() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["touches", vars.lead_id] });
+    },
+  });
+}
+
+export function useProfile(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["profile", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("icp_text")
+        .eq("id", userId!)
+        .single();
+      if (error) throw error;
+      return data as Profile | null;
     },
   });
 }

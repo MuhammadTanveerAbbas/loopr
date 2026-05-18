@@ -1,18 +1,18 @@
 <div align="center">
 
   <img src="./public/favicon.svg" alt="Loopr Logo" width="80" height="80" />
-  
-  # Loopr
-  
-  **A focused CRM that thinks with you built for solo founders running high-touch outbound.**
-  
-  [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://loopr-io.vercel.app/)
-  [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
-  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org)
-  [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-  [![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+
+# Loopr
+
+**A focused CRM that thinks with you built for solo founders running high-touch outbound.**
+
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://loopr-io.vercel.app/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 
 </div>
 
@@ -22,34 +22,34 @@
 
 Loopr is a lightweight, AI-assisted CRM designed specifically for solo founders running high-touch outbound campaigns. Unlike bloated CRMs designed for enterprise sales teams, Loopr focuses on what matters: tracking leads, analyzing responses, and getting daily AI-powered briefings on what to do next.
 
-Built with the philosophy of "calm productivity" — no notifications, no streaks, no spam features. Just you and your pipeline.
+Built with the philosophy of "calm productivity" no notifications, no streaks, no spam features. Just you and your pipeline.
 
 ---
 
 ## ✨ Features
 
-- 📊 **Sheet & Kanban Views** — Two views of one pipeline. Edit in place or drag to advance deals.
-- 🧠 **AI Daily Briefing** — Each morning, AI surfaces who to follow up with and why.
-- 🎯 **Signal Score** — Every lead gets a 0–100 score based on engagement signals.
-- 💬 **Reply Analyzer** — Paste any reply to get sentiment analysis and suggested next steps.
-- 🔒 **Your Data, Yours Alone** — Single-tenant architecture. Export to CSV anytime.
-- 📈 **Pipeline Analytics** — Live charts showing stage-by-stage conversion and trends.
-- 🎨 **Calm by Design** — No notifications, no streaks, no dark patterns.
+- 📊 **Sheet & Kanban Views** Two views of one pipeline. Edit in place or drag to advance deals.
+- 🧠 **AI Daily Briefing** Each morning, AI surfaces who to follow up with and why.
+- 🎯 **Signal Score** Every lead gets a 0–100 score based on engagement signals.
+- 💬 **Reply Analyzer** Paste any reply to get sentiment analysis and suggested next steps.
+- 🔒 **Your Data, Yours Alone** Single-tenant architecture. Export to CSV anytime.
+- 📈 **Pipeline Analytics** Live charts showing stage-by-stage conversion and trends.
+- 🎨 **Calm by Design** No notifications, no streaks, no dark patterns.
 
 ---
 
 ## 🛠 Tech Stack
 
-| Category | Technology |
-|----------|-----------|
-| Frontend | React 19 + TypeScript + Vite |
-| Styling | Tailwind CSS v4 + custom neobrutal design system |
-| Routing | TanStack Router |
-| State | TanStack React Query |
-| Backend | Supabase (Auth + Database + Edge Functions + RLS) |
-| AI | OpenAI / Compatible API (configurable) |
-| UI Components | Radix UI primitives + custom components |
-| Charts | Recharts |
+| Category      | Technology                                        |
+| ------------- | ------------------------------------------------- |
+| Frontend      | React 19 + TypeScript + Vite                      |
+| Styling       | Tailwind CSS v4 + custom neobrutal design system  |
+| Routing       | TanStack Router                                   |
+| State         | TanStack React Query                              |
+| Backend       | Supabase (Auth + Database + Edge Functions + RLS) |
+| AI            | OpenAI / Compatible API (configurable)            |
+| UI Components | Radix UI primitives + custom components           |
+| Charts        | Recharts                                          |
 
 ---
 
@@ -102,6 +102,7 @@ AI_ENDPOINT=https://api.openai.com/v1/chat/completions
 ```
 
 Get your keys:
+
 - **Supabase**: https://supabase.com
 - **OpenAI**: https://platform.openai.com
 
@@ -144,13 +145,13 @@ loopr/
 
 ## 📦 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Build for production |
-| `pnpm preview` | Preview production build |
-| `pnpm lint` | Run ESLint |
-| `pnpm format` | Format code with Prettier |
+| Command        | Description               |
+| -------------- | ------------------------- |
+| `pnpm dev`     | Start development server  |
+| `pnpm build`   | Build for production      |
+| `pnpm preview` | Preview production build  |
+| `pnpm lint`    | Run ESLint                |
+| `pnpm format`  | Format code with Prettier |
 
 ---
 
@@ -162,7 +163,7 @@ This project is deployed on **Vercel** using TanStack Start + Nitro.
 
 1. Push your code to GitHub
 2. Import your repository at [vercel.com/new](https://vercel.com/new)
-3. Vercel auto-detects TanStack Start — no extra config needed
+3. Vercel auto-detects TanStack Start no extra config needed
 4. Add environment variables in the Vercel dashboard
 5. Deploy
 
@@ -203,7 +204,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
 
-**Muhammad Tanveer Abbas**  
+**Muhammad Tanveer Abbas**
 SaaS Developer | Building production-ready MVPs in 14–21 days
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-themvpguy.vercel.app-black?style=for-the-badge)](https://themvpguy.vercel.app)
@@ -211,6 +212,6 @@ SaaS Developer | Building production-ready MVPs in 14–21 days
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/muhammadtanveerabbas)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github)](https://github.com/MuhammadTanveerAbbas)
 
-*If this project helped you, please consider giving it a ⭐*
+_If this project helped you, please consider giving it a ⭐_
 
 </div>

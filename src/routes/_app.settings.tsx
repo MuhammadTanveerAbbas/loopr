@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/settings")({
-  head: () => ({ meta: [{ title: "Settings — Loopr" }] }),
+  head: () => ({ meta: [{ title: "Settings  Loopr" }] }),
   component: Settings,
 });
 

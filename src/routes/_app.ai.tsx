@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { ComponentType } from "react";
 import { useState } from "react";
 import { NeuCard, NeuButton, NeuTextarea, NeuBadge } from "@/components/ui/neu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Brain, RefreshCw, Search, MessageSquare, Calendar, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,13 +11,33 @@ import { daysSilent } from "@/lib/signal-score";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_app/ai")({
-  head: () => ({ meta: [{ title: "AI Workspace — Loopr" }] }),
+  head: () => ({ meta: [{ title: "AI Workspace - Loopr" }] }),
   component: AiPage,
 });
 
 function AiPage() {
   const { user } = useAuth();
-  const { data: leads = [] } = useLeads();
+  const { data, isLoading } = useLeads();
+  const leads = data?.leads ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-5 p-6">
+        <div>
+          <Skeleton className="h-8 w-40 mb-2" />
+          <Skeleton className="h-5 w-72" />
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="neu-raised p-5 rounded-2xl">
+              <Skeleton className="h-6 w-32 mb-3" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const { data: autopsies = [] } = useQuery({
     queryKey: ["ai_logs", "autopsy"],
@@ -103,7 +124,7 @@ function BriefingTool({ leads }: { leads: Lead[] }) {
     try {
       const summary = leads
         .slice(0, 30)
-        .map((l) => `${l.name} — ${l.stage}, silent ${daysSilent(l.last_contact) ?? "?"}d`)
+        .map((l) => `${l.name}  ${l.stage}, silent ${daysSilent(l.last_contact) ?? "?"}d`)
         .join("\n");
       const r = await supabase.functions.invoke("ai-task", {
         body: { task: "briefing", payload: { leads_summary: summary } },
@@ -212,7 +233,7 @@ function RecapTool({ leads }: { leads: Lead[] }) {
     try {
       const weekAgo = Date.now() - 7 * 86400000;
       const recent = leads.filter((l) => new Date(l.updated_at).getTime() > weekAgo);
-      const summary = recent.map((l) => `${l.name} (${l.stage}) — $${l.deal_value}`).join("\n");
+      const summary = recent.map((l) => `${l.name} (${l.stage})  $${l.deal_value}`).join("\n");
       const r = await supabase.functions.invoke("ai-task", {
         body: { task: "recap", payload: { leads_summary: summary } },
       });

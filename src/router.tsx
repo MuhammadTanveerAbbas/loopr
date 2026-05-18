@@ -4,14 +4,14 @@ import { routeTree } from "./routeTree.gen";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
-  // Don't expose raw error.message to users — it can leak internal details.
+  // Don't expose raw error.message to users  it can leak internal details.
   if (typeof console !== "undefined") console.error("Route error:", error);
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="neu-raised-lg rounded-3xl p-8 max-w-md text-center">
         <h1 className="text-xl font-bold text-foreground">Something broke</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          An unexpected error occurred. Please try again — if it keeps happening, refresh the page.
+          An unexpected error occurred. Please try again if it keeps happening, refresh the page.
         </p>
         <button
           onClick={() => {

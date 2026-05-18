@@ -11,7 +11,7 @@ import { LoopMark } from "@/components/ui/logo";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Loopr" },
+      { title: "Sign in  Loopr" },
       { name: "description", content: "Sign in or create an account for Loopr by The MVP Guy." },
     ],
   }),
@@ -90,7 +90,7 @@ function AuthPage() {
       />
 
       <Link to="/" className="flex items-center gap-3 mb-8 z-10 group">
-        <LoopMark size={44} className="transition-transform group-hover:rotate-[-6deg]" />
+        <LoopMark size={44} className="transition-transform group-hover:-rotate-6" />
         <div className="leading-none">
           <div className="font-extrabold text-xl text-foreground">Loopr</div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/70 mt-1">

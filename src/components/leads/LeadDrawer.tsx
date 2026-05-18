@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { type Lead, useUpdateLead, useTouches, useAddTouch, STAGES } from "@/lib/leads-api";
+import {
+  type Lead,
+  useUpdateLead,
+  useTouches,
+  useAddTouch,
+  useProfile,
+  STAGES,
+} from "@/lib/leads-api";
 import { NeuButton, NeuInput, NeuTextarea, NeuSelect, NeuBadge } from "@/components/ui/neu";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Plus, Mail, Sparkles, Copy } from "lucide-react";
+import { X, Plus, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { scoreColor } from "@/lib/signal-score";
 
@@ -11,6 +18,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
   const { user } = useAuth();
   const update = useUpdateLead();
   const { data: touches = [] } = useTouches(lead.id);
+  const { data: profile } = useProfile(user?.id);
   const addTouch = useAddTouch();
   const [newTouchType, setNewTouchType] = useState("note");
   const [newTouchNote, setNewTouchNote] = useState("");
@@ -36,11 +44,6 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
     setDraftBusy(true);
     try {
       const lastNote = touches.find((t) => t.note)?.note ?? "";
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("icp_text")
-        .eq("id", user!.id)
-        .single();
       const res = await supabase.functions.invoke("ai-task", {
         body: {
           task: "email_draft",
@@ -50,7 +53,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             niche: lead.niche,
             stage: lead.stage,
             last_note: lastNote,
-            user_icp: prof?.icp_text ?? "",
+            user_icp: profile?.icp_text ?? "",
           },
         },
       });

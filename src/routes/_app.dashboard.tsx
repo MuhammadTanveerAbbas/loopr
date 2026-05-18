@@ -2,20 +2,43 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent } from "@/lib/signal-score";
 import { ArrowDown, ArrowUp, RefreshCw, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Loopr" }] }),
+  head: () => ({ meta: [{ title: "Dashboard  Loopr" }] }),
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { data: leads = [], isLoading } = useLeads();
+  const { data, isLoading } = useLeads();
   const { user } = useAuth();
 
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6 p-6">
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="neu-raised p-4 rounded-2xl">
+                <Skeleton className="h-3 w-20 mb-2" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            ))}
+          </div>
+          <NeuCard className="rounded-2xl p-5">
+            <Skeleton className="h-4 w-40 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </NeuCard>
+        </div>
+      </div>
+    );
+  }
+
+  const leads = data?.leads ?? [];
   const stats = useMemo(() => {
     const active = leads.filter((l) => !["Won", "Lost"].includes(l.stage));
     const replied = leads.filter((l) => l.has_reply);
@@ -35,10 +58,11 @@ function Dashboard() {
   }, [leads]);
 
   const stageCounts = useMemo(() => {
+    const leads = data?.leads ?? [];
     const map: Record<string, number> = {};
     for (const l of leads) map[l.stage] = (map[l.stage] || 0) + 1;
     return map;
-  }, [leads]);
+  }, [data]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -49,22 +73,39 @@ function Dashboard() {
         </div>
       </header>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <KpiCard label="Total Leads" value={String(stats.total)} accent="blue" trend={null} />
-        <KpiCard
-          label="Active Pipeline"
-          value={`$${stats.pipelineValue.toLocaleString()}`}
-          accent="green"
-          trend={null}
-        />
-        <KpiCard label="Reply Rate" value={`${stats.replyRate}%`} accent="amber" trend={null} />
-        <KpiCard
-          label="Closed Won (mo)"
-          value={`${stats.wonCount} · $${stats.wonValue.toLocaleString()}`}
-          accent="purple"
-          trend={null}
-        />
-      </div>
+      {isLoading ? (
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="neu-raised p-4 rounded-2xl">
+                <Skeleton className="h-3 w-20 mb-2" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            ))}
+          </div>
+          <NeuCard className="rounded-2xl p-5">
+            <Skeleton className="h-4 w-40 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </NeuCard>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <KpiCard label="Total Leads" value={String(stats.total)} accent="blue" trend={null} />
+          <KpiCard
+            label="Active Pipeline"
+            value={`$${stats.pipelineValue.toLocaleString()}`}
+            accent="green"
+            trend={null}
+          />
+          <KpiCard label="Reply Rate" value={`${stats.replyRate}%`} accent="amber" trend={null} />
+          <KpiCard
+            label="Closed Won (mo)"
+            value={`${stats.wonCount} · $${stats.wonValue.toLocaleString()}`}
+            accent="purple"
+            trend={null}
+          />
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
@@ -106,7 +147,7 @@ function Dashboard() {
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-foreground truncate">{l.name}</div>
                     <div className="text-[11px] text-muted-foreground truncate">
-                      {l.company || "—"}
+                      {l.company || ""}
                     </div>
                   </div>
                   <NeuBadge color="red">{d}d silent</NeuBadge>
@@ -171,7 +212,7 @@ function BriefingCard({ userId, leads }: { userId?: string; leads: Lead[] }) {
         .slice(0, 30)
         .map(
           (l) =>
-            `${l.name} (${l.company || "—"}) — stage: ${l.stage}, days_silent: ${daysSilent(l.last_contact) ?? "n/a"}, deal: $${l.deal_value}`,
+            `${l.name} (${l.company || ""})  stage: ${l.stage}, days_silent: ${daysSilent(l.last_contact) ?? "n/a"}, deal: $${l.deal_value}`,
         )
         .join("\n");
       const res = await supabase.functions.invoke("ai-task", {

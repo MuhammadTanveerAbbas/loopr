@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-/** Loopr brand mark — flat neobrutal infinity loop. */
+/** Loopr brand mark  flat neobrutal infinity loop. */
 export function LoopMark({ size = 40, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden="true">

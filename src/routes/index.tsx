@@ -28,13 +28,13 @@ import { LoopMark, BrandLockup } from "@/components/ui/logo";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Loopr — A focused CRM that thinks with you" },
+      { title: "Loopr | A focused CRM that thinks with you" },
       {
         name: "description",
         content:
-          "Loopr by The MVP Guy. A lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings — built for high-touch outbound, not mass spam.",
+          "Loopr by The MVP Guy. A lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings  built for high-touch outbound, not mass spam.",
       },
-      { property: "og:title", content: "Loopr — Focused CRM by The MVP Guy" },
+      { property: "og:title", content: "Loopr | Focused CRM by The MVP Guy" },
       {
         property: "og:description",
         content:
@@ -103,7 +103,7 @@ function Landing() {
 
 function Header() {
   return (
-    <header className="sticky top-0 z-30 bg-[var(--brand-yellow)] border-b-[3px] border-black">
+    <header className="sticky top-0 z-30 bg-brand-yellow border-b-[3px] border-black">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
         <BrandLockup size={42} />
         <nav className="hidden md:flex items-center gap-7 text-sm font-bold uppercase tracking-wide">
@@ -147,7 +147,7 @@ function Hero() {
       </div>
       <div
         aria-hidden
-        className="hidden md:block absolute top-32 right-8 brutal-card-yellow px-3 py-2 text-xs font-extrabold uppercase rotate-[6deg] animate-float"
+        className="hidden md:block absolute top-32 right-8 brutal-card-yellow px-3 py-2 text-xs font-extrabold uppercase rotate-6 animate-float"
         style={{ animationDelay: "1.5s" }}
       >
         🎯 Built for solo
@@ -163,7 +163,7 @@ function Hero() {
         A really good notebook
         <br />
         <span
-          className="inline-block bg-[var(--brand-orange)] text-white px-4 -rotate-1 border-[3px] border-black mt-2"
+          className="inline-block bg-brand-orange text-white px-4 -rotate-1 border-[3px] border-black mt-2"
           style={{ boxShadow: "0 6px 0 #0A0A0A" }}
         >
           that also thinks.
@@ -174,7 +174,7 @@ function Hero() {
         style={{ animationDelay: "0.2s" }}
       >
         Track every deal in a calm, focused interface. Spreadsheet, Kanban, and a daily AI briefing
-        — no bloat, no mass spam.
+        no bloat, no mass spam.
       </p>
       <div
         className="mt-10 flex flex-wrap justify-center gap-4 animate-fade-up"
@@ -205,9 +205,9 @@ function HeroPreview() {
     >
       <div className="brutal-card p-6 md:p-8">
         <div className="flex items-center gap-2 mb-5 pb-4 border-b-2 border-black">
-          <div className="w-3.5 h-3.5 rounded-full bg-[var(--destructive)] border-2 border-black" />
-          <div className="w-3.5 h-3.5 rounded-full bg-[var(--brand-yellow)] border-2 border-black" />
-          <div className="w-3.5 h-3.5 rounded-full bg-[var(--success)] border-2 border-black" />
+          <div className="w-3.5 h-3.5 rounded-full bg-destructive border-2 border-black" />
+          <div className="w-3.5 h-3.5 rounded-full bg-brand-yellow border-2 border-black" />
+          <div className="w-3.5 h-3.5 rounded-full bg-success border-2 border-black" />
           <div className="ml-3 text-xs font-bold text-foreground/60">loopr.io/dashboard</div>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
@@ -246,7 +246,7 @@ function MiniBars() {
       {data.map((h, i) => (
         <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
           <div
-            className="w-full border-2 border-black bg-[var(--brand-orange)] animate-bar-grow"
+            className="w-full border-2 border-black bg-brand-orange animate-bar-grow"
             style={{ height: `${h}%`, animationDelay: `${i * 0.05}s`, borderRadius: "6px 6px 0 0" }}
           />
           <div className="text-[10px] font-extrabold text-black">
@@ -270,7 +270,7 @@ function LogoStrip() {
     "MVP GUILD",
   ];
   return (
-    <section className="py-10 border-y-[3px] border-black bg-[var(--brand-yellow)]">
+    <section className="py-10 border-y-[3px] border-black bg-brand-yellow">
       <div className="max-w-6xl mx-auto px-6">
         <p className="text-center text-xs font-extrabold uppercase tracking-widest text-foreground/70 mb-5">
           Trusted by solo operators worldwide
@@ -350,7 +350,7 @@ function Features() {
     {
       icon: Mail,
       title: "Reply analyzer",
-      desc: "Paste any reply — get sentiment, intent, and a suggested next move.",
+      desc: "Paste any reply  get sentiment, intent, and a suggested next move.",
       color: "var(--brand-orange)",
     },
     {
@@ -414,7 +414,7 @@ function ChartShowcase() {
             align="left"
             eyebrow="Visual pipeline"
             title="Watch your pipeline breathe"
-            sub="Live charts, signal trends, and stage velocity — at a glance, every morning."
+            sub="Live charts, signal trends, and stage velocity  at a glance, every morning."
           />
           <ul className="mt-8 space-y-3">
             {[
@@ -425,7 +425,7 @@ function ChartShowcase() {
             ].map((t) => (
               <li key={t} className="flex items-start gap-3 text-foreground font-semibold">
                 <div
-                  className="w-6 h-6 mt-0.5 shrink-0 bg-[var(--success)] border-2 border-black rounded-full flex items-center justify-center"
+                  className="w-6 h-6 mt-0.5 shrink-0 bg-success border-2 border-black rounded-full flex items-center justify-center"
                   style={{ boxShadow: "0 2px 0 #0A0A0A" }}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 text-black" strokeWidth={3} />
@@ -447,7 +447,7 @@ function ChartShowcase() {
               <div className="text-xl font-extrabold text-foreground">This week</div>
             </div>
             <div
-              className="w-10 h-10 bg-[var(--brand-orange)] border-[2.5px] border-black rounded-xl flex items-center justify-center"
+              className="w-10 h-10 bg-brand-orange border-[2.5px] border-black rounded-xl flex items-center justify-center"
               style={{ boxShadow: "0 3px 0 #0A0A0A" }}
             >
               <BarChart3 className="h-5 w-5 text-white" strokeWidth={2.5} />
@@ -602,7 +602,7 @@ function Comparison() {
     if (typeof v === "boolean") {
       return v ? (
         <div
-          className={`mx-auto w-8 h-8 ${accent ? "bg-[var(--success)]" : "bg-white"} border-[2.5px] border-black rounded-lg flex items-center justify-center`}
+          className={`mx-auto w-8 h-8 ${accent ? "bg-success" : "bg-white"} border-[2.5px] border-black rounded-lg flex items-center justify-center`}
           style={{ boxShadow: "0 3px 0 #0A0A0A" }}
         >
           <CheckCircle2 className="h-4 w-4 text-black" strokeWidth={3} />
@@ -628,7 +628,7 @@ function Comparison() {
       <SectionHeader
         eyebrow="Compare"
         title="Loopr vs the usual suspects"
-        sub="Same job — different philosophy."
+        sub="Same job  different philosophy."
       />
       <Reveal>
         <div className="mt-12 brutal-card p-0 overflow-hidden">
@@ -639,7 +639,7 @@ function Comparison() {
                   <th className="text-left px-6 py-5 text-xs font-extrabold uppercase tracking-wider text-foreground/70">
                     Feature
                   </th>
-                  <th className="px-4 py-5 bg-[var(--brand-orange)] border-l-[3px] border-r-[3px] border-black">
+                  <th className="px-4 py-5 bg-brand-orange border-l-[3px] border-r-[3px] border-black">
                     <div className="text-white font-extrabold text-base">Loopr</div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-white/80 mt-1">
                       by The MVP Guy
@@ -668,7 +668,7 @@ function Comparison() {
                     <td className="text-left px-6 py-4 text-sm font-bold text-foreground">
                       {r.label}
                     </td>
-                    <td className="px-4 py-4 bg-[var(--brand-yellow)]/40 border-l-[3px] border-r-[3px] border-black">
+                    <td className="px-4 py-4 bg-brand-yellow/40 border-l-[3px] border-r-[3px] border-black">
                       <Cell v={r.loopr} accent />
                     </td>
                     <td className="px-4 py-4">
@@ -791,7 +791,7 @@ function FAQ() {
     },
     {
       q: "Why no team plan?",
-      a: "Loopr is built for one person who runs their own outbound. We may add small-team features later — never enterprise.",
+      a: "Loopr is built for one person who runs their own outbound. We may add small-team features later  never enterprise.",
     },
   ];
   const [open, setOpen] = useState<number | null>(0);
@@ -810,7 +810,7 @@ function FAQ() {
               >
                 <span className="font-extrabold text-foreground text-base">{it.q}</span>
                 <div
-                  className={`w-8 h-8 bg-[var(--brand-yellow)] border-2 border-black rounded-lg flex items-center justify-center transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`w-8 h-8 bg-brand-yellow border-2 border-black rounded-lg flex items-center justify-center transition-transform ${isOpen ? "rotate-180" : ""}`}
                   style={{ boxShadow: "0 2px 0 #0A0A0A" }}
                 >
                   <ChevronDown className="h-4 w-4 text-black" strokeWidth={3} />
@@ -841,7 +841,7 @@ function CTA() {
       <div className="brutal-card-orange p-12 md:p-16 text-center relative overflow-hidden">
         <div
           aria-hidden
-          className="absolute top-6 left-6 brutal-card-yellow px-3 py-1.5 text-xs font-extrabold uppercase rotate-[-6deg]"
+          className="absolute top-6 left-6 brutal-card-yellow px-3 py-1.5 text-xs font-extrabold uppercase -rotate-6"
         >
           🔥 Free forever tier
         </div>
@@ -900,7 +900,7 @@ function Footer() {
     },
   ];
   return (
-    <footer className="bg-[var(--brand-yellow)] border-t-[3px] border-black mt-10">
+    <footer className="bg-brand-yellow border-t-[3px] border-black mt-10">
       <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid md:grid-cols-5 gap-10">
           {/* Brand col */}
@@ -948,7 +948,7 @@ function Footer() {
                   <li key={l.label}>
                     <a
                       href={l.href}
-                      className="text-sm font-semibold text-foreground/80 hover:text-foreground hover:underline underline-offset-4 decoration-[2px]"
+                      className="text-sm font-semibold text-foreground/80 hover:text-foreground hover:underline underline-offset-4 decoration-2"
                     >
                       {l.label}
                     </a>
@@ -967,7 +967,7 @@ function Footer() {
           </div>
           <div className="text-xs font-bold text-foreground/80 flex items-center gap-1.5">
             Crafted with{" "}
-            <Heart className="h-3.5 w-3.5 text-[var(--brand-orange)] fill-[var(--brand-orange)]" />{" "}
+            <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" />{" "}
             by
             <span className="font-extrabold text-foreground">The MVP Guy</span>
           </div>

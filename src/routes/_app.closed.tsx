@@ -1,15 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { useLeads } from "@/lib/leads-api";
+import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard } from "@/components/ui/neu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_app/closed")({
-  head: () => ({ meta: [{ title: "Closed Won — Loopr" }] }),
+  head: () => ({ meta: [{ title: "Closed Won - Loopr" }] }),
   component: Closed,
 });
 
 function Closed() {
-  const { data: leads = [] } = useLeads();
+  const { data, isLoading } = useLeads();
+  const leads: Lead[] = data?.leads ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-5 p-6">
+        <div>
+          <Skeleton className="h-8 w-32 mb-2" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="neu-raised p-4 rounded-xl text-center">
+              <Skeleton className="h-4 w-16 mx-auto mb-2" />
+              <Skeleton className="h-8 w-24 mx-auto" />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="neu-raised-sm p-3 rounded-xl flex justify-between">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const won = useMemo(
     () =>
       leads
@@ -74,7 +104,7 @@ function Closed() {
                 {won.map((l) => (
                   <tr key={l.id}>
                     <td className="px-3 py-2.5 font-medium text-foreground">{l.name}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{l.company || "—"}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground">{l.company || ""}</td>
                     <td className="px-3 py-2.5 text-right font-semibold text-foreground">
                       ${Number(l.deal_value).toLocaleString()}
                     </td>
@@ -82,7 +112,7 @@ function Closed() {
                       {new Date(l.updated_at).toLocaleDateString()}
                     </td>
                     <td className="px-3 py-2.5 text-muted-foreground text-xs truncate max-w-xs">
-                      {l.notes || "—"}
+                      {l.notes || ""}
                     </td>
                   </tr>
                 ))}

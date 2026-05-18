@@ -2,23 +2,45 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useLeads } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent } from "@/lib/signal-score";
 import { Copy, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/nurture")({
-  head: () => ({ meta: [{ title: "Nurture — Loopr" }] }),
+  head: () => ({ meta: [{ title: "Nurture  Loopr" }] }),
   component: Nurture,
 });
 
 function Nurture() {
-  const { data: leads = [] } = useLeads();
+  const { data, isLoading } = useLeads();
+  const leads = data?.leads ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-5 p-6">
+        <div>
+          <Skeleton className="h-8 w-24 mb-2" />
+          <Skeleton className="h-5 w-64" />
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="neu-raised p-4 rounded-xl">
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const targets = useMemo(
     () =>
       leads
         .filter(
-          (l) =>
+          (l: any) =>
             !["Won", "Lost"].includes(l.stage) &&
             l.has_reply &&
             (daysSilent(l.last_contact) ?? 0) > 5,
@@ -66,7 +88,7 @@ function Nurture() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-foreground">{l.name}</span>
-                      <span className="text-sm text-muted-foreground">· {l.company || "—"}</span>
+                      <span className="text-sm text-muted-foreground">· {l.company || ""}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">
                       <NeuBadge>{l.stage}</NeuBadge>

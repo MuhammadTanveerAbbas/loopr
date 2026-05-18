@@ -7,6 +7,33 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const record = requestCounts.get(identifier);
+
+  if (!record || now > record.resetAt) {
+    requestCounts.set(identifier, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+}
+
+function sanitizeInput(input: string, maxLength: number = 2000): string {
+  // eslint-disable-next-line no-control-regex
+  return input.slice(0, maxLength).replace(/[\x00-\x1F\x7F]/g, "");
+}
+
 interface TaskPayload {
   leads_summary?: string;
   name?: string;
@@ -27,7 +54,7 @@ const PROMPTS: Record<string, (p: TaskPayload) => { system: string; user: string
   email_draft: (p) => ({
     system:
       "You write short personalized outreach emails. Sound like a real founder, not a marketer.",
-    user: `Write a subject line and email body (under 120 words) for this lead:\nName: ${p.name}\nCompany: ${p.company || "—"}\nNiche: ${p.niche || "—"}\nStage: ${p.stage}\nLast note: ${p.last_note || "—"}\nMy ICP: ${p.user_icp || "—"}\n\nFormat as:\nSubject: ...\n\n[body]`,
+    user: `Write a subject line and email body (under 120 words) for this lead:\nName: ${p.name}\nCompany: ${p.company || ""}\nNiche: ${p.niche || ""}\nStage: ${p.stage}\nLast note: ${p.last_note || ""}\nMy ICP: ${p.user_icp || ""}\n\nFormat as:\nSubject: ...\n\n[body]`,
   }),
   reply_analysis: (p) => ({
     system: "You analyze sales reply sentiment. Be terse.",
@@ -43,11 +70,11 @@ const PROMPTS: Record<string, (p: TaskPayload) => { system: string; user: string
   }),
   reengage: (p) => ({
     system: "You write short, warm re-engagement messages. Under 60 words.",
-    user: `Lead: ${p.name} at ${p.company || "—"}, stage ${p.stage}. Write a brief, casual re-engage message (under 60 words). No "just checking in".`,
+    user: `Lead: ${p.name} at ${p.company || ""}, stage ${p.stage}. Write a brief, casual re-engage message (under 60 words). No "just checking in".`,
   }),
   autopsy: (p) => ({
     system: "You analyze why deals are lost.",
-    user: `Lost deal: ${p.name} at ${p.company || "—"}.\nNotes: ${p.notes || "—"}\nLast sentiment: ${p.last_sentiment || "—"}\n\nIn 2-3 sentences: what likely went wrong, when momentum died, what signal was missed.`,
+    user: `Lost deal: ${p.name} at ${p.company || ""}.\nNotes: ${p.notes || ""}\nLast sentiment: ${p.last_sentiment || ""}\n\nIn 2-3 sentences: what likely went wrong, when momentum died, what signal was missed.`,
   }),
 };
 
@@ -55,21 +82,22 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // --- Auth check: require a valid Supabase session ---
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (!token) return jsonResp({ error: "Unauthorized" }, 401);
+    const jwtClaims = req.headers.get("x-jwt-claims");
+    if (!jwtClaims) return jsonResp({ error: "Unauthorized" }, 401);
 
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY)
-      return jsonResp({ error: "Server not configured" }, 500);
+    let claims: { sub?: string };
+    try {
+      claims = JSON.parse(jwtClaims);
+    } catch {
+      return jsonResp({ error: "Unauthorized" }, 401);
+    }
 
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    if (userErr || !userData.user) return jsonResp({ error: "Unauthorized" }, 401);
+    const userId = claims.sub;
+    if (!userId) return jsonResp({ error: "Unauthorized" }, 401);
+
+    if (!checkRateLimit(userId)) {
+      return jsonResp({ error: "Rate limit exceeded. Try again in a minute." }, 429);
+    }
 
     let body: { task?: unknown; payload?: unknown };
     try {
@@ -82,28 +110,38 @@ serve(async (req) => {
       body.payload && typeof body.payload === "object"
         ? (body.payload as Record<string, unknown>)
         : {};
-    const builder = PROMPTS[task];
-    if (!builder) return jsonResp({ error: "Unknown task" }, 400);
 
-    // Cap payload size to mitigate abusive prompts
-    const serialized = JSON.stringify(payload);
+    if (!PROMPTS[task]) return jsonResp({ error: "Unknown task" }, 400);
+
+    const sanitizedPayload: TaskPayload = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (typeof value === "string") {
+        sanitizedPayload[key as keyof TaskPayload] = sanitizeInput(value);
+      }
+    }
+
+    const serialized = JSON.stringify(sanitizedPayload);
     if (serialized.length > 20_000) return jsonResp({ error: "Payload too large" }, 413);
 
     const AI_API_KEY = Deno.env.get("AI_API_KEY");
-    const AI_ENDPOINT = Deno.env.get("AI_ENDPOINT") || "https://api.groq.com/openai/v1/chat/completions";
+    const AI_ENDPOINT =
+      Deno.env.get("AI_ENDPOINT") || "https://api.groq.com/openai/v1/chat/completions";
+    const AI_MODEL = Deno.env.get("AI_MODEL") || "llama-3.3-70b-versatile";
     if (!AI_API_KEY) return jsonResp({ error: "AI not configured" }, 500);
 
-    const { system, user } = builder(payload);
+    const { system, user } = PROMPTS[task](sanitizedPayload);
 
     const r = await fetch(AI_ENDPOINT, {
       method: "POST",
       headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: AI_MODEL,
         messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
+          { role: "system", content: sanitizeInput(system, 4000) },
+          { role: "user", content: sanitizeInput(user, 4000) },
         ],
+        max_tokens: 1024,
+        temperature: 0.7,
       }),
     });
 

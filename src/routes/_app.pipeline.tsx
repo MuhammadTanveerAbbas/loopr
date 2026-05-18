@@ -16,28 +16,58 @@ import {
 } from "@dnd-kit/core";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_app/pipeline")({
-  head: () => ({ meta: [{ title: "Pipeline — Loopr" }] }),
+  head: () => ({ meta: [{ title: "Pipeline  Loopr" }] }),
   component: Pipeline,
 });
 
 function Pipeline() {
-  const { data: leads = [] } = useLeads();
+  const { data, isLoading } = useLeads();
+  const leads = data?.leads ?? [];
   const update = useUpdateLead();
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [openLead, setOpenLead] = useState<Lead | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ Won: true, Lost: true });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  if (isLoading) {
+    return (
+      <div className="max-w-full mx-auto space-y-5 p-6">
+        <div>
+          <Skeleton className="h-8 w-24 mb-2" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {STAGES.map((stage) => (
+            <div key={stage} className="shrink-0 w-[300px]">
+              <div className="neu-raised rounded-2xl p-3">
+                <Skeleton className="h-5 w-20 mb-3" />
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="neu-raised-sm rounded-xl p-3">
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const byStage = useMemo(() => {
     const map: Record<string, Lead[]> = {};
     STAGES.forEach((s) => (map[s] = []));
-    leads.forEach((l) => {
+    leads.forEach((l: Lead) => {
       (map[l.stage] ?? map["Contacted"]).push(l);
     });
     return map;
-  }, [leads]);
+  }, [data]);
 
   const onDragStart = (e: DragStartEvent) => {
     const lead = leads.find((l) => l.id === String(e.active.id));
@@ -48,7 +78,7 @@ function Pipeline() {
     if (!e.over) return;
     const id = e.active.id as string;
     const newStage = e.over.id as string;
-    const lead = leads.find((l) => l.id === id);
+    const lead = leads.find((l: Lead) => l.id === id);
     if (lead && lead.stage !== newStage) {
       update.mutate({ id, patch: { stage: newStage, stage_changed_at: new Date().toISOString() } });
     }
@@ -71,7 +101,7 @@ function Pipeline() {
             return (
               <KanbanColumn key={stage} stage={stage}>
                 <div
-                  className={`flex-shrink-0 ${isCollapsed ? "w-[80px]" : "w-[300px]"} transition-all`}
+                  className={`shrink-0 ${isCollapsed ? "w-[80px]" : "w-[300px]"} transition-all`}
                 >
                   <div className="neu-raised rounded-2xl p-3 h-full">
                     <button
@@ -148,7 +178,7 @@ function KanbanCard({ lead, onClick }: { lead: Lead; onClick: () => void }) {
       className={`${atRisk ? "neu-risk-glow" : "neu-raised-sm"} bg-background rounded-xl p-3 cursor-pointer ${isDragging ? "opacity-50" : ""}`}
     >
       <div className="font-medium text-sm text-foreground truncate">{lead.name}</div>
-      <div className="text-[11px] text-muted-foreground truncate">{lead.company || "—"}</div>
+      <div className="text-[11px] text-muted-foreground truncate">{lead.company || ""}</div>
       <div className="flex items-center justify-between mt-2.5">
         <span className="text-[11px] font-semibold text-foreground">
           ${Number(lead.deal_value).toLocaleString()}

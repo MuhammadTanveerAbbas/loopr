@@ -16,7 +16,7 @@ import {
 export const Route = createFileRoute("/_app/quality")({
   head: () => ({
     meta: [
-      { title: "Quality & Security — Loopr" },
+      { title: "Quality & Security  Loopr" },
       { name: "description", content: "Audit checklist for code quality and security." },
     ],
   }),
