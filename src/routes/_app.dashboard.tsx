@@ -26,27 +26,6 @@ function Dashboard() {
   const { data, isLoading } = useLeads({ pageSize: 500 });
   const { user } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 p-6">
-        <div className="space-y-5">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="neu-raised p-4 rounded-2xl">
-                <Skeleton className="h-3 w-20 mb-2" />
-                <Skeleton className="h-8 w-24" />
-              </div>
-            ))}
-          </div>
-          <NeuCard className="rounded-2xl p-5">
-            <Skeleton className="h-4 w-40 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </NeuCard>
-        </div>
-      </div>
-    );
-  }
-
   const leads = data?.leads ?? [];
   const stats = useMemo(() => {
     const active = leads.filter((l) => !["Won", "Lost"].includes(l.stage));
@@ -72,6 +51,27 @@ function Dashboard() {
     for (const l of leads) map[l.stage] = (map[l.stage] || 0) + 1;
     return map;
   }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6 p-6">
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="neu-raised p-4 rounded-2xl">
+                <Skeleton className="h-3 w-20 mb-2" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            ))}
+          </div>
+          <NeuCard className="rounded-2xl p-5">
+            <Skeleton className="h-4 w-40 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </NeuCard>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">

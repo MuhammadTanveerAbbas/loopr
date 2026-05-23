@@ -36,30 +36,6 @@ function LeadsPage() {
   const { user } = useAuth();
   const { data, isLoading } = useLeads();
   const leads = data?.leads ?? [];
-
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto p-6 space-y-5">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="flex gap-3">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="neu-raised p-4 rounded-xl">
-              <Skeleton className="h-5 w-40 mb-2" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   const update = useUpdateLead();
   const create = useCreateLead();
   const del = useDeleteLead();
@@ -88,6 +64,29 @@ function LeadsPage() {
       r.sort((a, b) => (b.last_contact || "").localeCompare(a.last_contact || ""));
     return r;
   }, [leads, search, stageFilter, sortBy]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="neu-raised p-4 rounded-xl">
+              <Skeleton className="h-5 w-40 mb-2" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const allSelected = filtered.length > 0 && selectedIds.size === filtered.length;
   const toggleAll = () => {

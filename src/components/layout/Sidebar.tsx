@@ -10,7 +10,6 @@ import {
   Settings,
   LogOut,
   Brain,
-  ShieldCheck,
   Trash2,
   Activity,
   Upload,
@@ -30,7 +29,6 @@ const main = [
 ];
 const ai = [{ to: "/ai", label: "AI Workspace", icon: Brain }];
 const account = [
-  { to: "/quality", label: "Quality & Security", icon: ShieldCheck },
   { to: "/activity", label: "Activity", icon: Activity },
   { to: "/trash", label: "Trash", icon: Trash2 },
   { to: "/settings", label: "Settings", icon: Settings },

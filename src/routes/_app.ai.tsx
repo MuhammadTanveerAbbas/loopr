@@ -21,6 +21,19 @@ function AiPage() {
   const { data, isLoading } = useLeads();
   const leads = data?.leads ?? [];
 
+  const { data: autopsies = [] } = useQuery({
+    queryKey: ["ai_logs", "autopsy"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ai_logs")
+        .select("*")
+        .eq("type", "autopsy")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      return data ?? [];
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto space-y-5 p-6">
@@ -39,19 +52,6 @@ function AiPage() {
       </div>
     );
   }
-
-  const { data: autopsies = [] } = useQuery({
-    queryKey: ["ai_logs", "autopsy"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("ai_logs")
-        .select("*")
-        .eq("type", "autopsy")
-        .order("created_at", { ascending: false })
-        .limit(10);
-      return data ?? [];
-    },
-  });
 
   return (
     <div className="max-w-5xl mx-auto space-y-5">

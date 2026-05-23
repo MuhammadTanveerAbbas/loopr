@@ -19,7 +19,6 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppTrashRouteImport } from './routes/_app.trash'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
-import { Route as AppQualityRouteImport } from './routes/_app.quality'
 import { Route as AppPipelineRouteImport } from './routes/_app.pipeline'
 import { Route as AppNurtureRouteImport } from './routes/_app.nurture'
 import { Route as AppLeadsRouteImport } from './routes/_app.leads'
@@ -76,11 +75,6 @@ const AppTrashRoute = AppTrashRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppQualityRoute = AppQualityRouteImport.update({
-  id: '/quality',
-  path: '/quality',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPipelineRoute = AppPipelineRouteImport.update({
@@ -140,7 +134,6 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AppLeadsRoute
   '/nurture': typeof AppNurtureRoute
   '/pipeline': typeof AppPipelineRoute
-  '/quality': typeof AppQualityRoute
   '/settings': typeof AppSettingsRoute
   '/trash': typeof AppTrashRoute
 }
@@ -160,7 +153,6 @@ export interface FileRoutesByTo {
   '/leads': typeof AppLeadsRoute
   '/nurture': typeof AppNurtureRoute
   '/pipeline': typeof AppPipelineRoute
-  '/quality': typeof AppQualityRoute
   '/settings': typeof AppSettingsRoute
   '/trash': typeof AppTrashRoute
 }
@@ -182,7 +174,6 @@ export interface FileRoutesById {
   '/_app/leads': typeof AppLeadsRoute
   '/_app/nurture': typeof AppNurtureRoute
   '/_app/pipeline': typeof AppPipelineRoute
-  '/_app/quality': typeof AppQualityRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/trash': typeof AppTrashRoute
 }
@@ -204,7 +195,6 @@ export interface FileRouteTypes {
     | '/leads'
     | '/nurture'
     | '/pipeline'
-    | '/quality'
     | '/settings'
     | '/trash'
   fileRoutesByTo: FileRoutesByTo
@@ -224,7 +214,6 @@ export interface FileRouteTypes {
     | '/leads'
     | '/nurture'
     | '/pipeline'
-    | '/quality'
     | '/settings'
     | '/trash'
   id:
@@ -245,7 +234,6 @@ export interface FileRouteTypes {
     | '/_app/leads'
     | '/_app/nurture'
     | '/_app/pipeline'
-    | '/_app/quality'
     | '/_app/settings'
     | '/_app/trash'
   fileRoutesById: FileRoutesById
@@ -333,13 +321,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/quality': {
-      id: '/_app/quality'
-      path: '/quality'
-      fullPath: '/quality'
-      preLoaderRoute: typeof AppQualityRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/pipeline': {
       id: '/_app/pipeline'
       path: '/pipeline'
@@ -408,7 +389,6 @@ interface AppRouteChildren {
   AppLeadsRoute: typeof AppLeadsRoute
   AppNurtureRoute: typeof AppNurtureRoute
   AppPipelineRoute: typeof AppPipelineRoute
-  AppQualityRoute: typeof AppQualityRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTrashRoute: typeof AppTrashRoute
 }
@@ -422,7 +402,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppLeadsRoute: AppLeadsRoute,
   AppNurtureRoute: AppNurtureRoute,
   AppPipelineRoute: AppPipelineRoute,
-  AppQualityRoute: AppQualityRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTrashRoute: AppTrashRoute,
 }

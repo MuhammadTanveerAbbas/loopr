@@ -26,6 +26,21 @@ function Nurture() {
   const { data, isLoading } = useLeads();
   const leads = data?.leads ?? [];
 
+  const targets = useMemo(
+    () =>
+      leads
+        .filter(
+          (l: Lead) =>
+            !["Won", "Lost"].includes(l.stage) &&
+            l.has_reply &&
+            (daysSilent(l.last_contact) ?? 0) > 5,
+        )
+        .slice(0, 20),
+    [leads],
+  );
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto space-y-5 p-6">
@@ -44,21 +59,6 @@ function Nurture() {
       </div>
     );
   }
-
-  const targets = useMemo(
-    () =>
-      leads
-        .filter(
-          (l: Lead) =>
-            !["Won", "Lost"].includes(l.stage) &&
-            l.has_reply &&
-            (daysSilent(l.last_contact) ?? 0) > 5,
-        )
-        .slice(0, 20),
-    [leads],
-  );
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState<string | null>(null);
 
   const draft = async (id: string, name: string, company: string | null, stage: string) => {
     setBusy(id);

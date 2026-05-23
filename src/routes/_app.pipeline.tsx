@@ -40,6 +40,15 @@ function Pipeline() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ Won: true, Lost: true });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  const byStage = useMemo(() => {
+    const map: Record<string, Lead[]> = {};
+    STAGES.forEach((s) => (map[s] = []));
+    leads.forEach((l: Lead) => {
+      (map[l.stage] ?? map["Contacted"]!).push(l);
+    });
+    return map;
+  }, [data]);
+
   if (isLoading) {
     return (
       <div className="max-w-full mx-auto space-y-5 p-6">
@@ -67,15 +76,6 @@ function Pipeline() {
       </div>
     );
   }
-
-  const byStage = useMemo(() => {
-    const map: Record<string, Lead[]> = {};
-    STAGES.forEach((s) => (map[s] = []));
-    leads.forEach((l: Lead) => {
-      (map[l.stage] ?? map["Contacted"]!).push(l);
-    });
-    return map;
-  }, [data]);
 
   const onDragStart = (e: DragStartEvent) => {
     const lead = leads.find((l) => l.id === String(e.active.id));
