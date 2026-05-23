@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { useLeads, type Lead } from "@/lib/leads-api";
 import { daysSilent } from "@/lib/signal-score";
 import { useQuery } from "@tanstack/react-query";
+import { captureError } from "@/lib/error-service";
 
 export const Route = createFileRoute("/_app/ai")({
   head: () => ({ meta: [{ title: "AI Workspace - Loopr" }] }),
@@ -119,17 +120,47 @@ function ToolCard({
 function BriefingTool({ leads }: { leads: Lead[] }) {
   const [out, setOut] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
   const run = async () => {
     setBusy(true);
     try {
-      const summary = leads
-        .slice(0, 30)
-        .map((l) => `${l.name}  ${l.stage}, silent ${daysSilent(l.last_contact) ?? "?"}d`)
-        .join("\n");
+      const stageBreakdown = leads.reduce<Record<string, number>>((acc, l) => {
+        acc[l.stage] = (acc[l.stage] || 0) + 1;
+        return acc;
+      }, {});
+      const atRisk = leads.filter((l) => (daysSilent(l.last_contact) ?? 0) >= 5);
+      const topValue = [...leads]
+        .sort((a, b) => Number(b.deal_value) - Number(a.deal_value))
+        .slice(0, 5);
+      const summary = [
+        `Active leads: ${leads.filter((l) => !["Won", "Lost"].includes(l.stage)).length}`,
+        `Stages: ${JSON.stringify(stageBreakdown)}`,
+        `At-risk: ${atRisk.length} — ${atRisk
+          .slice(0, 10)
+          .map((l) => l.name)
+          .join(", ")}`,
+        `Top deals: ${topValue.map((l) => `${l.name} ($${Number(l.deal_value).toLocaleString()})`).join(", ")}`,
+      ].join("\n");
       const r = await supabase.functions.invoke("ai-task", {
         body: { task: "briefing", payload: { leads_summary: summary } },
       });
-      setOut(r.data?.output ?? "Failed");
+      const output = r.data?.output ?? "Failed";
+      setOut(output);
+      if (r.error) throw r.error;
+      if (user) {
+        await supabase
+          .from("ai_logs")
+          .insert({
+            user_id: user.id,
+            type: "briefing",
+            input: summary.slice(0, 1000),
+            output: output.slice(0, 5000),
+          })
+          .maybeSingle();
+      }
+    } catch (e) {
+      captureError(e, "ai-briefing");
+      setOut("Couldn't generate briefing. Try again.");
     } finally {
       setBusy(false);
     }
@@ -149,13 +180,30 @@ function ReplyAnalyzer() {
   const [text, setText] = useState("");
   const [out, setOut] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
   const run = async () => {
     setBusy(true);
     try {
       const r = await supabase.functions.invoke("ai-task", {
         body: { task: "reply_analysis", payload: { text } },
       });
-      setOut(r.data?.output ?? "Failed");
+      const output = r.data?.output ?? "Failed";
+      setOut(output);
+      if (r.error) throw r.error;
+      if (user) {
+        await supabase
+          .from("ai_logs")
+          .insert({
+            user_id: user.id,
+            type: "reply_analysis",
+            input: text.slice(0, 1000),
+            output: output.slice(0, 5000),
+          })
+          .maybeSingle();
+      }
+    } catch (e) {
+      captureError(e, "ai-reply-analyzer");
+      setOut("Analysis failed. Try again.");
     } finally {
       setBusy(false);
     }
@@ -198,7 +246,21 @@ function IcpScorer({ userId }: { userId?: string }) {
       const r = await supabase.functions.invoke("ai-task", {
         body: { task: "icp_score", payload: { lead_text: text, user_icp: prof?.icp_text ?? "" } },
       });
-      setOut(r.data?.output ?? "Failed");
+      const output = r.data?.output ?? "Failed";
+      setOut(output);
+      if (r.error) throw r.error;
+      await supabase
+        .from("ai_logs")
+        .insert({
+          user_id: userId,
+          type: "icp_score",
+          input: text.slice(0, 1000),
+          output: output.slice(0, 5000),
+        })
+        .maybeSingle();
+    } catch (e) {
+      captureError(e, "ai-icp-scorer");
+      setOut("Scoring failed. Try again.");
     } finally {
       setBusy(false);
     }
@@ -228,6 +290,7 @@ function IcpScorer({ userId }: { userId?: string }) {
 function RecapTool({ leads }: { leads: Lead[] }) {
   const [out, setOut] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
   const run = async () => {
     setBusy(true);
     try {
@@ -237,7 +300,23 @@ function RecapTool({ leads }: { leads: Lead[] }) {
       const r = await supabase.functions.invoke("ai-task", {
         body: { task: "recap", payload: { leads_summary: summary } },
       });
-      setOut(r.data?.output ?? "Failed");
+      const output = r.data?.output ?? "Failed";
+      setOut(output);
+      if (r.error) throw r.error;
+      if (user) {
+        await supabase
+          .from("ai_logs")
+          .insert({
+            user_id: user.id,
+            type: "recap",
+            input: summary.slice(0, 1000),
+            output: output.slice(0, 5000),
+          })
+          .maybeSingle();
+      }
+    } catch (e) {
+      captureError(e, "ai-recap");
+      setOut("Couldn't generate recap. Try again.");
     } finally {
       setBusy(false);
     }

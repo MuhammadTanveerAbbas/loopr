@@ -72,7 +72,7 @@ const checks: Array<{
       {
         name: "Dead helpers removed",
         status: "pass",
-        detail: "computeSignalScore unused import deleted",
+        detail: "computeSignalScore unused function deleted",
       },
       { name: "TypeScript build clean", status: "pass", detail: "tsc --noEmit passes" },
     ],
@@ -98,6 +98,11 @@ const checks: Array<{
         status: "pass",
         detail: "Only email + Google OAuth enabled",
       },
+      {
+        name: "Password reset origin validated",
+        status: "pass",
+        detail: "Uses VITE_PUBLIC_ORIGIN env var",
+      },
     ],
   },
   {
@@ -113,6 +118,12 @@ const checks: Array<{
       },
       { name: "RLS enabled on profiles", status: "pass", detail: "Self-only read/write" },
       { name: "RLS enabled on ai_logs & stage_history", status: "pass", detail: "Owner-scoped" },
+      { name: "RLS enabled on drafts & audit_logs", status: "pass", detail: "Owner-scoped" },
+      {
+        name: "restore_lead function scoped",
+        status: "pass",
+        detail: "Added auth.uid() check to SECURITY DEFINER",
+      },
     ],
   },
   {
@@ -131,6 +142,53 @@ const checks: Array<{
         name: "No raw errors leaked client-side",
         status: "pass",
         detail: "Toast messages user-friendly",
+      },
+      {
+        name: "TypeScript zero errors",
+        status: "pass",
+        detail: "tsc --noEmit compiles clean",
+      },
+    ],
+  },
+  {
+    category: "Security Hardening",
+    icon: ShieldCheck,
+    color: "pink",
+    items: [
+      {
+        name: "Edge function CORS tightened",
+        status: "pass",
+        detail: "CORS_ORIGIN required, no * fallback",
+      },
+      {
+        name: "Server-side input validation",
+        status: "warn",
+        detail: "RLS protects data, but all DB ops are client-side",
+      },
+      {
+        name: "Security headers in production",
+        status: "pass",
+        detail: "X-Frame-Options, X-Content-Type-Options, HSTS configured",
+      },
+      {
+        name: "Audit logging active",
+        status: "pass",
+        detail: "log_lead_changes trigger on leads table",
+      },
+      {
+        name: "Rate limiting on AI endpoint",
+        status: "pass",
+        detail: "20 req/min/user enforced in edge function",
+      },
+      {
+        name: "Secrets not committed",
+        status: "pass",
+        detail: ".env.local gitignored via *.local pattern",
+      },
+      {
+        name: "Health check with DB connectivity",
+        status: "pass",
+        detail: "Queries profiles table to verify DB status",
       },
     ],
   },

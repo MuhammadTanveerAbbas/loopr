@@ -2,35 +2,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+const CORS_ORIGIN = Deno.env.get("CORS_ORIGIN");
+if (!CORS_ORIGIN) {
+  console.error("CORS_ORIGIN environment variable is required for security");
+  Deno.exit(1);
+}
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": CORS_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const AI_TIMEOUT_MS = 30_000;
+const MAX_RETRIES = 1;
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
 
-const requestCounts = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(identifier: string): boolean {
-  const now = Date.now();
-  const record = requestCounts.get(identifier);
-
-  if (!record || now > record.resetAt) {
-    requestCounts.set(identifier, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-
-  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return false;
-  }
-
-  record.count++;
-  return true;
-}
-
 function sanitizeInput(input: string, maxLength: number = 2000): string {
-  // eslint-disable-next-line no-control-regex
   return input.slice(0, maxLength).replace(/[\x00-\x1F\x7F]/g, "");
 }
 
@@ -44,6 +32,8 @@ interface TaskPayload {
   user_icp?: string;
   text?: string;
   lead_text?: string;
+  notes?: string;
+  last_sentiment?: string;
 }
 
 const PROMPTS: Record<string, (p: TaskPayload) => { system: string; user: string }> = {
@@ -95,8 +85,20 @@ serve(async (req) => {
     const userId = claims.sub;
     if (!userId) return jsonResp({ error: "Unauthorized" }, 401);
 
-    if (!checkRateLimit(userId)) {
-      return jsonResp({ error: "Rate limit exceeded. Try again in a minute." }, 429);
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const { count, error: rlError } = await supabase
+        .from("ai_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("created_at", new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString());
+
+      if (!rlError && (count ?? 0) >= RATE_LIMIT_MAX_REQUESTS) {
+        return jsonResp({ error: "Rate limit exceeded. Try again in a minute." }, 429);
+      }
     }
 
     let body: { task?: unknown; payload?: unknown };
@@ -131,29 +133,81 @@ serve(async (req) => {
 
     const { system, user } = PROMPTS[task](sanitizedPayload);
 
-    const r = await fetch(AI_ENDPOINT, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [
-          { role: "system", content: sanitizeInput(system, 4000) },
-          { role: "user", content: sanitizeInput(user, 4000) },
-        ],
-        max_tokens: 1024,
-        temperature: 0.7,
-      }),
-    });
+    let output = "";
+    let lastError: Error | null = null;
 
-    if (r.status === 429) return jsonResp({ error: "Rate limit. Try again in a moment." }, 429);
-    if (r.status === 401) return jsonResp({ error: "AI credentials invalid. Check API key." }, 401);
-    if (!r.ok) {
-      console.error("AI gateway error", r.status, await r.text());
-      return jsonResp({ error: "AI request failed" }, 500);
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
+        const r = await fetch(AI_ENDPOINT, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: AI_MODEL,
+            messages: [
+              { role: "system", content: sanitizeInput(system, 4000) },
+              { role: "user", content: sanitizeInput(user, 4000) },
+            ],
+            max_tokens: 1024,
+            temperature: 0.7,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+
+        if (r.status === 429) {
+          if (attempt < MAX_RETRIES) {
+            await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+            continue;
+          }
+          return jsonResp({ error: "Rate limit. Try again in a moment." }, 429);
+        }
+        if (r.status === 401)
+          return jsonResp({ error: "AI credentials invalid. Check API key." }, 401);
+        if (!r.ok) {
+          console.error("AI gateway error", r.status, await r.text());
+          return jsonResp({ error: "AI request failed" }, 500);
+        }
+
+        const data = await r.json();
+        output = data.choices?.[0]?.message?.content ?? "";
+        break;
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error("Unknown fetch error");
+        if (lastError.name === "AbortError") {
+          return jsonResp({ error: "AI request timed out. Try again." }, 504);
+        }
+        if (attempt < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+          continue;
+        }
+      }
     }
 
-    const data = await r.json();
-    const output: string = data.choices?.[0]?.message?.content ?? "";
+    if (!output && lastError) {
+      console.error("ai-task error after retries", lastError);
+      return jsonResp({ error: "Internal server error" }, 500);
+    }
+
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        await supabase
+          .from("ai_logs")
+          .insert({
+            user_id: userId,
+            type: task,
+            input: JSON.stringify(sanitizedPayload).slice(0, 2000),
+            output: output.slice(0, 5000),
+          })
+          .maybeSingle();
+      } catch {
+        // Logging failure is non-fatal
+      }
+    }
+
     return jsonResp({ output });
   } catch (e) {
     console.error("ai-task error", e);

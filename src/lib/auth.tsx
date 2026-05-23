@@ -7,6 +7,7 @@ interface AuthCtx {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthCtx>({
@@ -14,6 +15,7 @@ const Ctx = createContext<AuthCtx>({
   session: null,
   loading: true,
   signOut: async () => {},
+  deleteAccount: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -32,6 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const deleteAccount = async () => {
+    const { error } = await supabase.functions.invoke("delete-account");
+    if (error) throw error;
+    await supabase.auth.signOut();
+  };
+
   return (
     <Ctx.Provider
       value={{
@@ -41,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut: async () => {
           await supabase.auth.signOut();
         },
+        deleteAccount,
       }}
     >
       {children}

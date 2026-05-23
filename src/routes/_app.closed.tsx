@@ -5,7 +5,16 @@ import { NeuCard } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_app/closed")({
-  head: () => ({ meta: [{ title: "Closed Won - Loopr" }] }),
+  head: () => ({
+    meta: [
+      { title: "Closed Won - Loopr" },
+      {
+        name: "description",
+        content:
+          "Review your closed won deals, total revenue, average deal size, and days to close.",
+      },
+    ],
+  }),
   component: Closed,
 });
 

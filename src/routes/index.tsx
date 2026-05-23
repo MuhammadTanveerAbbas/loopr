@@ -4,24 +4,22 @@ import { useAuth } from "@/lib/auth";
 import {
   ArrowRight,
   Brain,
+  Heart,
   Layout,
+  Linkedin,
+  Mail,
+  Twitter,
   Sparkles,
   Target,
   BarChart3,
-  Mail,
   Workflow,
   CheckCircle2,
-  Star,
-  Zap,
+  Github,
   Shield,
   Clock,
-  TrendingUp,
   ChevronDown,
+  TrendingUp,
   X,
-  Twitter,
-  Github,
-  Linkedin,
-  Heart,
 } from "lucide-react";
 import { LoopMark, BrandLockup } from "@/components/ui/logo";
 
@@ -85,8 +83,6 @@ function Landing() {
     <main className="min-h-screen overflow-hidden bg-background">
       <Header />
       <Hero />
-      <LogoStrip />
-      <Stats />
       <Features />
       <ChartShowcase />
       <Workflow_ />
@@ -181,7 +177,7 @@ function Hero() {
         style={{ animationDelay: "0.3s" }}
       >
         <Link to="/auth" className="brutal-btn px-7 py-3.5 text-sm inline-flex items-center gap-2">
-          Start tracking free <ArrowRight className="h-4 w-4" />
+          Get started free <ArrowRight className="h-4 w-4" />
         </Link>
         <a
           href="#features"
@@ -241,88 +237,80 @@ function HeroPreview() {
 
 function MiniBars() {
   const data = [40, 65, 50, 80, 70, 95, 85, 100, 75, 90, 110, 120];
+  const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  const max = Math.max(...data);
+  const niceMax = Math.ceil(max / 20) * 20;
+  const ticks = [
+    niceMax,
+    Math.round((niceMax * 3) / 4),
+    Math.round(niceMax / 2),
+    Math.round(niceMax / 4),
+    0,
+  ];
+
   return (
-    <div className="flex items-end justify-between gap-2 h-32">
-      {data.map((h, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-          <div
-            className="w-full border-2 border-black bg-brand-orange animate-bar-grow"
-            style={{ height: `${h}%`, animationDelay: `${i * 0.05}s`, borderRadius: "6px 6px 0 0" }}
-          />
-          <div className="text-[10px] font-extrabold text-black">
-            {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][i]}
+    <div>
+      <div className="flex gap-2">
+        <div className="flex flex-col justify-between text-[10px] font-extrabold text-foreground/50 py-1 w-7 text-right leading-none">
+          {ticks.map((t) => (
+            <span key={t}>{t}</span>
+          ))}
+        </div>
+        <div className="flex-1 relative h-36 border-l-2 border-b-2 border-black">
+          {ticks.slice(0, -1).map((_, i) => (
+            <div
+              key={i}
+              className="absolute left-0 right-0 border-t border-dashed border-black/10"
+              style={{ top: `${(i / (ticks.length - 1)) * 100}%` }}
+            />
+          ))}
+          <div className="absolute inset-0 flex items-end justify-around gap-[3px] px-1 pb-0">
+            {data.map((h, i) => (
+              <div
+                key={i}
+                className="flex-1 flex flex-col items-center justify-end h-full gap-1 max-w-[30px]"
+              >
+                <div className="text-[10px] font-extrabold text-foreground/70 leading-none">
+                  {h}
+                </div>
+                <div
+                  className="w-full border-2 border-black animate-bar-grow"
+                  style={{
+                    height: `${(h / niceMax) * 100}%`,
+                    background: "linear-gradient(180deg, #ff6b9d, #ff6b35)",
+                    animationDelay: `${i * 0.05}s`,
+                    borderRadius: "6px 6px 0 0",
+                    boxShadow: "0 3px 0 #0A0A0A",
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-  );
-}
-
-/* ============================== LOGO STRIP ============================== */
-
-function LogoStrip() {
-  const items = [
-    "INDIE HACKERS",
-    "MAKERS LEAGUE",
-    "SOLO FOUNDERS",
-    "SHIP DAILY",
-    "BOOTSTRAPPED.FM",
-    "MVP GUILD",
-  ];
-  return (
-    <section className="py-10 border-y-[3px] border-black bg-brand-yellow">
-      <div className="max-w-6xl mx-auto px-6">
-        <p className="text-center text-xs font-extrabold uppercase tracking-widest text-foreground/70 mb-5">
-          Trusted by solo operators worldwide
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-          {items.map((l) => (
+      </div>
+      <div className="flex gap-2 mt-2">
+        <div className="w-7" />
+        <div className="flex-1 flex items-start justify-around gap-[3px] px-1">
+          {months.map((m) => (
             <div
-              key={l}
-              className="text-sm md:text-base font-extrabold tracking-wider text-foreground"
+              key={m}
+              className="flex-1 text-center text-[10px] font-extrabold text-foreground/70 leading-tight"
             >
-              {l}
+              {m}
             </div>
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
-/* ============================== STATS ============================== */
+function LogoStrip() {
+  return null;
+}
 
 function Stats() {
-  const stats = [
-    { value: "10k+", label: "Leads tracked weekly", icon: TrendingUp, bg: "brutal-card-yellow" },
-    { value: "3.2x", label: "Faster follow-ups", icon: Zap, bg: "brutal-card-orange" },
-    { value: "92%", label: "User satisfaction", icon: Star, bg: "brutal-card-pink" },
-    { value: "24/7", label: "AI assistance", icon: Brain, bg: "brutal-card" },
-  ];
-  return (
-    <section className="max-w-6xl mx-auto px-6 py-20">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-        {stats.map((s, i) => (
-          <div
-            key={s.label}
-            className={`${s.bg} p-6 text-center animate-fade-up hover:translate-y-[3px] transition-transform`}
-            style={{ animationDelay: `${i * 0.08}s` }}
-          >
-            <div
-              className="w-12 h-12 mx-auto mb-3 bg-white border-[2.5px] border-black rounded-xl flex items-center justify-center"
-              style={{ boxShadow: "0 3px 0 #0A0A0A" }}
-            >
-              <s.icon className="h-5 w-5 text-foreground" strokeWidth={2.5} />
-            </div>
-            <div className="text-3xl md:text-4xl font-extrabold">{s.value}</div>
-            <div className="mt-1 text-xs font-bold uppercase tracking-wide opacity-80">
-              {s.label}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+  return null;
 }
 
 /* ============================== FEATURES ============================== */
@@ -453,25 +441,56 @@ function ChartShowcase() {
               <BarChart3 className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
           </div>
-          <div className="flex items-end justify-between gap-3 h-56">
-            {stages.map((s, i) => (
-              <div key={s.name} className="flex-1 flex flex-col items-center gap-2">
-                <div className="text-sm font-extrabold text-foreground">{s.count}</div>
+          <div className="flex gap-3">
+            <div className="flex flex-col justify-between text-[10px] font-extrabold text-foreground/50 py-1 w-7 text-right leading-none">
+              {[max, Math.round((max * 3) / 4), Math.round(max / 2), Math.round(max / 4), 0].map(
+                (t) => (
+                  <span key={t}>{t}</span>
+                ),
+              )}
+            </div>
+            <div className="flex-1 relative h-56 border-l-2 border-b-2 border-black">
+              {[0, 1, 2, 3].map((i) => (
                 <div
-                  className="w-full border-[2.5px] border-black animate-bar-grow"
-                  style={{
-                    height: `${(s.count / max) * 100}%`,
-                    background: s.color,
-                    animationDelay: `${i * 0.12}s`,
-                    borderRadius: "8px 8px 0 0",
-                    boxShadow: "0 3px 0 #0A0A0A",
-                  }}
+                  key={i}
+                  className="absolute left-0 right-0 border-t border-dashed border-black/10"
+                  style={{ top: `${(i / 4) * 100}%` }}
                 />
-                <div className="text-[11px] font-extrabold text-foreground text-center uppercase">
+              ))}
+              <div className="absolute inset-0 flex items-end justify-around gap-2 px-2 pb-0">
+                {stages.map((s, i) => (
+                  <div
+                    key={s.name}
+                    className="flex-1 flex flex-col items-center justify-end h-full gap-2 max-w-[48px]"
+                  >
+                    <div className="text-sm font-extrabold text-foreground">{s.count}</div>
+                    <div
+                      className="w-full border-[2.5px] border-black animate-bar-grow"
+                      style={{
+                        height: `${(s.count / max) * 100}%`,
+                        background: s.color,
+                        animationDelay: `${i * 0.12}s`,
+                        borderRadius: "8px 8px 0 0",
+                        boxShadow: "0 3px 0 #0A0A0A",
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3 mt-2">
+            <div className="w-7" />
+            <div className="flex-1 flex items-start justify-around gap-2 px-2">
+              {stages.map((s) => (
+                <div
+                  key={s.name}
+                  className="flex-1 text-center text-[11px] font-extrabold text-foreground uppercase leading-tight"
+                >
                   {s.name}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-3">
             <Donut label="Convert" value={28} />
@@ -695,9 +714,9 @@ function Pricing() {
     {
       name: "Solo",
       price: "$0",
-      period: "free forever",
-      features: ["Up to 50 leads", "Sheet + Kanban", "Daily AI brief"],
-      cta: "Start free",
+      period: "free tier",
+      features: ["Sheet + Kanban pipeline", "Daily AI brief", "Signal scoring", "Reply analyzer"],
+      cta: "Get started",
       highlight: false,
       bg: "brutal-card",
       comingSoon: false,
@@ -706,8 +725,8 @@ function Pricing() {
       name: "Pro",
       price: "$19",
       period: "/month",
-      features: ["Unlimited leads", "Reply analyzer", "Signal Score", "CSV export"],
-      cta: "Start 14-day trial",
+      features: ["Everything in Solo", "Email templates & drafts", "Priority support"],
+      cta: "Coming Soon",
       highlight: true,
       bg: "brutal-card-orange",
       comingSoon: true,
@@ -716,8 +735,8 @@ function Pricing() {
       name: "Studio",
       price: "$49",
       period: "/month",
-      features: ["Everything in Pro", "AI weekly recap", "Priority support"],
-      cta: "Talk to us",
+      features: ["Everything in Pro", "AI weekly recap", "CSV import & API access"],
+      cta: "Coming Soon",
       highlight: false,
       bg: "brutal-card-yellow",
       comingSoon: true,
@@ -787,7 +806,7 @@ function FAQ() {
     },
     {
       q: "Can I import from another CRM?",
-      a: "Yes. CSV import on day one. Mappings for HubSpot, Pipedrive, and Streak are coming.",
+      a: "CSV import and CRM mappings are on the roadmap. For now, you can manually add leads or use the spreadsheet view to paste data in.",
     },
     {
       q: "Why no team plan?",
@@ -843,7 +862,7 @@ function CTA() {
           aria-hidden
           className="absolute top-6 left-6 brutal-card-yellow px-3 py-1.5 text-xs font-extrabold uppercase -rotate-6"
         >
-          🔥 Free forever tier
+          🔥 Free tier
         </div>
         <div
           aria-hidden
@@ -855,13 +874,13 @@ function CTA() {
           Ready to track calmly?
         </h2>
         <p className="mt-4 text-lg font-bold opacity-90 max-w-xl mx-auto">
-          Free forever for your first 50 leads. No credit card. No nags.
+          Free for your first 50 leads. No credit card. No nags.
         </p>
         <Link
           to="/auth"
           className="mt-8 inline-flex items-center gap-2 brutal-btn-secondary px-8 py-4 text-base"
         >
-          Start tracking free <ArrowRight className="h-5 w-5" />
+          Get started free <ArrowRight className="h-5 w-5" />
         </Link>
       </div>
     </section>
@@ -879,23 +898,15 @@ function Footer() {
         { label: "Pricing", href: "#pricing" },
         { label: "Workflow", href: "#workflow" },
         { label: "FAQ", href: "#faq" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About", href: "#" },
-        { label: "Blog", href: "#" },
-        { label: "Changelog", href: "#" },
-        { label: "Contact", href: "#" },
+        { label: "Changelog", href: "/changelog" },
       ],
     },
     {
       title: "Legal",
       links: [
-        { label: "Privacy", href: "#" },
-        { label: "Terms", href: "#" },
-        { label: "Security", href: "#" },
+        { label: "Privacy", href: "/privacy" },
+        { label: "Terms", href: "/terms" },
+        { label: "Security", href: "/security" },
       ],
     },
   ];
@@ -920,9 +931,13 @@ function Footer() {
             </p>
             <div className="mt-5 flex items-center gap-3">
               {[
-                { Icon: Twitter, href: "#", label: "Twitter" },
-                { Icon: Github, href: "#", label: "GitHub" },
-                { Icon: Linkedin, href: "#", label: "LinkedIn" },
+                { Icon: Twitter, href: "https://x.com/m_tanveerabbas", label: "Twitter" },
+                { Icon: Github, href: "https://github.com/muhammadtanveerabbas", label: "GitHub" },
+                {
+                  Icon: Linkedin,
+                  href: "https://linkedin.com/in/muhammadtanveerabbas",
+                  label: "LinkedIn",
+                },
               ].map(({ Icon, href, label }) => (
                 <a
                   key={label}
@@ -966,9 +981,7 @@ function Footer() {
             © {new Date().getFullYear()} Loopr. All rights reserved.
           </div>
           <div className="text-xs font-bold text-foreground/80 flex items-center gap-1.5">
-            Crafted with{" "}
-            <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" />{" "}
-            by
+            Crafted with <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" /> by
             <span className="font-extrabold text-foreground">The MVP Guy</span>
           </div>
         </div>

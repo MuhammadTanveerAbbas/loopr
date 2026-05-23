@@ -89,6 +89,8 @@ export type Database = {
           company: string | null;
           created_at: string;
           deal_value: number;
+          deleted_at: string | null;
+          email: string | null;
           has_reply: boolean;
           id: string;
           last_contact: string | null;
@@ -99,8 +101,11 @@ export type Database = {
           notes: string | null;
           owner: string | null;
           signal_score: number;
+          source: string | null;
           stage: string;
           stage_changed_at: string;
+          starred: boolean;
+          tags: string[];
           updated_at: string;
           user_id: string;
         };
@@ -108,6 +113,8 @@ export type Database = {
           company?: string | null;
           created_at?: string;
           deal_value?: number;
+          deleted_at?: string | null;
+          email?: string | null;
           has_reply?: boolean;
           id?: string;
           last_contact?: string | null;
@@ -118,8 +125,11 @@ export type Database = {
           notes?: string | null;
           owner?: string | null;
           signal_score?: number;
+          source?: string | null;
           stage?: string;
           stage_changed_at?: string;
+          starred?: boolean;
+          tags?: string[];
           updated_at?: string;
           user_id: string;
         };
@@ -127,6 +137,8 @@ export type Database = {
           company?: string | null;
           created_at?: string;
           deal_value?: number;
+          deleted_at?: string | null;
+          email?: string | null;
           has_reply?: boolean;
           id?: string;
           last_contact?: string | null;
@@ -137,8 +149,11 @@ export type Database = {
           notes?: string | null;
           owner?: string | null;
           signal_score?: number;
+          source?: string | null;
           stage?: string;
           stage_changed_at?: string;
+          starred?: boolean;
+          tags?: string[];
           updated_at?: string;
           user_id?: string;
         };
@@ -206,12 +221,108 @@ export type Database = {
           },
         ];
       };
+      drafts: {
+        Row: {
+          id: string;
+          lead_id: string | null;
+          user_id: string;
+          subject: string | null;
+          body: string;
+          type: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id?: string | null;
+          user_id: string;
+          subject?: string | null;
+          body: string;
+          type?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string | null;
+          user_id?: string;
+          subject?: string | null;
+          body?: string;
+          type?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "drafts_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      audit_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          action: string;
+          table_name: string;
+          record_id: string | null;
+          old_data: Record<string, unknown> | null;
+          new_data: Record<string, unknown> | null;
+          ip_address: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          action: string;
+          table_name: string;
+          record_id?: string | null;
+          old_data?: Record<string, unknown> | null;
+          new_data?: Record<string, unknown> | null;
+          ip_address?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          action?: string;
+          table_name?: string;
+          record_id?: string | null;
+          old_data?: Record<string, unknown> | null;
+          new_data?: Record<string, unknown> | null;
+          ip_address?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      recompute_signal_score: {
+        Args: { lead_id: string };
+        Returns: number;
+      };
+      recompute_all_signal_scores: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      restore_lead: {
+        Args: { lead_id: string };
+        Returns: void;
+      };
+      bulk_update_leads_stage: {
+        Args: { lead_ids: string[]; new_stage: string; p_user_id: string };
+        Returns: void;
+      };
+      cleanup_old_deleted_leads: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
     };
     Enums: {
       [_ in never]: never;

@@ -9,12 +9,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard  Loopr" }] }),
+  head: () => ({
+    meta: [
+      { title: "Dashboard  Loopr" },
+      {
+        name: "description",
+        content:
+          "Your CRM pipeline dashboard - KPI overview, stage breakdown, and at-risk lead alerts.",
+      },
+    ],
+  }),
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { data, isLoading } = useLeads();
+  const { data, isLoading } = useLeads({ pageSize: 500 });
   const { user } = useAuth();
 
   if (isLoading) {
@@ -73,39 +82,22 @@ function Dashboard() {
         </div>
       </header>
 
-      {isLoading ? (
-        <div className="space-y-5">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="neu-raised p-4 rounded-2xl">
-                <Skeleton className="h-3 w-20 mb-2" />
-                <Skeleton className="h-8 w-24" />
-              </div>
-            ))}
-          </div>
-          <NeuCard className="rounded-2xl p-5">
-            <Skeleton className="h-4 w-40 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </NeuCard>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          <KpiCard label="Total Leads" value={String(stats.total)} accent="blue" trend={null} />
-          <KpiCard
-            label="Active Pipeline"
-            value={`$${stats.pipelineValue.toLocaleString()}`}
-            accent="green"
-            trend={null}
-          />
-          <KpiCard label="Reply Rate" value={`${stats.replyRate}%`} accent="amber" trend={null} />
-          <KpiCard
-            label="Closed Won (mo)"
-            value={`${stats.wonCount} · $${stats.wonValue.toLocaleString()}`}
-            accent="purple"
-            trend={null}
-          />
-        </div>
-      )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <KpiCard label="Total Leads" value={String(stats.total)} accent="blue" trend={null} />
+        <KpiCard
+          label="Active Pipeline"
+          value={`$${stats.pipelineValue.toLocaleString()}`}
+          accent="green"
+          trend={null}
+        />
+        <KpiCard label="Reply Rate" value={`${stats.replyRate}%`} accent="amber" trend={null} />
+        <KpiCard
+          label="Closed Won (mo)"
+          value={`${stats.wonCount} · $${stats.wonValue.toLocaleString()}`}
+          accent="purple"
+          trend={null}
+        />
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
@@ -208,13 +200,23 @@ function BriefingCard({ userId, leads }: { userId?: string; leads: Lead[] }) {
     if (!userId) return;
     setBusy(true);
     try {
-      const summary = leads
-        .slice(0, 30)
-        .map(
-          (l) =>
-            `${l.name} (${l.company || ""})  stage: ${l.stage}, days_silent: ${daysSilent(l.last_contact) ?? "n/a"}, deal: $${l.deal_value}`,
-        )
-        .join("\n");
+      const stageBreakdown = leads.reduce<Record<string, number>>((acc, l) => {
+        acc[l.stage] = (acc[l.stage] || 0) + 1;
+        return acc;
+      }, {});
+      const atRisk = leads.filter(
+        (l) => (daysSilent(l.last_contact) ?? 0) >= 5 && !["Won", "Lost"].includes(l.stage),
+      );
+      const topValue = [...leads]
+        .sort((a, b) => Number(b.deal_value) - Number(a.deal_value))
+        .slice(0, 5);
+      const summary = [
+        `Total active leads: ${leads.filter((l) => !["Won", "Lost"].includes(l.stage)).length}`,
+        `Pipeline value: $${leads.reduce((s, l) => s + Number(l.deal_value), 0).toLocaleString()}`,
+        `Stages: ${JSON.stringify(stageBreakdown)}`,
+        `At-risk leads (silent 5d+): ${atRisk.length} — ${atRisk.map((l) => l.name).join(", ")}`,
+        `Highest value: ${topValue.map((l) => `${l.name} ($${Number(l.deal_value).toLocaleString()})`).join(", ")}`,
+      ].join("\n");
       const res = await supabase.functions.invoke("ai-task", {
         body: { task: "briefing", payload: { leads_summary: summary } },
       });

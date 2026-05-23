@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { useLeads, useUpdateLead, STAGES, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuBadge } from "@/components/ui/neu";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
@@ -19,7 +19,15 @@ import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_app/pipeline")({
-  head: () => ({ meta: [{ title: "Pipeline  Loopr" }] }),
+  head: () => ({
+    meta: [
+      { title: "Pipeline  Loopr" },
+      {
+        name: "description",
+        content: "Kanban pipeline view with drag-and-drop stage management for your CRM leads.",
+      },
+    ],
+  }),
   component: Pipeline,
 });
 
@@ -64,7 +72,7 @@ function Pipeline() {
     const map: Record<string, Lead[]> = {};
     STAGES.forEach((s) => (map[s] = []));
     leads.forEach((l: Lead) => {
-      (map[l.stage] ?? map["Contacted"]).push(l);
+      (map[l.stage] ?? map["Contacted"]!).push(l);
     });
     return map;
   }, [data]);
@@ -164,7 +172,13 @@ function KanbanColumn({ stage, children }: { stage: string; children: React.Reac
   );
 }
 
-function KanbanCard({ lead, onClick }: { lead: Lead; onClick: () => void }) {
+const KanbanCard = memo(function KanbanCard({
+  lead,
+  onClick,
+}: {
+  lead: Lead;
+  onClick: () => void;
+}) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
   const ds = daysSilent(lead.last_contact);
   const sc = scoreColor(lead.signal_score);
@@ -196,4 +210,4 @@ function KanbanCard({ lead, onClick }: { lead: Lead; onClick: () => void }) {
       )}
     </div>
   );
-}
+});

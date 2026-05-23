@@ -9,18 +9,51 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SecurityRouteImport } from './routes/security'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as HealthRouteImport } from './routes/health'
+import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTrashRouteImport } from './routes/_app.trash'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppQualityRouteImport } from './routes/_app.quality'
 import { Route as AppPipelineRouteImport } from './routes/_app.pipeline'
 import { Route as AppNurtureRouteImport } from './routes/_app.nurture'
 import { Route as AppLeadsRouteImport } from './routes/_app.leads'
+import { Route as AppImportRouteImport } from './routes/_app.import'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppClosedRouteImport } from './routes/_app.closed'
 import { Route as AppAiRouteImport } from './routes/_app.ai'
+import { Route as AppActivityRouteImport } from './routes/_app.activity'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -34,6 +67,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppTrashRoute = AppTrashRouteImport.update({
+  id: '/trash',
+  path: '/trash',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
@@ -60,6 +98,11 @@ const AppLeadsRoute = AppLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AppRoute,
 } as any)
+const AppImportRoute = AppImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -75,93 +118,186 @@ const AppAiRoute = AppAiRouteImport.update({
   path: '/ai',
   getParentRoute: () => AppRoute,
 } as any)
+const AppActivityRoute = AppActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/changelog': typeof ChangelogRoute
+  '/health': typeof HealthRoute
+  '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
+  '/terms': typeof TermsRoute
+  '/activity': typeof AppActivityRoute
   '/ai': typeof AppAiRoute
   '/closed': typeof AppClosedRoute
   '/dashboard': typeof AppDashboardRoute
+  '/import': typeof AppImportRoute
   '/leads': typeof AppLeadsRoute
   '/nurture': typeof AppNurtureRoute
   '/pipeline': typeof AppPipelineRoute
   '/quality': typeof AppQualityRoute
   '/settings': typeof AppSettingsRoute
+  '/trash': typeof AppTrashRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/changelog': typeof ChangelogRoute
+  '/health': typeof HealthRoute
+  '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
+  '/terms': typeof TermsRoute
+  '/activity': typeof AppActivityRoute
   '/ai': typeof AppAiRoute
   '/closed': typeof AppClosedRoute
   '/dashboard': typeof AppDashboardRoute
+  '/import': typeof AppImportRoute
   '/leads': typeof AppLeadsRoute
   '/nurture': typeof AppNurtureRoute
   '/pipeline': typeof AppPipelineRoute
   '/quality': typeof AppQualityRoute
   '/settings': typeof AppSettingsRoute
+  '/trash': typeof AppTrashRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/changelog': typeof ChangelogRoute
+  '/health': typeof HealthRoute
+  '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
+  '/terms': typeof TermsRoute
+  '/_app/activity': typeof AppActivityRoute
   '/_app/ai': typeof AppAiRoute
   '/_app/closed': typeof AppClosedRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/import': typeof AppImportRoute
   '/_app/leads': typeof AppLeadsRoute
   '/_app/nurture': typeof AppNurtureRoute
   '/_app/pipeline': typeof AppPipelineRoute
   '/_app/quality': typeof AppQualityRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/_app/trash': typeof AppTrashRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/changelog'
+    | '/health'
+    | '/privacy'
+    | '/security'
+    | '/terms'
+    | '/activity'
     | '/ai'
     | '/closed'
     | '/dashboard'
+    | '/import'
     | '/leads'
     | '/nurture'
     | '/pipeline'
     | '/quality'
     | '/settings'
+    | '/trash'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/changelog'
+    | '/health'
+    | '/privacy'
+    | '/security'
+    | '/terms'
+    | '/activity'
     | '/ai'
     | '/closed'
     | '/dashboard'
+    | '/import'
     | '/leads'
     | '/nurture'
     | '/pipeline'
     | '/quality'
     | '/settings'
+    | '/trash'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/auth'
+    | '/changelog'
+    | '/health'
+    | '/privacy'
+    | '/security'
+    | '/terms'
+    | '/_app/activity'
     | '/_app/ai'
     | '/_app/closed'
     | '/_app/dashboard'
+    | '/_app/import'
     | '/_app/leads'
     | '/_app/nurture'
     | '/_app/pipeline'
     | '/_app/quality'
     | '/_app/settings'
+    | '/_app/trash'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ChangelogRoute: typeof ChangelogRoute
+  HealthRoute: typeof HealthRoute
+  PrivacyRoute: typeof PrivacyRoute
+  SecurityRoute: typeof SecurityRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -182,6 +318,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/trash': {
+      id: '/_app/trash'
+      path: '/trash'
+      fullPath: '/trash'
+      preLoaderRoute: typeof AppTrashRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/settings': {
       id: '/_app/settings'
@@ -218,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLeadsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/import': {
+      id: '/_app/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof AppImportRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -239,29 +389,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAiRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/activity': {
+      id: '/_app/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof AppActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppActivityRoute: typeof AppActivityRoute
   AppAiRoute: typeof AppAiRoute
   AppClosedRoute: typeof AppClosedRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppImportRoute: typeof AppImportRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppNurtureRoute: typeof AppNurtureRoute
   AppPipelineRoute: typeof AppPipelineRoute
   AppQualityRoute: typeof AppQualityRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppTrashRoute: typeof AppTrashRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActivityRoute: AppActivityRoute,
   AppAiRoute: AppAiRoute,
   AppClosedRoute: AppClosedRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppImportRoute: AppImportRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppNurtureRoute: AppNurtureRoute,
   AppPipelineRoute: AppPipelineRoute,
   AppQualityRoute: AppQualityRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppTrashRoute: AppTrashRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -270,6 +433,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  ChangelogRoute: ChangelogRoute,
+  HealthRoute: HealthRoute,
+  PrivacyRoute: PrivacyRoute,
+  SecurityRoute: SecurityRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -19,12 +19,40 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
       {
         name: "description",
         content:
-          "Loopr by The MVP Guy. Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings  built for high-touch outbound.",
+          "Loopr by The MVP Guy. Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings — built for high-touch outbound.",
       },
+      // OG
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://loopr.app" },
+      { property: "og:title", content: "Loopr - A focused CRM that thinks with you" },
+      {
+        property: "og:description",
+        content:
+          "Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings — built for solo founders running high-touch outbound.",
+      },
+      { property: "og:image", content: "https://loopr.app/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Loopr — CRM for solo founders" },
+      { property: "og:site_name", content: "Loopr" },
+      // Twitter Card
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Loopr - A focused CRM that thinks with you" },
+      {
+        name: "twitter:description",
+        content:
+          "Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings — built for solo founders running high-touch outbound.",
+      },
+      { name: "twitter:image", content: "https://loopr.app/og-image.png" },
+      { name: "twitter:image:alt", content: "Loopr — CRM for solo founders" },
+      // Misc
+      { name: "theme-color", content: "#FFE14D" },
+      { name: "robots", content: "index, follow" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "canonical", href: "https://loopr.app" },
     ],
   }),
   errorComponent: ErrorBoundary,

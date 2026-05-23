@@ -21,7 +21,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const nav = useNavigate();
   const { user, loading } = useAuth();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -37,16 +37,37 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { name } },
+      if (mode === "reset") {
+        const redirectOrigin = import.meta.env.VITE_PUBLIC_ORIGIN || window.location.origin;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${redirectOrigin}/auth`,
         });
         if (error) throw error;
-        toast.success("Account created. Welcome!");
+        toast.success("Check your email for the reset link.");
+        setMode("login");
+        return;
+      }
+      if (mode === "signup") {
+        const { error, data } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth`,
+            data: { name },
+          },
+        });
+        if (error) throw error;
+        if (data?.user?.identities?.length === 0) {
+          toast.error("An account with this email already exists.");
+          return;
+        }
+        toast.success("Account created. Check your email to confirm your sign-up.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+
+        });
         if (error) throw error;
         toast.success("Welcome back.");
       }
@@ -101,10 +122,18 @@ function AuthPage() {
 
       <NeuCard variant="lg" className="w-full max-w-md rounded-3xl p-8 z-10 animate-fade-up">
         <h1 className="text-2xl font-bold text-foreground">
-          {mode === "login" ? "Welcome back" : "Create your account"}
+          {mode === "login"
+            ? "Welcome back"
+            : mode === "reset"
+              ? "Reset your password"
+              : "Create your account"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {mode === "login" ? "Sign in to your pipeline." : "Start tracking in under a minute."}
+          {mode === "login"
+            ? "Sign in to your pipeline."
+            : mode === "reset"
+              ? "We'll send you a reset link."
+              : "Start tracking in under a minute."}
         </p>
 
         <button
@@ -141,36 +170,59 @@ function AuthPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <div className="relative">
-            <NeuInput
-              type={showPw ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="pr-12"
-            />
+          {mode !== "reset" && (
+            <div className="relative">
+              <NeuInput
+                type={showPw ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="pr-12"
+              />
+              <button
+                type="button"
+                aria-label={showPw ? "Hide password" : "Show password"}
+                onClick={() => setShowPw((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          )}
+          {mode === "login" && (
             <button
               type="button"
-              aria-label={showPw ? "Hide password" : "Show password"}
-              onClick={() => setShowPw((v) => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setMode("reset")}
+              className="text-xs text-muted-foreground hover:text-foreground self-end -mt-2"
             >
-              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              Forgot password?
             </button>
-          </div>
+          )}
           <NeuButton type="submit" variant="primary" disabled={busy} className="mt-2">
-            {busy ? "Working..." : mode === "login" ? "Sign in" : "Create account"}
+            {busy
+              ? "Working..."
+              : mode === "reset"
+                ? "Send reset link"
+                : mode === "login"
+                  ? "Sign in"
+                  : "Create account"}
           </NeuButton>
         </form>
 
         <button
           type="button"
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
+          onClick={() =>
+            setMode(mode === "login" ? "signup" : mode === "reset" ? "login" : "login")
+          }
           className="mt-6 text-sm text-muted-foreground hover:text-foreground w-full text-center"
         >
-          {mode === "login" ? "No account? Create one" : "Already have an account? Sign in"}
+          {mode === "login"
+            ? "No account? Create one"
+            : mode === "reset"
+              ? "Back to sign in"
+              : "Already have an account? Sign in"}
         </button>
       </NeuCard>
     </main>

@@ -6,15 +6,25 @@ import {
   useCreateLead,
   useDeleteLead,
   STAGES,
-  STAGE_COLOR,
   type Lead,
 } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
 import { useAuth } from "@/lib/auth";
-import { Plus, Search, Trash2, X, Download } from "lucide-react";
+import { Plus, Search, Trash2, Download } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/leads")({
@@ -57,6 +67,8 @@ function LeadsPage() {
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"signal" | "silent" | "value" | "contact">("signal");
   const [openLead, setOpenLead] = useState<Lead | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Lead | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     let r = leads.slice();
@@ -77,6 +89,30 @@ function LeadsPage() {
     return r;
   }, [leads, search, stageFilter, sortBy]);
 
+  const allSelected = filtered.length > 0 && selectedIds.size === filtered.length;
+  const toggleAll = () => {
+    if (allSelected) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filtered.map((l) => l.id)));
+  };
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+  const bulkStageUpdate = (stage: string) => {
+    Array.from(selectedIds).forEach((id) =>
+      update.mutate({ id, patch: { stage, stage_changed_at: new Date().toISOString() } }),
+    );
+    toast.success(`${selectedIds.size} leads updated`);
+    setSelectedIds(new Set());
+  };
+  const bulkDelete = () => {
+    selectedIds.forEach((id) => del.mutate(id));
+    toast.success(`${selectedIds.size} leads moved to trash`);
+    setSelectedIds(new Set());
+  };
+
   const addLead = async () => {
     if (!user) return;
     try {
@@ -88,7 +124,8 @@ function LeadsPage() {
     }
   };
 
-  const exportCsv = () => {
+  const exportCsv = async (all: boolean) => {
+    const data = all ? leads : filtered;
     const headers = [
       "Name",
       "Company",
@@ -100,7 +137,7 @@ function LeadsPage() {
       "Days Silent",
       "Next Action",
     ];
-    const rows = filtered.map((l) => [
+    const rows = data.map((l) => [
       l.name,
       l.company || "",
       l.niche || "",
@@ -117,7 +154,7 @@ function LeadsPage() {
     const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "leads.csv";
+    a.download = all ? "leads-all.csv" : "leads-filtered.csv";
     a.click();
   };
 
@@ -131,10 +168,26 @@ function LeadsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <NeuButton onClick={exportCsv} size="sm">
-            <Download className="h-3.5 w-3.5 mr-1.5 inline" />
-            Export
-          </NeuButton>
+          <div className="relative group">
+            <NeuButton size="sm">
+              <Download className="h-3.5 w-3.5 mr-1.5 inline" />
+              Export
+            </NeuButton>
+            <div className="absolute right-0 top-full mt-1 w-40 rounded-xl neu-raised-sm bg-background p-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+              <button
+                onClick={() => exportCsv(false)}
+                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+              >
+                Export visible
+              </button>
+              <button
+                onClick={() => exportCsv(true)}
+                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+              >
+                Export all leads
+              </button>
+            </div>
+          </div>
           <NeuButton variant="primary" onClick={addLead}>
             <Plus className="h-4 w-4 mr-1.5 inline" />
             Add Lead
@@ -172,10 +225,49 @@ function LeadsPage() {
           </NeuSelect>
         </div>
 
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-2 mb-3 px-2 py-2 bg-foreground/5 rounded-xl">
+            <span className="text-xs font-semibold text-foreground">
+              {selectedIds.size} selected
+            </span>
+            <div className="flex gap-1 ml-2">
+              {STAGES.filter((s) => !["Won", "Lost"].includes(s)).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => bulkStageUpdate(s)}
+                  className="text-[11px] font-semibold px-2 py-1 rounded-lg hover:bg-foreground/10 border border-black/20"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={bulkDelete}
+              className="text-[11px] font-semibold px-2 py-1 rounded-lg text-destructive hover:bg-destructive/10 ml-auto"
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="text-[11px] font-semibold px-2 py-1 rounded-lg hover:bg-foreground/10"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+
         <div className="overflow-x-auto neu-inset rounded-xl p-2">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                <th className="w-8 px-1 py-2">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    className="cursor-pointer"
+                  />
+                </th>
                 <th className="text-left px-3 py-2 font-semibold">Name</th>
                 <th className="text-left px-3 py-2 font-semibold">Company</th>
                 <th className="text-left px-3 py-2 font-semibold">Stage</th>
@@ -196,6 +288,14 @@ function LeadsPage() {
                     className="group hover:bg-background cursor-pointer"
                     onClick={() => setOpenLead(l)}
                   >
+                    <td className="px-1 py-2.5" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(l.id)}
+                        onChange={() => toggleOne(l.id)}
+                        className="cursor-pointer"
+                      />
+                    </td>
                     <td className="px-3 py-2.5">
                       <input
                         defaultValue={l.name}
@@ -283,7 +383,7 @@ function LeadsPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm("Delete this lead?")) del.mutate(l.id);
+                          setDeleteTarget(l);
                         }}
                         className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1.5"
                       >
@@ -295,8 +395,22 @@ function LeadsPage() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-muted-foreground text-sm">
-                    No leads yet. Click "Add Lead" to get started.
+                  <td colSpan={9} className="text-center py-12 text-muted-foreground text-sm">
+                    {leads.length === 0 ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="font-medium">No leads yet</p>
+                        <p className="text-xs">
+                          Click <strong>Add Lead</strong> above to begin tracking your pipeline.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="font-medium">No leads match your filters</p>
+                        <p className="text-xs">
+                          Try adjusting your search or clearing the stage filter.
+                        </p>
+                      </div>
+                    )}
                   </td>
                 </tr>
               )}
@@ -304,6 +418,30 @@ function LeadsPage() {
           </table>
         </div>
       </NeuCard>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.name} will be moved to trash. You can contact support to restore it if
+              needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteTarget) del.mutate(deleteTarget.id);
+                setDeleteTarget(null);
+              }}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {openLead && <LeadDrawer lead={openLead} onClose={() => setOpenLead(null)} />}
     </div>

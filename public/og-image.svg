@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#FFFBEB"/>
+
+  <!-- Brutal border frame -->
+  <rect x="16" y="16" width="1168" height="598" rx="20" fill="#FFE14D" stroke="#0A0A0A" stroke-width="6"/>
+
+  <!-- Decorative grid dots -->
+  <g fill="#0A0A0A" opacity="0.08">
+    <circle cx="80" cy="80" r="4"/><circle cx="160" cy="80" r="4"/><circle cx="240" cy="80" r="4"/>
+    <circle cx="80" cy="160" r="4"/><circle cx="160" cy="160" r="4"/><circle cx="240" cy="160" r="4"/>
+    <circle cx="80" cy="240" r="4"/><circle cx="160" cy="240" r="4"/><circle cx="240" cy="240" r="4"/>
+    <circle cx="960" cy="400" r="4"/><circle cx="1040" cy="400" r="4"/><circle cx="1120" cy="400" r="4"/>
+    <circle cx="960" cy="480" r="4"/><circle cx="1040" cy="480" r="4"/><circle cx="1120" cy="480" r="4"/>
+    <circle cx="960" cy="560" r="4"/><circle cx="1040" cy="560" r="4"/><circle cx="1120" cy="560" r="4"/>
+  </g>
+
+  <!-- Logo icon -->
+  <rect x="80" y="220" width="80" height="80" rx="16" fill="#FFE14D" stroke="#0A0A0A" stroke-width="4"/>
+  <path d="M100 260c0-7 6-13 13-13s13 6 13 13-6 13-13 13c7 0 13 6 13 13s-6 13-13 13-13-6-13-13" fill="none" stroke="#0A0A0A" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="143" cy="260" r="7" fill="#FF6B35" stroke="#0A0A0A" stroke-width="3"/>
+
+  <!-- Main headline -->
+  <text x="80" y="360" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="88" fill="#0A0A0A" letter-spacing="-3">Loopr</text>
+
+  <!-- Tagline -->
+  <text x="82" y="420" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="28" fill="#0A0A0A" opacity="0.75">A focused CRM that thinks with you.</text>
+
+  <!-- Feature pills -->
+  <rect x="82" y="450" width="160" height="44" rx="8" fill="#0A0A0A" stroke="#0A0A0A" stroke-width="3"/>
+  <text x="162" y="478" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#FFE14D" text-anchor="middle">AI Briefings</text>
+
+  <rect x="258" y="450" width="160" height="44" rx="8" fill="#FF6B35" stroke="#0A0A0A" stroke-width="3"/>
+  <text x="338" y="478" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#0A0A0A" text-anchor="middle">Kanban Board</text>
+
+  <rect x="434" y="450" width="180" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="3"/>
+  <text x="524" y="478" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#0A0A0A" text-anchor="middle">Signal Scoring</text>
+
+  <!-- Right side: mini pipeline card -->
+  <rect x="720" y="180" width="400" height="280" rx="16" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+  <rect x="720" y="180" width="400" height="52" rx="16" fill="#0A0A0A"/>
+  <rect x="720" y="212" width="400" height="20" fill="#0A0A0A"/>
+  <text x="920" y="214" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#FFE14D" text-anchor="middle">Pipeline</text>
+
+  <!-- Kanban columns -->
+  <rect x="740" y="248" width="100" height="180" rx="8" fill="#FFE14D" stroke="#0A0A0A" stroke-width="2.5"/>
+  <text x="790" y="270" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#0A0A0A" text-anchor="middle">Prospect</text>
+  <rect x="750" y="280" width="80" height="28" rx="5" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <rect x="750" y="316" width="80" height="28" rx="5" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <rect x="750" y="352" width="80" height="28" rx="5" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+
+  <rect x="850" y="248" width="100" height="180" rx="8" fill="#FF6B35" stroke="#0A0A0A" stroke-width="2.5"/>
+  <text x="900" y="270" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#0A0A0A" text-anchor="middle">Contacted</text>
+  <rect x="860" y="280" width="80" height="28" rx="5" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <rect x="860" y="316" width="80" height="28" rx="5" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+
+  <rect x="960" y="248" width="100" height="180" rx="8" fill="#A8E6CF" stroke="#0A0A0A" stroke-width="2.5"/>
+  <text x="1010" y="270" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#0A0A0A" text-anchor="middle">Closed</text>
+  <rect x="970" y="280" width="80" height="28" rx="5" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+
+  <!-- Bottom bar -->
+  <rect x="16" y="574" width="1168" height="40" rx="0" fill="#0A0A0A"/>
+  <rect x="16" y="574" width="1168" height="40" rx="0" fill="#0A0A0A"/>
+  <rect x="16" y="594" width="1168" height="20" rx="0" fill="#0A0A0A"/>
+  <rect x="16" y="574" width="1168" height="40" rx="16" fill="#0A0A0A"/>
+  <text x="600" y="601" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#FFE14D" text-anchor="middle">loopr.app · Built for solo founders running outbound</text>
+</svg>

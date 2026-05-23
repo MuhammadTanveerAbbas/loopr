@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Sitemap: https://loopr.io/sitemap.xml
+
+# Disallow auth and app routes
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /leads
+Disallow: /pipeline
+Disallow: /nurture
+Disallow: /ai
+Disallow: /settings
+Disallow: /trash
+Disallow: /activity
+Disallow: /closed
+Disallow: /quality
+Disallow: /import

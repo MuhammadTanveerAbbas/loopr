@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useLeads } from "@/lib/leads-api";
+import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent } from "@/lib/signal-score";
@@ -9,7 +9,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/nurture")({
-  head: () => ({ meta: [{ title: "Nurture  Loopr" }] }),
+  head: () => ({
+    meta: [
+      { title: "Nurture  Loopr" },
+      {
+        name: "description",
+        content:
+          "Re-engage leads that have gone cold. AI-generated draft messages to bring them back.",
+      },
+    ],
+  }),
   component: Nurture,
 });
 
@@ -40,7 +49,7 @@ function Nurture() {
     () =>
       leads
         .filter(
-          (l: any) =>
+          (l: Lead) =>
             !["Won", "Lost"].includes(l.stage) &&
             l.has_reply &&
             (daysSilent(l.last_contact) ?? 0) > 5,
@@ -77,9 +86,12 @@ function Nurture() {
 
       <NeuCard className="rounded-2xl">
         {targets.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground py-12">
-            No leads need re-engaging right now.
-          </p>
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="font-medium text-sm">No leads need re-engaging right now.</p>
+            <p className="text-xs mt-1">
+              Leads appear here when they have a reply but have been silent for more than 5 days.
+            </p>
+          </div>
         ) : (
           <div className="space-y-3">
             {targets.map((l) => (
@@ -109,7 +121,7 @@ function Nurture() {
                     {drafts[l.id]}
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(drafts[l.id]);
+                        navigator.clipboard.writeText(drafts[l.id]!);
                         toast.success("Copied");
                       }}
                       className="absolute top-2 right-2 neu-pressable rounded-lg p-1.5"

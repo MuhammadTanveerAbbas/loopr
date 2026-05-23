@@ -5,6 +5,10 @@ import {
   useTouches,
   useAddTouch,
   useProfile,
+  useStageHistory,
+  useRecomputeSignalScore,
+  useSaveDraft,
+  useDrafts,
   STAGES,
 } from "@/lib/leads-api";
 import { NeuButton, NeuInput, NeuTextarea, NeuSelect, NeuBadge } from "@/components/ui/neu";
@@ -13,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { X, Plus, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { scoreColor } from "@/lib/signal-score";
+import { captureError } from "@/lib/error-service";
 
 export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }) {
   const { user } = useAuth();
@@ -20,6 +25,10 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
   const { data: touches = [] } = useTouches(lead.id);
   const { data: profile } = useProfile(user?.id);
   const addTouch = useAddTouch();
+  const recomputeScore = useRecomputeSignalScore();
+  const saveDraft = useSaveDraft(user?.id ?? "");
+  const { data: savedDrafts = [] } = useDrafts(lead.id);
+  const { data: stageHistory = [] } = useStageHistory(lead.id);
   const [newTouchType, setNewTouchType] = useState("note");
   const [newTouchNote, setNewTouchNote] = useState("");
   const [draftBusy, setDraftBusy] = useState(false);
@@ -58,8 +67,22 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
         },
       });
       if (res.error) throw res.error;
-      setDraft(res.data?.output ?? "");
-    } catch {
+      const output = res.data?.output ?? "";
+      setDraft(output);
+      if (user) {
+        await supabase
+          .from("ai_logs")
+          .insert({
+            user_id: user.id,
+            lead_id: lead.id,
+            type: "email_draft",
+            input: `name:${lead.name} stage:${lead.stage}`,
+            output: output.slice(0, 5000),
+          })
+          .maybeSingle();
+      }
+    } catch (e) {
+      captureError(e, "lead-email-draft", { leadId: lead.id });
       toast.error("Couldn't generate draft");
     } finally {
       setDraftBusy(false);
@@ -96,9 +119,18 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
         </div>
 
         <div className="flex items-center gap-2 mb-5">
-          <NeuBadge color={sc === "red" ? "red" : sc === "amber" ? "amber" : "green"}>
-            Signal {lead.signal_score}
-          </NeuBadge>
+          <div className="relative">
+            <NeuBadge color={sc === "red" ? "red" : sc === "amber" ? "amber" : "green"}>
+              Signal {lead.signal_score}
+            </NeuBadge>
+            <button
+              onClick={() => recomputeScore.mutate(lead.id)}
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-foreground/10 text-[9px] font-bold flex items-center justify-center hover:bg-foreground/20"
+              title="Recompute signal score"
+            >
+              ↻
+            </button>
+          </div>
           <NeuSelect
             value={lead.stage}
             onChange={(e) =>
@@ -144,6 +176,57 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
 
           <div>
             <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Source
+            </label>
+            <NeuSelect
+              defaultValue={lead.source ?? ""}
+              onChange={(e) =>
+                update.mutate({ id: lead.id, patch: { source: e.target.value || null } })
+              }
+              className="mt-1.5"
+            >
+              <option value="">None</option>
+              <option value="LinkedIn">LinkedIn</option>
+              <option value="Referral">Referral</option>
+              <option value="Cold Email">Cold Email</option>
+              <option value="Website">Website</option>
+              <option value="Event">Event</option>
+              <option value="Other">Other</option>
+            </NeuSelect>
+          </div>
+
+          <div>
+            <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Tags
+            </label>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {["Hot", "Warm", "Cold", "VIP", "Partner", "Trial"].map((tag) => {
+                const active = (lead.tags ?? []).includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      const current = lead.tags ?? [];
+                      const next = active
+                        ? current.filter((t: string) => t !== tag)
+                        : [...current, tag];
+                      update.mutate({ id: lead.id, patch: { tags: next } });
+                    }}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border-2 border-black transition-all ${
+                      active
+                        ? "bg-foreground text-background"
+                        : "bg-background text-foreground hover:bg-foreground/5"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
               Notes
             </label>
             <NeuTextarea
@@ -167,15 +250,44 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             {draft && (
               <div className="neu-inset rounded-xl p-3 text-sm text-foreground whitespace-pre-wrap relative">
                 {draft}
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(draft);
-                    toast.success("Copied");
-                  }}
-                  className="absolute top-2 right-2 neu-pressable rounded-lg p-1.5"
-                >
-                  <Copy className="h-3 w-3" />
-                </button>
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <button
+                    onClick={() => {
+                      saveDraft.mutate({ lead_id: lead.id, body: draft });
+                      toast.success("Draft saved");
+                    }}
+                    className="neu-pressable rounded-lg p-1.5"
+                    title="Save draft"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(draft);
+                      toast.success("Copied");
+                    }}
+                    className="neu-pressable rounded-lg p-1.5"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+            {savedDrafts.length > 0 && (
+              <div className="mt-2">
+                <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+                  Saved drafts ({savedDrafts.length})
+                </label>
+                <div className="mt-1 space-y-1">
+                  {savedDrafts.slice(0, 3).map((d: { id: string; body: string }) => (
+                    <div
+                      key={d.id}
+                      className="neu-inset-sm rounded-lg p-2 text-xs text-foreground whitespace-pre-wrap truncate"
+                    >
+                      {d.body.slice(0, 100)}...
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -206,6 +318,27 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
               value={newTouchNote}
               onChange={(e) => setNewTouchNote(e.target.value)}
             />
+          </div>
+
+          <div>
+            <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Stage History
+            </label>
+            <div className="space-y-1 mt-2">
+              {stageHistory.length === 0 && (
+                <p className="text-xs text-muted-foreground">No stage changes recorded.</p>
+              )}
+              {stageHistory.slice(0, 10).map((s) => (
+                <div key={s.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="font-semibold">{s.from_stage ?? "—"}</span>
+                  <span className="text-[10px]">→</span>
+                  <span className="font-semibold text-foreground">{s.to_stage}</span>
+                  <span className="ml-auto text-[10px]">
+                    {new Date(s.changed_at).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div>
