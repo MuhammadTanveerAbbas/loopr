@@ -33,9 +33,33 @@ function ImportPage() {
         toast.error("CSV must have a header row and at least one lead.");
         return;
       }
-      const headers = lines[0]!.split(",").map((h) => h.trim().toLowerCase());
+      const parseCsvLine = (line: string): string[] => {
+        const result: string[] = [];
+        let current = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === "," && !inQuotes) {
+            result.push(current.trim());
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      };
+
+      const headers = parseCsvLine(lines[0]!).map((h) => h.trim().toLowerCase());
       const rows = lines.slice(1).map((l) => {
-        const vals = l.split(",").map((v) => v.trim());
+        const vals = parseCsvLine(l);
         const row: CsvRow = {};
         headers.forEach((h, i) => {
           row[h] = vals[i] ?? "";
@@ -55,12 +79,37 @@ function ImportPage() {
     try {
       const text = await fileRef.current.files[0].text();
       const lines = text.split(/\n/).filter(Boolean);
-      const headers = lines[0]!.split(",").map((h) => h.trim().toLowerCase());
+
+      const parseCsvLine = (line: string): string[] => {
+        const result: string[] = [];
+        let current = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === "," && !inQuotes) {
+            result.push(current.trim());
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      };
+
+      const headers = parseCsvLine(lines[0]!).map((h) => h.trim().toLowerCase());
       const sanitize = (v: string) => v.replace(/^[=\-+@]/, " ").trim();
 
       // Parse all rows first
       const rows: CsvRow[] = lines.slice(1).map((line) => {
-        const vals = line.split(",").map((v) => v.trim());
+        const vals = parseCsvLine(line);
         const row: CsvRow = {};
         headers.forEach((h, i) => {
           row[h] = vals[i] ?? "";

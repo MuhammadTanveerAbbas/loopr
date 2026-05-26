@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NeuCard } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,10 +27,23 @@ interface AiLog {
   input: string | null;
 }
 
+type FilterTab = "all" | "ai" | "system";
+
+const aiTypeLabels: Record<string, string> = {
+  briefing: "Daily Briefing",
+  reply_analysis: "Reply Analysis",
+  icp_score: "ICP Scoring",
+  recap: "Weekly Recap",
+  reengage: "Nurture Draft",
+  email_draft: "Email Draft",
+  autopsy: "Deal Autopsy",
+};
+
 function ActivityPage() {
   const { user } = useAuth();
+  const [filter, setFilter] = useState<FilterTab>("all");
 
-  const { data: auditLogs = [], isLoading } = useQuery({
+  const { data: auditLogs = [], isLoading: auditLoading } = useQuery({
     queryKey: ["audit_logs"],
     enabled: !!user,
     queryFn: async () => {
@@ -43,7 +57,7 @@ function ActivityPage() {
     },
   });
 
-  const { data: aiLogs = [] } = useQuery({
+  const { data: aiLogs = [], isLoading: aiLoading } = useQuery({
     queryKey: ["ai_logs_recent"],
     enabled: !!user,
     queryFn: async () => {
@@ -57,10 +71,20 @@ function ActivityPage() {
     },
   });
 
+  const isLoading = auditLoading || aiLoading;
+
+  const filteredAi = filter === "all" || filter === "ai" ? aiLogs : [];
+  const filteredAudit = filter === "all" || filter === "system" ? auditLogs : [];
+
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto space-y-5 p-6">
         <Skeleton className="h-8 w-32" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-20" />
+        </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="neu-raised p-4 rounded-xl">
@@ -74,23 +98,45 @@ function ActivityPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-4xl mx-auto space-y-5 animate-fade-up">
       <header>
         <h1 className="text-2xl font-bold text-foreground">Activity</h1>
         <p className="text-sm text-muted-foreground">Recent AI calls and system events.</p>
       </header>
 
-      <NeuCard className="rounded-2xl">
-        <h2 className="text-sm font-semibold text-foreground mb-3">AI Activity</h2>
-        {aiLogs.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-6 text-center">No AI activity yet.</p>
-        ) : (
+      <div className="flex items-center gap-2">
+        {(["all", "ai", "system"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setFilter(t)}
+            className={`text-xs font-extrabold uppercase px-4 py-2 rounded-xl border-2 border-black transition-all ${
+              filter === t
+                ? "bg-foreground text-background"
+                : "bg-background text-foreground hover:bg-foreground/5"
+            }`}
+          >
+            {t === "all" ? "All" : t === "ai" ? "AI Activity" : "System Events"}
+          </button>
+        ))}
+      </div>
+
+      {filteredAi.length > 0 && (
+        <NeuCard className="rounded-2xl animate-fade-up">
+          <h2 className="text-sm font-semibold text-foreground mb-3">AI Activity</h2>
           <div className="space-y-2">
-            {aiLogs.map((log: AiLog) => (
-              <div key={log.id} className="neu-raised-sm rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="font-semibold uppercase">{log.type}</span>
-                  <span>{new Date(log.created_at).toLocaleDateString()}</span>
+            {filteredAi.map((log: AiLog, i) => (
+              <div
+                key={log.id}
+                className="neu-raised-sm rounded-xl px-3 py-2.5 animate-fade-up"
+                style={{ animationDelay: `${i * 0.03}s` }}
+              >
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-extrabold uppercase text-foreground">
+                    {aiTypeLabels[log.type] || log.type}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {new Date(log.created_at).toLocaleDateString()}
+                  </span>
                 </div>
                 {log.input && (
                   <p className="text-xs text-muted-foreground mt-1 truncate">{log.input}</p>
@@ -98,20 +144,24 @@ function ActivityPage() {
               </div>
             ))}
           </div>
-        )}
-      </NeuCard>
+        </NeuCard>
+      )}
 
-      <NeuCard className="rounded-2xl">
-        <h2 className="text-sm font-semibold text-foreground mb-3">System Events</h2>
-        {auditLogs.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-6 text-center">No system events yet.</p>
-        ) : (
+      {filteredAudit.length > 0 && (
+        <NeuCard className="rounded-2xl animate-fade-up">
+          <h2 className="text-sm font-semibold text-foreground mb-3">System Events</h2>
           <div className="space-y-2">
-            {auditLogs.map((log: AuditLog) => (
-              <div key={log.id} className="neu-raised-sm rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="font-semibold">{log.action}</span>
-                  <span>{new Date(log.created_at).toLocaleDateString()}</span>
+            {filteredAudit.map((log: AuditLog, i) => (
+              <div
+                key={log.id}
+                className="neu-raised-sm rounded-xl px-3 py-2.5 animate-fade-up"
+                style={{ animationDelay: `${i * 0.03}s` }}
+              >
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-foreground">{log.action}</span>
+                  <span className="text-muted-foreground">
+                    {new Date(log.created_at).toLocaleDateString()}
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {log.table_name} {log.record_id ? `· ${log.record_id.slice(0, 8)}` : ""}
@@ -119,8 +169,20 @@ function ActivityPage() {
               </div>
             ))}
           </div>
-        )}
-      </NeuCard>
+        </NeuCard>
+      )}
+
+      {filteredAi.length === 0 && filteredAudit.length === 0 && (
+        <NeuCard className="rounded-2xl">
+          <p className="text-center text-sm text-muted-foreground py-12">
+            {filter === "ai"
+              ? "No AI activity yet."
+              : filter === "system"
+                ? "No system events yet."
+                : "No activity yet."}
+          </p>
+        </NeuCard>
+      )}
     </div>
   );
 }

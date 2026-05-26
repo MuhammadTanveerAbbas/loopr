@@ -1,14 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useLeads, useUpdateLead, useDeleteLead, type Lead } from "@/lib/leads-api";
-import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
+import { useLeads, useHardDeleteLead, type Lead } from "@/lib/leads-api";
+import { NeuCard, NeuButton } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { daysSilent, scoreColor } from "@/lib/signal-score";
 import { Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -39,7 +37,7 @@ function TrashPage() {
   const leads = data?.leads ?? [];
   const deleted = leads.filter((l: Lead) => l.deleted_at);
   const qc = useQueryClient();
-  const del = useDeleteLead();
+  const hardDelete = useHardDeleteLead();
   const [permDeleteTarget, setPermDeleteTarget] = useState<Lead | null>(null);
 
   const restore = useMutation({
@@ -70,6 +68,12 @@ function TrashPage() {
     );
   }
 
+  const getDaysUntilPurge = (deletedAt: string | null) => {
+    if (!deletedAt) return null;
+    const daysSince = Math.floor((Date.now() - new Date(deletedAt).getTime()) / 86400000);
+    return 30 - daysSince;
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-5">
       <header>
@@ -81,12 +85,14 @@ function TrashPage() {
 
       <NeuCard className="rounded-2xl">
         {deleted.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground py-12">Trash is empty.</p>
+          <div className="text-center py-12">
+            <p className="text-sm font-medium text-muted-foreground">Trash is empty.</p>
+            <p className="text-xs text-muted-foreground mt-1">Deleted leads will appear here.</p>
+          </div>
         ) : (
           <div className="space-y-2">
             {deleted.map((l: Lead) => {
-              const ds = daysSilent(l.last_contact);
-              const sc = scoreColor(l.signal_score);
+              const daysLeft = getDaysUntilPurge(l.deleted_at);
               return (
                 <div
                   key={l.id}
@@ -94,9 +100,15 @@ function TrashPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-foreground">{l.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {l.company || "No company"} · {l.stage} · Deleted{" "}
-                      {l.deleted_at ? new Date(l.deleted_at).toLocaleDateString() : ""}
+                    <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
+                      <span>
+                        {l.company || "No company"} · {l.stage}
+                      </span>
+                      {daysLeft !== null && (
+                        <span className="text-amber-600 font-semibold">
+                          {daysLeft > 0 ? `Auto-purge in ${daysLeft}d` : "Pending purge"}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -138,7 +150,7 @@ function TrashPage() {
             <AlertDialogAction
               onClick={() => {
                 if (permDeleteTarget) {
-                  del.mutate(permDeleteTarget.id);
+                  hardDelete.mutate(permDeleteTarget.id);
                   setPermDeleteTarget(null);
                   toast.success("Lead permanently deleted");
                 }

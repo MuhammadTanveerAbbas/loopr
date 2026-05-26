@@ -60,8 +60,11 @@ export const authSchema = z.object({
 });
 
 export function sanitizeString(input: string): string {
-  return input
-    .replace(/[<>]/g, "")
-    .replace(/[\x00-\x1F\x7F]/g, "")
-    .trim();
+  return (
+    input
+      .replace(/[<>]/g, "")
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\x00-\x1F\x7F]/g, "")
+      .trim()
+  );
 }

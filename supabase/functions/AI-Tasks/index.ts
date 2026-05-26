@@ -19,6 +19,7 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
 
 function sanitizeInput(input: string, maxLength: number = 2000): string {
+  // eslint-disable-next-line no-control-regex
   return input.slice(0, maxLength).replace(/[\x00-\x1F\x7F]/g, "");
 }
 

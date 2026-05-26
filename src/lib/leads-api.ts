@@ -197,6 +197,143 @@ export function useRecomputeSignalScore() {
   });
 }
 
+export interface DashboardStats {
+  total_leads: number;
+  pipeline_value: number;
+  reply_rate: number;
+  won_count_month: number;
+  won_value_month: number;
+  stage_counts: Record<string, number>;
+  at_risk: Array<{
+    id: string;
+    name: string;
+    company: string | null;
+    stage: string;
+    deal_value: number;
+    days_silent: number;
+  }>;
+  total_won: number;
+  won_count: number;
+  pipeline_leads: number;
+  trends_prev_total: number;
+  trends_prev_won: number;
+}
+
+function computeDashboardStats(leads: Lead[]): DashboardStats {
+  const active = leads.filter((l) => !["Won", "Lost"].includes(l.stage));
+  const replied = leads.filter((l) => l.has_reply);
+  const won = leads.filter((l) => l.stage === "Won");
+  const now = new Date();
+  const wonThisMonth = won.filter((l) => {
+    const d = new Date(l.updated_at);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const stageCounts: Record<string, number> = {};
+  for (const l of leads) stageCounts[l.stage] = (stageCounts[l.stage] || 0) + 1;
+
+  const atRisk = leads
+    .filter((l) => {
+      if (["Won", "Lost"].includes(l.stage)) return false;
+      const ds = Math.abs(
+        Math.round((Date.now() - new Date(l.last_contact || l.created_at).getTime()) / 86400000),
+      );
+      return ds >= 5;
+    })
+    .map((l) => ({
+      id: l.id,
+      name: l.name,
+      company: l.company,
+      stage: l.stage,
+      deal_value: Number(l.deal_value),
+      days_silent: Math.abs(
+        Math.round((Date.now() - new Date(l.last_contact || l.created_at).getTime()) / 86400000),
+      ),
+    }))
+    .sort((a, b) => b.days_silent - a.days_silent)
+    .slice(0, 10);
+
+  const weekAgo = Date.now() - 14 * 86400000;
+  const twoWeeksAgo = Date.now() - 14 * 86400000;
+  const prevTotal = leads.filter((l) => {
+    const d = new Date(l.created_at).getTime();
+    return d >= twoWeeksAgo && d < weekAgo;
+  }).length;
+  const prevWon = leads.filter((l) => {
+    if (l.stage !== "Won") return false;
+    const d = new Date(l.updated_at).getTime();
+    return d >= twoWeeksAgo && d < weekAgo;
+  }).length;
+
+  return {
+    total_leads: leads.length,
+    pipeline_value: active.reduce((s, l) => s + Number(l.deal_value), 0),
+    reply_rate: leads.length ? Math.round((replied.length / leads.length) * 100) : 0,
+    won_count_month: wonThisMonth.length,
+    won_value_month: wonThisMonth.reduce((s, l) => s + Number(l.deal_value), 0),
+    stage_counts: stageCounts,
+    at_risk: atRisk,
+    total_won: won.reduce((s, l) => s + Number(l.deal_value), 0),
+    won_count: won.length,
+    pipeline_leads: active.length,
+    trends_prev_total: prevTotal,
+    trends_prev_won: prevWon,
+  };
+}
+
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ["dashboard_stats"],
+    queryFn: async () => {
+      const { data: rpcData, error: rpcError } = await supabase.rpc("get_dashboard_stats");
+      if (!rpcError && rpcData) return rpcData as unknown as DashboardStats;
+
+      const { data: leads, error: leadsError } = await supabase
+        .from("leads")
+        .select("*", { count: "exact" })
+        .is("deleted_at", null)
+        .limit(500);
+      if (leadsError) throw leadsError;
+      return computeDashboardStats(leads ?? []);
+    },
+    staleTime: 30000,
+    retry: 1,
+  });
+}
+
+export function useHardDeleteLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("hard_delete_lead", { lead_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onError: (err) => {
+      if (err instanceof Error) {
+        console.error("Failed to permanently delete lead:", err.message);
+      }
+    },
+  });
+}
+
+export function useTrendingLeads(limit = 5) {
+  return useQuery({
+    queryKey: ["leads_trending", limit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("leads")
+        .select("id, name, company, stage, deal_value, signal_score, last_contact, updated_at")
+        .is("deleted_at", null)
+        .not("stage", "in", '("Won","Lost")')
+        .order("updated_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data as Lead[];
+    },
+  });
+}
+
 export function useAddTouch() {
   const qc = useQueryClient();
   return useMutation({

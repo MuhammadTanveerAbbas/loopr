@@ -225,30 +225,30 @@ function LeadsPage() {
         </div>
 
         {selectedIds.size > 0 && (
-          <div className="flex items-center gap-2 mb-3 px-2 py-2 bg-foreground/5 rounded-xl">
-            <span className="text-xs font-semibold text-foreground">
+          <div className="neu-raised-sm rounded-xl mb-3 p-3 flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-extrabold text-foreground bg-foreground/10 px-2 py-1 rounded-lg">
               {selectedIds.size} selected
             </span>
-            <div className="flex gap-1 ml-2">
-              {STAGES.filter((s) => !["Won", "Lost"].includes(s)).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => bulkStageUpdate(s)}
-                  className="text-[11px] font-semibold px-2 py-1 rounded-lg hover:bg-foreground/10 border border-black/20"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            <div className="h-4 w-px bg-black/20 mx-1" />
+            {STAGES.filter((s) => !["Won", "Lost"].includes(s)).map((s) => (
+              <button
+                key={s}
+                onClick={() => bulkStageUpdate(s)}
+                className="text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-foreground/10 border-2 border-black/30 transition-all"
+              >
+                {s}
+              </button>
+            ))}
+            <div className="h-4 w-px bg-black/20 mx-1" />
             <button
               onClick={bulkDelete}
-              className="text-[11px] font-semibold px-2 py-1 rounded-lg text-destructive hover:bg-destructive/10 ml-auto"
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-destructive hover:bg-destructive/10 border-2 border-destructive/30 ml-auto"
             >
               Delete
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="text-[11px] font-semibold px-2 py-1 rounded-lg hover:bg-foreground/10"
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-foreground/10 border-2 border-black/20"
             >
               Clear
             </button>
@@ -284,7 +284,7 @@ function LeadsPage() {
                 return (
                   <tr
                     key={l.id}
-                    className="group hover:bg-background cursor-pointer"
+                    className="group cursor-pointer transition-all duration-100 hover:bg-foreground/[0.02]"
                     onClick={() => setOpenLead(l)}
                   >
                     <td className="px-1 py-2.5" onClick={(e) => e.stopPropagation()}>

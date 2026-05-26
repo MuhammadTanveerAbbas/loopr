@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, memo } from "react";
+import { useMemo, useState, memo, useRef } from "react";
 import { useLeads, useUpdateLead, STAGES, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuBadge } from "@/components/ui/neu";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
@@ -14,7 +14,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -39,6 +39,13 @@ function Pipeline() {
   const [openLead, setOpenLead] = useState<Lead | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ Won: true, Lost: true });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const amount = 320;
+    scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
 
   const byStage = useMemo(() => {
     const map: Record<string, Lead[]> = {};
@@ -47,7 +54,7 @@ function Pipeline() {
       (map[l.stage] ?? map["Contacted"]!).push(l);
     });
     return map;
-  }, [data]);
+  }, [leads]);
 
   if (isLoading) {
     return (
@@ -100,61 +107,87 @@ function Pipeline() {
       </header>
 
       <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {STAGES.map((stage) => {
-            const items = byStage[stage] || [];
-            const value = items.reduce((s, l) => s + Number(l.deal_value), 0);
-            const isCollapsible = stage === "Won" || stage === "Lost";
-            const isCollapsed = isCollapsible && collapsed[stage];
-            return (
-              <KanbanColumn key={stage} stage={stage}>
-                <div
-                  className={`shrink-0 ${isCollapsed ? "w-[80px]" : "w-[300px]"} transition-all`}
-                >
-                  <div className="neu-raised rounded-2xl p-3 h-full">
-                    <button
-                      onClick={() =>
-                        isCollapsible && setCollapsed({ ...collapsed, [stage]: !isCollapsed })
-                      }
-                      className="w-full flex items-center justify-between px-2 py-1 mb-3"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        {isCollapsible &&
-                          (isCollapsed ? (
-                            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                          ))}
-                        <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                          {isCollapsed ? stage[0] : stage}
-                        </span>
-                      </div>
-                      {!isCollapsed && (
-                        <div className="text-[10px] text-muted-foreground">
-                          {items.length} · ${value.toLocaleString()}
+        <div className="relative group/scroll">
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto pb-4 scroll-smooth scrollbar-thin"
+          >
+            {STAGES.map((stage) => {
+              const items = byStage[stage] || [];
+              const value = items.reduce((s, l) => s + Number(l.deal_value), 0);
+              const isCollapsible = stage === "Won" || stage === "Lost";
+              const isCollapsed = isCollapsible && collapsed[stage];
+              return (
+                <KanbanColumn key={stage} stage={stage}>
+                  <div
+                    className={`shrink-0 ${isCollapsed ? "w-[80px]" : "w-[300px]"} transition-all duration-200`}
+                  >
+                    <div className="neu-raised rounded-2xl p-3 h-full">
+                      <button
+                        onClick={() =>
+                          isCollapsible && setCollapsed({ ...collapsed, [stage]: !isCollapsed })
+                        }
+                        className="w-full flex items-center justify-between px-2 py-1 mb-3"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {isCollapsible &&
+                            (isCollapsed ? (
+                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                            ))}
+                          <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                            {isCollapsed ? stage[0] : stage}
+                          </span>
                         </div>
-                      )}
-                    </button>
-                    {!isCollapsed && (
-                      <div className="space-y-2.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-                        {items.map((l) => (
-                          <KanbanCard key={l.id} lead={l} onClick={() => setOpenLead(l)} />
-                        ))}
-                        {items.length === 0 && (
-                          <div className="neu-inset-sm rounded-xl py-8 text-center text-xs text-muted-foreground">
-                            Drop here
+                        {!isCollapsed && (
+                          <div className="flex items-center gap-2">
+                            <span className="bg-foreground/10 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+                              {items.length}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              ${value.toLocaleString()}
+                            </span>
                           </div>
                         )}
-                      </div>
-                    )}
+                      </button>
+                      {!isCollapsed && (
+                        <div className="space-y-2.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
+                          {items.map((l) => (
+                            <KanbanCard key={l.id} lead={l} onClick={() => setOpenLead(l)} />
+                          ))}
+                          {items.length === 0 && (
+                            <div className="neu-inset-sm rounded-xl py-8 text-center text-xs text-muted-foreground">
+                              Drop here
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </KanbanColumn>
-            );
-          })}
+                </KanbanColumn>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 opacity-0 group-hover/scroll:opacity-100 transition-opacity z-10 neu-pressable rounded-xl p-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 opacity-0 group-hover/scroll:opacity-100 transition-opacity z-10 neu-pressable rounded-xl p-2"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
         <DragOverlay>
-          {activeLead && <KanbanCard lead={activeLead} onClick={() => {}} />}
+          {activeLead && (
+            <div className="rotate-2 opacity-90">
+              <KanbanCard lead={activeLead} onClick={() => {}} />
+            </div>
+          )}
         </DragOverlay>
       </DndContext>
 

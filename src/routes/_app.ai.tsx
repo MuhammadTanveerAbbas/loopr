@@ -54,7 +54,7 @@ function AiPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5">
+    <div className="max-w-5xl mx-auto space-y-5 animate-fade-up">
       <header>
         <h1 className="text-2xl font-bold text-foreground">AI Workspace</h1>
         <p className="text-sm text-muted-foreground">
@@ -75,13 +75,19 @@ function AiPage() {
           <h2 className="text-sm font-semibold text-foreground">Deal Autopsies</h2>
         </div>
         {autopsies.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            When you mark a deal as Lost, an autopsy will appear here.
-          </p>
+          <div className="text-center py-6">
+            <p className="text-xs text-muted-foreground">
+              When you mark a deal as Lost, an autopsy will appear here.
+            </p>
+          </div>
         ) : (
           <div className="space-y-2">
-            {autopsies.map((a) => (
-              <div key={a.id} className="neu-raised-sm rounded-xl p-3">
+            {autopsies.map((a, i) => (
+              <div
+                key={a.id}
+                className="neu-raised-sm rounded-xl p-3 animate-fade-up"
+                style={{ animationDelay: `${i * 0.05}s` }}
+              >
                 <div className="text-[11px] text-muted-foreground">
                   {new Date(a.created_at).toLocaleDateString()}
                 </div>

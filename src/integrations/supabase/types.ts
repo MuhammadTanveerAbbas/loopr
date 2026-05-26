@@ -323,6 +323,14 @@ export type Database = {
         Args: Record<string, never>;
         Returns: number;
       };
+      get_dashboard_stats: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      hard_delete_lead: {
+        Args: { lead_id: string };
+        Returns: void;
+      };
     };
     Enums: {
       [_ in never]: never;

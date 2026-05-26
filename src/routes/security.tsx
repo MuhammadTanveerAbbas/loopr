@@ -48,8 +48,8 @@ function SecurityPage() {
           </Section>
 
           <Section title="Infrastructure">
-            Loopr runs on Supabase (PostgreSQL, edge functions). Supabase
-            follows industry-standard security practices.
+            Loopr runs on Supabase (PostgreSQL, edge functions). Supabase follows industry-standard
+            security practices.
           </Section>
 
           <Section title="AI privacy">

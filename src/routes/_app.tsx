@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { Navbar } from "@/components/layout/Navbar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { OnboardingModal } from "@/components/layout/OnboardingModal";
 import { useEffect } from "react";
@@ -30,9 +31,12 @@ function AppLayout() {
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar />
-      <main className="flex-1 min-w-0 p-6 md:p-8 pt-16 md:pt-8">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Navbar />
+        <main className="flex-1 p-6 md:p-8 pt-6 md:pt-8">
+          <Outlet />
+        </main>
+      </div>
       <CommandPalette />
       <OnboardingModal />
     </div>

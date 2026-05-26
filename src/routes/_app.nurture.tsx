@@ -4,7 +4,7 @@ import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent } from "@/lib/signal-score";
-import { Copy, Sparkles } from "lucide-react";
+import { Copy, Sparkles, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -69,14 +69,20 @@ function Nurture() {
       if (res.error) throw res.error;
       setDrafts({ ...drafts, [id]: res.data?.output ?? "" });
     } catch {
-      toast.error("Failed");
+      toast.error("Failed to generate draft");
     } finally {
       setBusy(null);
     }
   };
 
+  const generateAll = async () => {
+    for (const l of targets) {
+      await draft(l.id, l.name, l.company, l.stage);
+    }
+  };
+
   return (
-    <div className="max-w-5xl mx-auto space-y-5">
+    <div className="max-w-5xl mx-auto space-y-5 animate-fade-up">
       <header>
         <h1 className="text-2xl font-bold text-foreground">Nurture</h1>
         <p className="text-sm text-muted-foreground">
@@ -86,52 +92,73 @@ function Nurture() {
 
       <NeuCard className="rounded-2xl">
         {targets.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="font-medium text-sm">No leads need re-engaging right now.</p>
-            <p className="text-xs mt-1">
+          <div className="text-center py-12">
+            <div className="text-3xl mb-2">&#10024;</div>
+            <p className="font-medium text-sm text-muted-foreground">
+              No leads need re-engaging right now.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
               Leads appear here when they have a reply but have been silent for more than 5 days.
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {targets.map((l) => (
-              <div key={l.id} className="neu-raised-sm rounded-xl p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">{l.name}</span>
-                      <span className="text-sm text-muted-foreground">· {l.company || ""}</span>
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-semibold text-muted-foreground">
+                {targets.length} lead{targets.length > 1 ? "s" : ""} need attention
+              </p>
+              <NeuButton size="sm" onClick={generateAll} disabled={targets.length === 0}>
+                <Sparkles className="h-3 w-3 mr-1 inline" />
+                Draft all
+              </NeuButton>
+            </div>
+            <div className="space-y-3">
+              {targets.map((l, i) => (
+                <div
+                  key={l.id}
+                  className="neu-raised-sm rounded-xl p-4 animate-fade-up"
+                  style={{ animationDelay: `${i * 0.05}s` }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-foreground/10 border-2 border-black flex items-center justify-center text-sm font-extrabold shrink-0">
+                        {l.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-foreground">{l.name}</div>
+                        <div className="text-xs text-muted-foreground">{l.company || ""}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <NeuBadge>{l.stage}</NeuBadge>
+                          <NeuBadge color="red">{daysSilent(l.last_contact)}d silent</NeuBadge>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <NeuBadge>{l.stage}</NeuBadge>
-                      <NeuBadge color="red">{daysSilent(l.last_contact)}d silent</NeuBadge>
-                    </div>
-                  </div>
-                  <NeuButton
-                    size="sm"
-                    onClick={() => draft(l.id, l.name, l.company, l.stage)}
-                    disabled={busy === l.id}
-                  >
-                    <Sparkles className="h-3 w-3 inline mr-1" />
-                    {busy === l.id ? "..." : "Draft"}
-                  </NeuButton>
-                </div>
-                {drafts[l.id] && (
-                  <div className="mt-3 neu-inset rounded-xl p-3 text-sm text-foreground whitespace-pre-wrap relative">
-                    {drafts[l.id]}
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(drafts[l.id]!);
-                        toast.success("Copied");
-                      }}
-                      className="absolute top-2 right-2 neu-pressable rounded-lg p-1.5"
+                    <NeuButton
+                      size="sm"
+                      onClick={() => draft(l.id, l.name, l.company, l.stage)}
+                      disabled={busy === l.id}
                     >
-                      <Copy className="h-3 w-3" />
-                    </button>
+                      <Mail className="h-3 w-3 inline mr-1" />
+                      {busy === l.id ? "..." : "Draft"}
+                    </NeuButton>
                   </div>
-                )}
-              </div>
-            ))}
+                  {drafts[l.id] && (
+                    <div className="mt-3 neu-inset rounded-xl p-3 text-sm text-foreground whitespace-pre-wrap relative">
+                      {drafts[l.id]}
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(drafts[l.id]!);
+                          toast.success("Copied to clipboard");
+                        }}
+                        className="absolute top-2 right-2 neu-pressable rounded-lg p-1.5"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </NeuCard>
