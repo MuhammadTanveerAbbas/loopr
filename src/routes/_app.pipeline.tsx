@@ -3,6 +3,7 @@ import { useMemo, useState, memo, useRef } from "react";
 import { useLeads, useUpdateLead, STAGES, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuBadge } from "@/components/ui/neu";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
+import { useAuth } from "@/hooks/use-auth";
 import {
   DndContext,
   useDraggable,
@@ -17,6 +18,7 @@ import {
 import { ChevronDown, ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 
 export const Route = createFileRoute("/_app/pipeline")({
   head: () => ({
@@ -32,8 +34,9 @@ export const Route = createFileRoute("/_app/pipeline")({
 });
 
 function Pipeline() {
-  const { data, isLoading } = useLeads();
-  const leads = data?.leads ?? [];
+  const { data, isLoading, error, refetch } = useLeads();
+  const leads = useMemo(() => data?.leads ?? [], [data]);
+  const { user } = useAuth();
   const update = useUpdateLead();
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [openLead, setOpenLead] = useState<Lead | null>(null);
@@ -56,6 +59,16 @@ function Pipeline() {
     return map;
   }, [leads]);
 
+  if (error) {
+    return (
+      <ErrorFallback
+        error={error instanceof Error ? error : new Error(String(error))}
+        reset={refetch}
+        message="Failed to load pipeline"
+      />
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="max-w-full mx-auto space-y-5 p-6">
@@ -65,7 +78,7 @@ function Pipeline() {
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {STAGES.map((stage) => (
-            <div key={stage} className="shrink-0 w-[300px]">
+            <div key={stage} className="shrink-0 w-[min(280px,calc(100vw-3rem))]">
               <div className="neu-raised rounded-2xl p-3">
                 <Skeleton className="h-5 w-20 mb-3" />
                 <div className="space-y-2">
@@ -95,7 +108,11 @@ function Pipeline() {
     const newStage = e.over.id as string;
     const lead = leads.find((l: Lead) => l.id === id);
     if (lead && lead.stage !== newStage) {
-      update.mutate({ id, patch: { stage: newStage, stage_changed_at: new Date().toISOString() } });
+      update.mutate({
+        id,
+        patch: { stage: newStage, stage_changed_at: new Date().toISOString() },
+        userId: user!.id,
+      });
     }
   };
 
@@ -120,7 +137,7 @@ function Pipeline() {
               return (
                 <KanbanColumn key={stage} stage={stage}>
                   <div
-                    className={`shrink-0 ${isCollapsed ? "w-[80px]" : "w-[300px]"} transition-all duration-200`}
+                    className={`shrink-0 ${isCollapsed ? "w-[80px]" : "w-[min(280px,calc(100vw-3rem))]"} transition-all duration-200`}
                   >
                     <div className="neu-raised rounded-2xl p-3 h-full">
                       <button

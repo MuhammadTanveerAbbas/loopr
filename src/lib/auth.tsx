@@ -1,22 +1,7 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import { useEffect, useState, type ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
-interface AuthCtx {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-  deleteAccount: () => Promise<void>;
-}
-
-const Ctx = createContext<AuthCtx>({
-  user: null,
-  session: null,
-  loading: true,
-  signOut: async () => {},
-  deleteAccount: async () => {},
-});
+import { AuthContext } from "@/lib/auth-context";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -28,8 +13,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
+      if (data.session) {
+        supabase.auth.getUser().then(({ data: userData, error }) => {
+          if (error || !userData?.user) {
+            supabase.auth.signOut();
+            setSession(null);
+          } else {
+            setSession(data.session);
+          }
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -41,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <Ctx.Provider
+    <AuthContext.Provider
       value={{
         user: session?.user ?? null,
         session,
@@ -53,8 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </Ctx.Provider>
+    </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => useContext(Ctx);

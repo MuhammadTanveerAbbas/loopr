@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type { ComponentType } from "react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { NeuCard, NeuButton, NeuTextarea, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Brain, RefreshCw, Search, MessageSquare, Calendar, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { useLeads, type Lead } from "@/lib/leads-api";
 import { daysSilent } from "@/lib/signal-score";
 import { useQuery } from "@tanstack/react-query";
@@ -19,15 +19,18 @@ export const Route = createFileRoute("/_app/ai")({
 function AiPage() {
   const { user } = useAuth();
   const { data, isLoading } = useLeads();
-  const leads = data?.leads ?? [];
+  const leads = useMemo(() => data?.leads ?? [], [data]);
 
   const { data: autopsies = [] } = useQuery({
-    queryKey: ["ai_logs", "autopsy"],
+    queryKey: ["ai_logs", "autopsy", user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
+      if (!user?.id) return [];
       const { data } = await supabase
         .from("ai_logs")
         .select("*")
         .eq("type", "autopsy")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10);
       return data ?? [];
@@ -166,7 +169,12 @@ function BriefingTool({ leads }: { leads: Lead[] }) {
       }
     } catch (e) {
       captureError(e, "ai-briefing");
-      setOut("Couldn't generate briefing. Try again.");
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("rate") || msg.includes("limit"))
+        setOut("Rate limit reached. Please wait a moment.");
+      else if (msg.includes("timeout") || msg.includes("timed out"))
+        setOut("Request timed out. The AI service may be slow.");
+      else setOut("Couldn't generate briefing. Check your API key and try again.");
     } finally {
       setBusy(false);
     }
@@ -209,7 +217,12 @@ function ReplyAnalyzer() {
       }
     } catch (e) {
       captureError(e, "ai-reply-analyzer");
-      setOut("Analysis failed. Try again.");
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("rate") || msg.includes("limit"))
+        setOut("Rate limit reached. Please wait a moment.");
+      else if (msg.includes("timeout") || msg.includes("timed out"))
+        setOut("Request timed out. Try a shorter message.");
+      else setOut("Analysis failed. Check your API key and try again.");
     } finally {
       setBusy(false);
     }
@@ -266,7 +279,12 @@ function IcpScorer({ userId }: { userId?: string }) {
         .maybeSingle();
     } catch (e) {
       captureError(e, "ai-icp-scorer");
-      setOut("Scoring failed. Try again.");
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("rate") || msg.includes("limit"))
+        setOut("Rate limit reached. Please wait a moment.");
+      else if (msg.includes("timeout") || msg.includes("timed out"))
+        setOut("Request timed out. Try again.");
+      else setOut("Scoring failed. Check your API key and try again.");
     } finally {
       setBusy(false);
     }
@@ -322,7 +340,12 @@ function RecapTool({ leads }: { leads: Lead[] }) {
       }
     } catch (e) {
       captureError(e, "ai-recap");
-      setOut("Couldn't generate recap. Try again.");
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("rate") || msg.includes("limit"))
+        setOut("Rate limit reached. Please wait a moment.");
+      else if (msg.includes("timeout") || msg.includes("timed out"))
+        setOut("Request timed out. The AI service may be slow.");
+      else setOut("Couldn't generate recap. Check your API key and try again.");
     } finally {
       setBusy(false);
     }

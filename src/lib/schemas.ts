@@ -1,15 +1,7 @@
 import { z } from "zod";
+import { STAGES } from "@/config/plans";
 
-export const STAGES = [
-  "Contacted",
-  "Replied",
-  "Call Booked",
-  "Proposal Sent",
-  "Negotiating",
-  "Won",
-  "Lost",
-] as const;
-
+export { STAGES };
 export const stageSchema = z.enum(STAGES);
 
 export const createLeadSchema = z.object({
@@ -63,6 +55,7 @@ export function sanitizeString(input: string): string {
   return (
     input
       .replace(/[<>]/g, "")
+      .replace(/&(nbsp|amp|lt|gt|quot|#\d+|#x[\da-fA-F]+);?/g, "")
       // eslint-disable-next-line no-control-regex
       .replace(/[\x00-\x1F\x7F]/g, "")
       .trim()

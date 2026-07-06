@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 
 export const Route = createFileRoute("/_app/closed")({
   head: () => ({
@@ -19,8 +20,8 @@ export const Route = createFileRoute("/_app/closed")({
 });
 
 function Closed() {
-  const { data, isLoading } = useLeads();
-  const leads: Lead[] = data?.leads ?? [];
+  const { data, isLoading, error, refetch } = useLeads();
+  const leads: Lead[] = useMemo(() => data?.leads ?? [], [data]);
 
   const won = useMemo(
     () =>
@@ -55,6 +56,16 @@ function Closed() {
     });
     return Object.entries(months).slice(-6);
   }, [won]);
+
+  if (error) {
+    return (
+      <ErrorFallback
+        error={error instanceof Error ? error : new Error(String(error))}
+        reset={refetch}
+        message="Failed to load closed deals"
+      />
+    );
+  }
 
   if (isLoading) {
     return (

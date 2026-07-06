@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 import { daysSilent } from "@/lib/signal-score";
 import { Copy, Sparkles, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,8 +24,8 @@ export const Route = createFileRoute("/_app/nurture")({
 });
 
 function Nurture() {
-  const { data, isLoading } = useLeads();
-  const leads = data?.leads ?? [];
+  const { data, isLoading, error, refetch } = useLeads();
+  const leads = useMemo(() => data?.leads ?? [], [data]);
 
   const targets = useMemo(
     () =>
@@ -40,6 +41,16 @@ function Nurture() {
   );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
+
+  if (error) {
+    return (
+      <ErrorFallback
+        error={error instanceof Error ? error : new Error(String(error))}
+        reset={refetch}
+        message="Failed to load nurture leads"
+      />
+    );
+  }
 
   if (isLoading) {
     return (

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import {
   useLeads,
   useUpdateLead,
@@ -11,7 +11,7 @@ import {
 import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Plus, Search, Trash2, Download } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import {
@@ -26,6 +26,8 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { sanitizeErrorMessage } from "@/lib/error-service";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 
 export const Route = createFileRoute("/_app/leads")({
   head: () => ({ meta: [{ title: "Leads  Loopr" }] }),
@@ -34,8 +36,8 @@ export const Route = createFileRoute("/_app/leads")({
 
 function LeadsPage() {
   const { user } = useAuth();
-  const { data, isLoading } = useLeads();
-  const leads = data?.leads ?? [];
+  const { data, isLoading, error, refetch } = useLeads();
+  const leads = useMemo(() => data?.leads ?? [], [data]);
   const update = useUpdateLead();
   const create = useCreateLead();
   const del = useDeleteLead();
@@ -45,6 +47,24 @@ function LeadsPage() {
   const [openLead, setOpenLead] = useState<Lead | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Lead | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!exportOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExportOpen(false);
+    };
+    document.addEventListener("mousedown", handle);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handle);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [exportOpen]);
 
   const filtered = useMemo(() => {
     let r = leads.slice();
@@ -64,6 +84,16 @@ function LeadsPage() {
       r.sort((a, b) => (b.last_contact || "").localeCompare(a.last_contact || ""));
     return r;
   }, [leads, search, stageFilter, sortBy]);
+
+  if (error) {
+    return (
+      <ErrorFallback
+        error={error instanceof Error ? error : new Error(String(error))}
+        reset={refetch}
+        message="Failed to load leads"
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -101,13 +131,17 @@ function LeadsPage() {
   };
   const bulkStageUpdate = (stage: string) => {
     Array.from(selectedIds).forEach((id) =>
-      update.mutate({ id, patch: { stage, stage_changed_at: new Date().toISOString() } }),
+      update.mutate({
+        id,
+        patch: { stage, stage_changed_at: new Date().toISOString() },
+        userId: user!.id,
+      }),
     );
     toast.success(`${selectedIds.size} leads updated`);
     setSelectedIds(new Set());
   };
   const bulkDelete = () => {
-    selectedIds.forEach((id) => del.mutate(id));
+    selectedIds.forEach((id) => del.mutate({ id, userId: user!.id }));
     toast.success(`${selectedIds.size} leads moved to trash`);
     setSelectedIds(new Set());
   };
@@ -118,8 +152,7 @@ function LeadsPage() {
       await create.mutateAsync({ user_id: user.id, name: "New lead", stage: "Contacted" });
       toast.success("Lead added");
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to add lead";
-      toast.error(message);
+      toast.error(sanitizeErrorMessage(e, "Failed to add lead. Please try again."));
     }
   };
 
@@ -167,25 +200,43 @@ function LeadsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative group">
-            <NeuButton size="sm">
+          <div className="relative" ref={exportRef}>
+            <NeuButton
+              size="sm"
+              onClick={() => setExportOpen((v) => !v)}
+              aria-expanded={exportOpen}
+              aria-haspopup="true"
+            >
               <Download className="h-3.5 w-3.5 mr-1.5 inline" />
               Export
             </NeuButton>
-            <div className="absolute right-0 top-full mt-1 w-40 rounded-xl neu-raised-sm bg-background p-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-              <button
-                onClick={() => exportCsv(false)}
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+            {exportOpen && (
+              <div
+                className="absolute right-0 top-full mt-1 w-40 rounded-xl neu-raised-sm bg-background p-1 z-10"
+                role="menu"
               >
-                Export visible
-              </button>
-              <button
-                onClick={() => exportCsv(true)}
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
-              >
-                Export all leads
-              </button>
-            </div>
+                <button
+                  onClick={() => {
+                    exportCsv(false);
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+                  role="menuitem"
+                >
+                  Export visible
+                </button>
+                <button
+                  onClick={() => {
+                    exportCsv(true);
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+                  role="menuitem"
+                >
+                  Export all leads
+                </button>
+              </div>
+            )}
           </div>
           <NeuButton variant="primary" onClick={addLead}>
             <Plus className="h-4 w-4 mr-1.5 inline" />
@@ -301,7 +352,11 @@ function LeadsPage() {
                         onClick={(e) => e.stopPropagation()}
                         onBlur={(e) =>
                           e.target.value !== l.name &&
-                          update.mutate({ id: l.id, patch: { name: e.target.value } })
+                          update.mutate({
+                            id: l.id,
+                            patch: { name: e.target.value },
+                            userId: user!.id,
+                          })
                         }
                         className="bg-transparent w-full font-medium text-foreground outline-none focus:neu-input focus:px-2 focus:rounded-lg"
                       />
@@ -312,7 +367,11 @@ function LeadsPage() {
                         onClick={(e) => e.stopPropagation()}
                         onBlur={(e) =>
                           e.target.value !== (l.company ?? "") &&
-                          update.mutate({ id: l.id, patch: { company: e.target.value } })
+                          update.mutate({
+                            id: l.id,
+                            patch: { company: e.target.value },
+                            userId: user!.id,
+                          })
                         }
                         className="bg-transparent w-full text-muted-foreground outline-none focus:neu-input focus:px-2 focus:rounded-lg"
                       />
@@ -327,6 +386,7 @@ function LeadsPage() {
                               stage: e.target.value,
                               stage_changed_at: new Date().toISOString(),
                             },
+                            userId: user!.id,
                           })
                         }
                         className="text-xs"
@@ -343,10 +403,16 @@ function LeadsPage() {
                         type="number"
                         defaultValue={Number(l.deal_value)}
                         onClick={(e) => e.stopPropagation()}
-                        onBlur={(e) =>
-                          Number(e.target.value) !== Number(l.deal_value) &&
-                          update.mutate({ id: l.id, patch: { deal_value: Number(e.target.value) } })
-                        }
+                        onBlur={(e) => {
+                          const parsed = Number(e.target.value);
+                          if (!isNaN(parsed) && parsed !== Number(l.deal_value)) {
+                            update.mutate({
+                              id: l.id,
+                              patch: { deal_value: parsed },
+                              userId: user!.id,
+                            });
+                          }
+                        }}
                         className="bg-transparent w-24 text-right text-foreground outline-none focus:neu-input focus:px-2 focus:rounded-lg"
                       />
                     </td>
@@ -372,7 +438,11 @@ function LeadsPage() {
                         onClick={(e) => e.stopPropagation()}
                         onBlur={(e) =>
                           e.target.value !== (l.next_action ?? "") &&
-                          update.mutate({ id: l.id, patch: { next_action: e.target.value } })
+                          update.mutate({
+                            id: l.id,
+                            patch: { next_action: e.target.value },
+                            userId: user!.id,
+                          })
                         }
                         placeholder=""
                         className="bg-transparent w-full text-sm text-foreground outline-none focus:neu-input focus:px-2 focus:rounded-lg placeholder:text-muted-foreground"
@@ -384,7 +454,8 @@ function LeadsPage() {
                           e.stopPropagation();
                           setDeleteTarget(l);
                         }}
-                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1.5"
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label={`Delete ${l.name}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -431,7 +502,7 @@ function LeadsPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (deleteTarget) del.mutate(deleteTarget.id);
+                if (deleteTarget) del.mutate({ id: deleteTarget.id, userId: user!.id });
                 setDeleteTarget(null);
               }}
               className="bg-destructive text-white hover:bg-destructive/90"

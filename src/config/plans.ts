@@ -7,6 +7,18 @@ export const STAGES = [
   "Won",
   "Lost",
 ] as const;
+export type Stage = (typeof STAGES)[number];
+
+export const STAGE_COLOR: Record<string, "blue" | "amber" | "green" | "purple" | "red" | "muted"> =
+  {
+    Contacted: "muted",
+    Replied: "blue",
+    "Call Booked": "amber",
+    "Proposal Sent": "purple",
+    Negotiating: "amber",
+    Won: "green",
+    Lost: "red",
+  };
 
 export const ROUTES = {
   AUTH: "/auth",
@@ -20,7 +32,6 @@ export const ROUTES = {
   TRASH: "/trash",
   ACTIVITY: "/activity",
   SETTINGS: "/settings",
-  QUALITY: "/quality",
 } as const;
 
 export const PAGE_SIZE = 50 as const;

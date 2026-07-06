@@ -46,3 +46,27 @@ export function captureError(error: unknown, source: string, context?: Record<st
 export function captureWarning(message: string, source: string, context?: Record<string, unknown>) {
   log.warn({ message, source, context, level: "warn" });
 }
+
+const KNOWN_ERROR_MAP: Record<string, string> = {
+  "Invalid login credentials": "Invalid email or password. Please try again.",
+  "Email not confirmed": "Please confirm your email address before signing in.",
+  "User already registered": "An account with this email already exists.",
+  "Password should be at least 6 characters": "Password must be at least 6 characters.",
+  rate_limit: "Too many attempts. Please wait a moment and try again.",
+  Unauthorized: "Your session has expired. Please sign in again.",
+  "JWT expired": "Your session has expired. Please sign in again.",
+  "Invalid token": "Your session has expired. Please sign in again.",
+  "service_role key": "Authentication service unavailable. Please try again later.",
+};
+
+export function sanitizeErrorMessage(
+  error: unknown,
+  fallback = "Something went wrong. Please try again.",
+): string {
+  const msg = error instanceof Error ? error.message : String(error ?? fallback);
+  for (const [key, friendly] of Object.entries(KNOWN_ERROR_MAP)) {
+    if (msg.toLowerCase().includes(key.toLowerCase())) return friendly;
+  }
+  if (msg.length > 120) return fallback;
+  return fallback;
+}

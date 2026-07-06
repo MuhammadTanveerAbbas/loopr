@@ -108,7 +108,7 @@ export function NeuBadge({
   className?: string;
 }) {
   const styles: Record<string, string> = {
-    blue: "bg-[var(--brand-pink)] text-white",
+    blue: "bg-[var(--brand-orange)] text-white",
     green: "bg-[var(--success)] text-black",
     amber: "bg-[var(--brand-yellow)] text-black",
     red: "bg-[var(--destructive)] text-white",

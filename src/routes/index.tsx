@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import {
   ArrowRight,
   Brain,
@@ -20,6 +20,7 @@ import {
   ChevronDown,
   TrendingUp,
   X,
+  Menu,
 } from "lucide-react";
 import { LoopMark, BrandLockup } from "@/components/ui/logo";
 
@@ -98,33 +99,61 @@ function Landing() {
 /* ============================== HEADER ============================== */
 
 function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const links = [
+    { href: "#features", label: "Features" },
+    { href: "#workflow", label: "Workflow" },
+    { href: "#pricing", label: "Pricing" },
+    { href: "#faq", label: "FAQ" },
+  ];
+
   return (
     <header className="sticky top-0 z-30 bg-brand-yellow border-b-[3px] border-black">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
         <BrandLockup size={42} />
         <nav className="hidden md:flex items-center gap-7 text-sm font-bold uppercase tracking-wide">
-          <a href="#features" className="hover:underline underline-offset-4 decoration-[3px]">
-            Features
-          </a>
-          <a href="#workflow" className="hover:underline underline-offset-4 decoration-[3px]">
-            Workflow
-          </a>
-          <a href="#pricing" className="hover:underline underline-offset-4 decoration-[3px]">
-            Pricing
-          </a>
-          <a href="#faq" className="hover:underline underline-offset-4 decoration-[3px]">
-            FAQ
-          </a>
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="hover:underline underline-offset-4 decoration-[3px]"
+            >
+              {l.label}
+            </a>
+          ))}
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             to="/auth"
-            className="brutal-btn px-4 py-2 text-xs hidden sm:inline-flex items-center gap-2"
+            className="brutal-btn px-3 sm:px-4 py-2 text-xs inline-flex items-center gap-2 min-h-[44px]"
           >
             Sign in <ArrowRight className="h-4 w-4" />
           </Link>
+          <button
+            type="button"
+            className="md:hidden neu-pressable rounded-xl p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
+      {menuOpen && (
+        <nav className="md:hidden border-t-[3px] border-black px-4 py-4 flex flex-col gap-3 bg-brand-yellow">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-wide py-2 min-h-[44px] flex items-center"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+      )}
     </header>
   );
 }
@@ -133,7 +162,7 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 text-center relative">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16 sm:pb-20 text-center relative">
       {/* Floating sticker decorations */}
       <div
         aria-hidden
@@ -153,7 +182,7 @@ function Hero() {
         <span className="w-2 h-2 rounded-full bg-white" /> v1.0 NOW LIVE
       </div>
       <h1
-        className="text-5xl md:text-7xl font-extrabold tracking-tight text-foreground leading-[1.02] animate-fade-up"
+        className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-foreground leading-[1.02] animate-fade-up"
         style={{ animationDelay: "0.1s" }}
       >
         A really good notebook
@@ -204,13 +233,13 @@ function HeroPreview() {
           <div className="w-3.5 h-3.5 rounded-full bg-destructive border-2 border-black" />
           <div className="w-3.5 h-3.5 rounded-full bg-brand-yellow border-2 border-black" />
           <div className="w-3.5 h-3.5 rounded-full bg-success border-2 border-black" />
-          <div className="ml-3 text-xs font-bold text-foreground/60">loopr.io/dashboard</div>
+          <div className="ml-3 text-xs font-bold text-foreground/60">Example dashboard preview</div>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {[
-            { label: "Pipeline value", value: "$184k", trend: "+12%", bg: "brutal-card-orange" },
-            { label: "Hot leads", value: "23", trend: "+5", bg: "brutal-card-yellow" },
-            { label: "Replies today", value: "8", trend: "+2", bg: "brutal-card-pink" },
+            { label: "Pipeline value", value: "—", trend: "Your data", bg: "brutal-card-orange" },
+            { label: "Active leads", value: "—", trend: "Your data", bg: "brutal-card-yellow" },
+            { label: "Reply rate", value: "—", trend: "Your data", bg: "brutal-card-pink" },
           ].map((k, i) => (
             <div
               key={k.label}
@@ -305,14 +334,6 @@ function MiniBars() {
   );
 }
 
-function LogoStrip() {
-  return null;
-}
-
-function Stats() {
-  return null;
-}
-
 /* ============================== FEATURES ============================== */
 
 function Features() {
@@ -320,7 +341,7 @@ function Features() {
     {
       icon: Layout,
       title: "Sheet & Kanban",
-      desc: "Two views of one pipeline. Edit in place. Drag to advance.",
+      desc: "Two views of one pipeline. Edit in place. Drag to advance in Pipeline view.",
       color: "var(--brand-orange)",
     },
     {
@@ -402,14 +423,14 @@ function ChartShowcase() {
             align="left"
             eyebrow="Visual pipeline"
             title="Watch your pipeline breathe"
-            sub="Live charts, signal trends, and stage velocity  at a glance, every morning."
+            sub="Stage breakdown, reply rate, and at-risk alerts — pulled from your real pipeline data."
           />
           <ul className="mt-8 space-y-3">
             {[
-              "Stage-by-stage conversion",
-              "Daily reply & touch heatmap",
-              "Signal Score distribution",
-              "Stale lead alerts before they go cold",
+              "Stage-by-stage breakdown",
+              "Reply rate from your logged touches",
+              "Signal scores on every lead",
+              "At-risk alerts when leads go quiet",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3 text-foreground font-semibold">
                 <div
@@ -432,7 +453,7 @@ function ChartShowcase() {
               <div className="text-xs font-extrabold uppercase tracking-wider text-foreground/60">
                 Pipeline by stage
               </div>
-              <div className="text-xl font-extrabold text-foreground">This week</div>
+              <div className="text-xl font-extrabold text-foreground">Example stages</div>
             </div>
             <div
               className="w-10 h-10 bg-brand-orange border-[2.5px] border-black rounded-xl flex items-center justify-center"
@@ -493,17 +514,20 @@ function ChartShowcase() {
             </div>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-3">
-            <Donut label="Convert" value={28} />
-            <Donut label="Reply" value={42} />
-            <Donut label="Win" value={18} />
+            <Donut label="Convert" value={28} sample />
+            <Donut label="Reply" value={42} sample />
+            <Donut label="Win" value={18} sample />
           </div>
+          <p className="mt-4 text-center text-[11px] font-bold text-foreground/60 uppercase tracking-wide">
+            Illustrative sample data
+          </p>
         </div>
       </div>
     </section>
   );
 }
 
-function Donut({ label, value }: { label: string; value: number }) {
+function Donut({ label, value, sample }: { label: string; value: number; sample?: boolean }) {
   const r = 22;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
@@ -533,7 +557,9 @@ function Donut({ label, value }: { label: string; value: number }) {
         />
       </svg>
       <div className="text-left">
-        <div className="text-lg font-extrabold text-black leading-none">{value}%</div>
+        <div className="text-lg font-extrabold text-black leading-none">
+          {sample ? "—" : `${value}%`}
+        </div>
         <div className="text-[10px] font-bold uppercase text-black/70 mt-1">{label}</div>
       </div>
     </div>
@@ -548,7 +574,7 @@ function Workflow_() {
     {
       icon: Sparkles,
       title: "Track touches",
-      desc: "Log emails, calls, meetings. Sentiment captured automatically.",
+      desc: "Log emails, calls, meetings. Tag replies to capture sentiment.",
     },
     {
       icon: Brain,
@@ -558,7 +584,7 @@ function Workflow_() {
     {
       icon: TrendingUp,
       title: "Close calmly",
-      desc: "Move deals through stages with a drag. No friction.",
+      desc: "Move deals through stages with drag-and-drop in Pipeline view.",
     },
   ];
   const colors = ["brutal-card-yellow", "brutal-card-orange", "brutal-card-pink", "brutal-card"];
@@ -647,7 +673,7 @@ function Comparison() {
       <SectionHeader
         eyebrow="Compare"
         title="Loopr vs the usual suspects"
-        sub="Same job  different philosophy."
+        sub="Same job, different philosophy. Competitor rows are approximate — verify before you switch."
       />
       <Reveal>
         <div className="mt-12 brutal-card p-0 overflow-hidden">
@@ -715,7 +741,13 @@ function Pricing() {
       name: "Solo",
       price: "$0",
       period: "free tier",
-      features: ["Sheet + Kanban pipeline", "Daily AI brief", "Signal scoring", "Reply analyzer"],
+      features: [
+        "Sheet + Kanban pipeline",
+        "Daily AI brief",
+        "Signal scoring",
+        "Reply analyzer",
+        "CSV import",
+      ],
       cta: "Get started",
       highlight: false,
       bg: "brutal-card",
@@ -735,7 +767,7 @@ function Pricing() {
       name: "Studio",
       price: "$49",
       period: "/month",
-      features: ["Everything in Pro", "AI weekly recap", "CSV import & API access"],
+      features: ["Everything in Pro", "AI weekly recap", "Higher lead limits"],
       cta: "Coming Soon",
       highlight: false,
       bg: "brutal-card-yellow",
@@ -798,7 +830,7 @@ function FAQ() {
   const items = [
     {
       q: "Is my data really mine?",
-      a: "Yes. Your leads live in your account only. Export to CSV at any time. We never share or train on your data.",
+      a: "Yes. Your leads live in your account only. Export to CSV at any time. We don't train models on your data; AI requests are sent to Groq — see their privacy policy for how they handle prompts.",
     },
     {
       q: "What does the AI actually do?",
@@ -806,7 +838,7 @@ function FAQ() {
     },
     {
       q: "Can I import from another CRM?",
-      a: "CSV import and CRM mappings are on the roadmap. For now, you can manually add leads or use the spreadsheet view to paste data in.",
+      a: "CSV import is available on the Solo plan today. Map columns from HubSpot, Pipedrive, or any spreadsheet export.",
     },
     {
       q: "Why no team plan?",

@@ -12,7 +12,7 @@ import {
   STAGES,
 } from "@/lib/leads-api";
 import { NeuButton, NeuInput, NeuTextarea, NeuSelect, NeuBadge } from "@/components/ui/neu";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { X, Plus, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -22,13 +22,13 @@ import { captureError } from "@/lib/error-service";
 export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }) {
   const { user } = useAuth();
   const update = useUpdateLead();
-  const { data: touches = [] } = useTouches(lead.id);
+  const { data: touches = [], isLoading: touchesLoading } = useTouches(lead.id);
   const { data: profile } = useProfile(user?.id);
   const addTouch = useAddTouch();
   const recomputeScore = useRecomputeSignalScore();
   const saveDraft = useSaveDraft(user?.id ?? "");
-  const { data: savedDrafts = [] } = useDrafts(lead.id);
-  const { data: stageHistory = [] } = useStageHistory(lead.id);
+  const { data: savedDrafts = [], isLoading: draftsLoading } = useDrafts(lead.id);
+  const { data: stageHistory = [], isLoading: historyLoading } = useStageHistory(lead.id);
   const [newTouchType, setNewTouchType] = useState("note");
   const [newTouchNote, setNewTouchNote] = useState("");
   const [draftBusy, setDraftBusy] = useState(false);
@@ -102,18 +102,24 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
               defaultValue={lead.name}
               onBlur={(e) =>
                 e.target.value !== lead.name &&
-                update.mutate({ id: lead.id, patch: { name: e.target.value } })
+                update.mutate({ id: lead.id, patch: { name: e.target.value }, userId: user!.id })
               }
               className="text-xl font-bold text-foreground bg-transparent w-full outline-none"
             />
             <input
               defaultValue={lead.company ?? ""}
-              onBlur={(e) => update.mutate({ id: lead.id, patch: { company: e.target.value } })}
+              onBlur={(e) =>
+                update.mutate({ id: lead.id, patch: { company: e.target.value }, userId: user!.id })
+              }
               placeholder="Company"
               className="text-sm text-muted-foreground bg-transparent w-full outline-none mt-0.5"
             />
           </div>
-          <button onClick={onClose} className="neu-pressable rounded-xl p-2 ml-2">
+          <button
+            onClick={onClose}
+            className="neu-pressable rounded-xl p-2 ml-2"
+            aria-label="Close drawer"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -125,8 +131,9 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             </NeuBadge>
             <button
               onClick={() => recomputeScore.mutate(lead.id)}
-              className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-foreground/10 text-[9px] font-bold flex items-center justify-center hover:bg-foreground/20"
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-foreground/10 text-[9px] font-bold flex items-center justify-center hover:bg-foreground/20"
               title="Recompute signal score"
+              aria-label="Recompute signal score"
             >
               ↻
             </button>
@@ -137,6 +144,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
               update.mutate({
                 id: lead.id,
                 patch: { stage: e.target.value, stage_changed_at: new Date().toISOString() },
+                userId: user!.id,
               })
             }
           >
@@ -157,7 +165,11 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
               type="number"
               defaultValue={Number(lead.deal_value)}
               onBlur={(e) =>
-                update.mutate({ id: lead.id, patch: { deal_value: Number(e.target.value) } })
+                update.mutate({
+                  id: lead.id,
+                  patch: { deal_value: Number(e.target.value) },
+                  userId: user!.id,
+                })
               }
               className="mt-1.5"
             />
@@ -169,7 +181,9 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             </label>
             <NeuInput
               defaultValue={lead.niche ?? ""}
-              onBlur={(e) => update.mutate({ id: lead.id, patch: { niche: e.target.value } })}
+              onBlur={(e) =>
+                update.mutate({ id: lead.id, patch: { niche: e.target.value }, userId: user!.id })
+              }
               className="mt-1.5"
             />
           </div>
@@ -181,7 +195,11 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             <NeuSelect
               defaultValue={lead.source ?? ""}
               onChange={(e) =>
-                update.mutate({ id: lead.id, patch: { source: e.target.value || null } })
+                update.mutate({
+                  id: lead.id,
+                  patch: { source: e.target.value || null },
+                  userId: user!.id,
+                })
               }
               className="mt-1.5"
             >
@@ -210,7 +228,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
                       const next = active
                         ? current.filter((t: string) => t !== tag)
                         : [...current, tag];
-                      update.mutate({ id: lead.id, patch: { tags: next } });
+                      update.mutate({ id: lead.id, patch: { tags: next }, userId: user!.id });
                     }}
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border-2 border-black transition-all ${
                       active
@@ -232,7 +250,9 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             <NeuTextarea
               rows={4}
               defaultValue={lead.notes ?? ""}
-              onBlur={(e) => update.mutate({ id: lead.id, patch: { notes: e.target.value } })}
+              onBlur={(e) =>
+                update.mutate({ id: lead.id, patch: { notes: e.target.value }, userId: user!.id })
+              }
               className="mt-1.5"
             />
           </div>
@@ -256,8 +276,9 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
                       saveDraft.mutate({ lead_id: lead.id, body: draft });
                       toast.success("Draft saved");
                     }}
-                    className="neu-pressable rounded-lg p-1.5"
+                    className="neu-pressable rounded-lg p-2"
                     title="Save draft"
+                    aria-label="Save draft"
                   >
                     <Plus className="h-3 w-3" />
                   </button>
@@ -266,7 +287,8 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
                       navigator.clipboard.writeText(draft);
                       toast.success("Copied");
                     }}
-                    className="neu-pressable rounded-lg p-1.5"
+                    className="neu-pressable rounded-lg p-2"
+                    aria-label="Copy draft to clipboard"
                   >
                     <Copy className="h-3 w-3" />
                   </button>
@@ -325,19 +347,24 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
               Stage History
             </label>
             <div className="space-y-1 mt-2">
-              {stageHistory.length === 0 && (
+              {historyLoading ? (
+                <p className="text-xs text-muted-foreground animate-pulse">
+                  Loading stage history…
+                </p>
+              ) : stageHistory.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No stage changes recorded.</p>
+              ) : (
+                stageHistory.slice(0, 10).map((s) => (
+                  <div key={s.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-semibold">{s.from_stage ?? "—"}</span>
+                    <span className="text-[10px]">→</span>
+                    <span className="font-semibold text-foreground">{s.to_stage}</span>
+                    <span className="ml-auto text-[10px]">
+                      {new Date(s.changed_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))
               )}
-              {stageHistory.slice(0, 10).map((s) => (
-                <div key={s.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-semibold">{s.from_stage ?? "—"}</span>
-                  <span className="text-[10px]">→</span>
-                  <span className="font-semibold text-foreground">{s.to_stage}</span>
-                  <span className="ml-auto text-[10px]">
-                    {new Date(s.changed_at).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -346,20 +373,23 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
               Timeline
             </label>
             <div className="space-y-2 mt-2">
-              {touches.length === 0 && (
+              {touchesLoading ? (
+                <p className="text-xs text-muted-foreground animate-pulse">Loading timeline…</p>
+              ) : touches.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No touches logged yet.</p>
-              )}
-              {touches.map((t) => (
-                <div key={t.id} className="neu-raised-sm rounded-xl px-3 py-2.5">
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="font-semibold uppercase tracking-wider">
-                      {t.type.replace("_", " ")}
-                    </span>
-                    <span>{new Date(t.touched_at).toLocaleDateString()}</span>
+              ) : (
+                touches.map((t) => (
+                  <div key={t.id} className="neu-raised-sm rounded-xl px-3 py-2.5">
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="font-semibold uppercase tracking-wider">
+                        {t.type.replace("_", " ")}
+                      </span>
+                      <span>{new Date(t.touched_at).toLocaleDateString()}</span>
+                    </div>
+                    {t.note && <p className="text-sm text-foreground mt-1">{t.note}</p>}
                   </div>
-                  {t.note && <p className="text-sm text-foreground mt-1">{t.note}</p>}
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

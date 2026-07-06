@@ -1,4 +1,5 @@
 // Account deletion edge function. Deletes user data and auth user.
+// Note: audit_logs are intentionally preserved for compliance.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -29,12 +30,11 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Delete public schema data (cascades to related tables)
-    await supabase.from("leads").delete().eq("user_id", userId);
-    await supabase.from("profiles").delete().eq("id", userId);
-    await supabase.from("audit_logs").delete().eq("user_id", userId);
-    await supabase.from("ai_logs").delete().eq("user_id", userId);
-    await supabase.from("drafts").delete().eq("user_id", userId);
+    // Delete public schema data in a single transactional call
+    const { error: rpcError } = await supabase.rpc("delete_user_account", {
+      p_user_id: userId,
+    });
+    if (rpcError) return jsonResp({ error: rpcError.message }, 500);
 
     // Delete the auth user last
     const { error } = await supabase.auth.admin.deleteUser(userId);

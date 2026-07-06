@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useLeads } from "@/lib/leads-api";
 import {
@@ -36,7 +36,7 @@ export function CommandPalette() {
   const [search, setSearch] = useState("");
   const nav = useNavigate();
   const { data } = useLeads();
-  const leads = data?.leads ?? [];
+  const leads = useMemo(() => data?.leads ?? [], [data]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {

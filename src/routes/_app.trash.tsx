@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLeads, useHardDeleteLead, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorFallback } from "@/components/ui/error-fallback";
 import { Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -33,8 +34,8 @@ export const Route = createFileRoute("/_app/trash")({
 });
 
 function TrashPage() {
-  const { data, isLoading } = useLeads({ includeDeleted: true });
-  const leads = data?.leads ?? [];
+  const { data, isLoading, error, refetch } = useLeads({ includeDeleted: true });
+  const leads = useMemo(() => data?.leads ?? [], [data]);
   const deleted = leads.filter((l: Lead) => l.deleted_at);
   const qc = useQueryClient();
   const hardDelete = useHardDeleteLead();
@@ -51,6 +52,16 @@ function TrashPage() {
     },
     onError: () => toast.error("Failed to restore"),
   });
+
+  if (error) {
+    return (
+      <ErrorFallback
+        error={error instanceof Error ? error : new Error(String(error))}
+        reset={refetch}
+        message="Failed to load trash"
+      />
+    );
+  }
 
   if (isLoading) {
     return (

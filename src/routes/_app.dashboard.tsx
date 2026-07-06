@@ -6,10 +6,19 @@ import {
   type Lead,
   type DashboardStats,
 } from "@/lib/leads-api";
-import { NeuCard, NeuBadge } from "@/components/ui/neu";
+import { NeuCard, NeuBadge, NeuButton } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { daysSilent } from "@/lib/signal-score";
-import { ArrowDown, ArrowUp, TrendingUp, Users, DollarSign, Reply, Trophy } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Reply,
+  Trophy,
+  RefreshCw,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
@@ -64,8 +73,25 @@ function AnimatedValue({
 }
 
 function Dashboard() {
-  const { data: stats, isLoading, error } = useDashboardStats();
+  const { data: stats, isLoading, error, refetch } = useDashboardStats();
   const { data: recentLeads = [] } = useTrendingLeads(5);
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <NeuCard className="rounded-2xl p-8 text-center">
+          <h2 className="text-lg font-bold text-foreground">Failed to load dashboard data.</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Something went wrong loading your pipeline stats.
+          </p>
+          <NeuButton variant="primary" onClick={() => refetch()} className="mt-5">
+            <RefreshCw className="h-4 w-4 inline mr-1" />
+            Retry
+          </NeuButton>
+        </NeuCard>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -98,16 +124,7 @@ function Dashboard() {
     );
   }
 
-  if (error || !stats) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <NeuCard className="rounded-2xl p-8 text-center">
-          <p className="text-destructive font-semibold">Failed to load dashboard data.</p>
-          <p className="text-sm text-muted-foreground mt-1">Please try refreshing the page.</p>
-        </NeuCard>
-      </div>
-    );
-  }
+  if (!stats) return null;
 
   const stageCounts = stats.stage_counts || {};
   const atRisk = stats.at_risk || [];

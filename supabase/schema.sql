@@ -33,6 +33,7 @@ DROP FUNCTION IF EXISTS public.bulk_update_leads_stage(UUID[], TEXT, UUID);
 DROP FUNCTION IF EXISTS public.cleanup_old_deleted_leads();
 DROP FUNCTION IF EXISTS public.get_dashboard_stats();
 DROP FUNCTION IF EXISTS public.hard_delete_lead(UUID);
+DROP FUNCTION IF EXISTS public.delete_user_account(UUID);
 
 DROP TABLE IF EXISTS public.drafts CASCADE;
 DROP TABLE IF EXISTS public.audit_logs CASCADE;
@@ -386,6 +387,16 @@ CREATE OR REPLACE FUNCTION public.hard_delete_lead(lead_id UUID)
 RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   DELETE FROM public.leads WHERE id = lead_id AND user_id = auth.uid();
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.delete_user_account(p_user_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  DELETE FROM public.leads WHERE user_id = p_user_id;
+  DELETE FROM public.profiles WHERE id = p_user_id;
+  DELETE FROM public.ai_logs WHERE user_id = p_user_id;
+  DELETE FROM public.drafts WHERE user_id = p_user_id;
 END;
 $$;
 

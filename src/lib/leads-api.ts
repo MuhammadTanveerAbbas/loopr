@@ -3,34 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Draft, AuditLog } from "@/integrations/supabase/supplemental-types";
 import { updateLeadSchema, createTouchSchema, sanitizeString } from "./schemas";
+import { STAGES, STAGE_COLOR } from "@/config/plans";
+import type { Stage } from "@/config/plans";
 
 type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
 export type Lead = LeadRow;
 export type Touch = Database["public"]["Tables"]["lead_touches"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type { Draft, AuditLog } from "@/integrations/supabase/supplemental-types";
-
-export const STAGES = [
-  "Contacted",
-  "Replied",
-  "Call Booked",
-  "Proposal Sent",
-  "Negotiating",
-  "Won",
-  "Lost",
-] as const;
-export type Stage = (typeof STAGES)[number];
-
-export const STAGE_COLOR: Record<string, "blue" | "amber" | "green" | "purple" | "red" | "muted"> =
-  {
-    Contacted: "muted",
-    Replied: "blue",
-    "Call Booked": "amber",
-    "Proposal Sent": "purple",
-    Negotiating: "amber",
-    Won: "green",
-    Lost: "red",
-  };
+export { STAGES, STAGE_COLOR };
+export type { Stage };
 
 export interface LeadFilters {
   stage?: string;
@@ -45,6 +27,20 @@ export interface PaginatedLeads {
 }
 
 const DEFAULT_PAGE_SIZE = 50;
+
+async function verifyLeadOwnership(leadId: string, userId: string) {
+  const { data, error } = await supabase.from("leads").select("user_id").eq("id", leadId).single();
+  if (error || !data || data.user_id !== userId) {
+    throw new Error("Unauthorized");
+  }
+}
+
+async function verifyLeadExists(leadId: string) {
+  const { data, error } = await supabase.from("leads").select("id").eq("id", leadId).single();
+  if (error || !data) {
+    throw new Error("Lead not found");
+  }
+}
 
 export function useLeads(options?: { pageSize?: number; includeDeleted?: boolean }) {
   const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE;
@@ -106,7 +102,16 @@ export function useStageHistory(leadId: string | null) {
 export function useUpdateLead() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Lead> }) => {
+    mutationFn: async ({
+      id,
+      patch,
+      userId,
+    }: {
+      id: string;
+      patch: Partial<Lead>;
+      userId?: string;
+    }) => {
+      if (userId) await verifyLeadOwnership(id, userId);
       const sanitized: Record<string, unknown> = { ...patch };
       for (const key of Object.keys(sanitized)) {
         const val = sanitized[key];
@@ -169,7 +174,8 @@ export function useCreateLead() {
 export function useDeleteLead() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, userId }: { id: string; userId?: string }) => {
+      if (userId) await verifyLeadOwnership(id, userId);
       const { error } = await supabase
         .from("leads")
         .update({ deleted_at: new Date().toISOString() })
@@ -253,7 +259,7 @@ function computeDashboardStats(leads: Lead[]): DashboardStats {
     .sort((a, b) => b.days_silent - a.days_silent)
     .slice(0, 10);
 
-  const weekAgo = Date.now() - 14 * 86400000;
+  const weekAgo = Date.now() - 7 * 86400000;
   const twoWeeksAgo = Date.now() - 14 * 86400000;
   const prevTotal = leads.filter((l) => {
     const d = new Date(l.created_at).getTime();
@@ -338,6 +344,7 @@ export function useAddTouch() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (t: Database["public"]["Tables"]["lead_touches"]["Insert"]) => {
+      if (t.user_id && t.lead_id) await verifyLeadOwnership(t.lead_id, t.user_id);
       const parsed = createTouchSchema.parse({
         lead_id: t.lead_id,
         type: t.type,

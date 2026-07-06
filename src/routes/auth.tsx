@@ -1,17 +1,29 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { NeuButton, NeuCard, NeuInput } from "@/components/ui/neu";
 import { GoogleIcon } from "@/components/ui/google-icon";
 import { toast } from "sonner";
+import { sanitizeErrorMessage } from "@/lib/error-service";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { LoopMark } from "@/components/ui/logo";
+
+const authFormSchema = z.object({
+  email: z.string().email("Enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(1, "Name is required").max(100).optional(),
+});
+
+type AuthForm = z.infer<typeof authFormSchema>;
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in  Loopr" },
+      { title: "Sign in - Loopr" },
       { name: "description", content: "Sign in or create an account for Loopr by The MVP Guy." },
     ],
   }),
@@ -22,24 +34,34 @@ function AuthPage() {
   const nav = useNavigate();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<AuthForm>({
+    resolver: zodResolver(authFormSchema),
+    defaultValues: { email: "", password: "", name: "" },
+  });
+
+  const watchedEmail = watch("email");
+  const watchedPassword = watch("password");
+  const hasValues = mode === "reset" ? !!watchedEmail : !!watchedEmail && !!watchedPassword;
 
   useEffect(() => {
     if (!loading && user) nav({ to: "/dashboard" });
   }, [user, loading, nav]);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (data: AuthForm) => {
     setBusy(true);
     try {
       if (mode === "reset") {
         const redirectOrigin = import.meta.env.VITE_PUBLIC_ORIGIN || window.location.origin;
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
           redirectTo: `${redirectOrigin}/auth`,
         });
         if (error) throw error;
@@ -48,31 +70,30 @@ function AuthPage() {
         return;
       }
       if (mode === "signup") {
-        const { error, data } = await supabase.auth.signUp({
-          email,
-          password,
+        const { error, data: signupData } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth`,
-            data: { name },
+            data: { name: data.name },
           },
         });
         if (error) throw error;
-        if (data?.user?.identities?.length === 0) {
+        if (signupData?.user?.identities?.length === 0) {
           toast.error("An account with this email already exists.");
           return;
         }
         toast.success("Account created. Check your email to confirm your sign-up.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: data.email,
+          password: data.password,
         });
         if (error) throw error;
         toast.success("Welcome back.");
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Authentication failed";
-      toast.error(message);
+      toast.error(sanitizeErrorMessage(err, "Authentication failed. Please try again."));
     } finally {
       setBusy(false);
     }
@@ -86,12 +107,11 @@ function AuthPage() {
         options: { redirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) {
-        toast.error(error.message ?? "Google sign-in failed");
+        toast.error(sanitizeErrorMessage(error, "Google sign-in failed. Please try again."));
         setGoogleBusy(false);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Google sign-in failed";
-      toast.error(message);
+      toast.error(sanitizeErrorMessage(err, "Google sign-in failed. Please try again."));
       setGoogleBusy(false);
     }
   };
@@ -153,41 +173,54 @@ function AuthPage() {
           <div className="flex-1 h-px bg-muted-foreground/15" />
         </div>
 
-        <form onSubmit={submit} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-3">
           {mode === "signup" && (
-            <NeuInput
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          )}
-          <NeuInput
-            type="email"
-            placeholder="you@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          {mode !== "reset" && (
-            <div className="relative">
+            <div>
               <NeuInput
-                type={showPw ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="pr-12"
+                placeholder="Your name"
+                {...register("name")}
+                aria-invalid={!!errors.name}
               />
-              <button
-                type="button"
-                aria-label={showPw ? "Hide password" : "Show password"}
-                onClick={() => setShowPw((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              {errors.name && (
+                <p className="mt-1 text-xs font-semibold text-destructive">{errors.name.message}</p>
+              )}
+            </div>
+          )}
+          <div>
+            <NeuInput
+              type="email"
+              placeholder="you@company.com"
+              {...register("email")}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && (
+              <p className="mt-1 text-xs font-semibold text-destructive">{errors.email.message}</p>
+            )}
+          </div>
+          {mode !== "reset" && (
+            <div>
+              <div className="relative">
+                <NeuInput
+                  type={showPw ? "text" : "password"}
+                  placeholder="Password"
+                  {...register("password")}
+                  aria-invalid={!!errors.password}
+                  className="pr-12"
+                />
+                <button
+                  type="button"
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-xs font-semibold text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
           )}
           {mode === "login" && (
@@ -199,14 +232,19 @@ function AuthPage() {
               Forgot password?
             </button>
           )}
-          <NeuButton type="submit" variant="primary" disabled={busy} className="mt-2">
-            {busy
-              ? "Working..."
-              : mode === "reset"
-                ? "Send reset link"
-                : mode === "login"
-                  ? "Sign in"
-                  : "Create account"}
+          <NeuButton type="submit" variant="primary" disabled={busy || !hasValues} className="mt-2">
+            {busy ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Working…
+              </span>
+            ) : mode === "reset" ? (
+              "Send reset link"
+            ) : mode === "login" ? (
+              "Sign in"
+            ) : (
+              "Create account"
+            )}
           </NeuButton>
         </form>
 

@@ -3,8 +3,6 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 /*
  * Dopamine + Neobrutal design system.
  * Hard offset shadows, thick black borders, vibrant flat colors.
@@ -118,8 +116,6 @@
   --sidebar-border: #0a0a0a;
   --sidebar-ring: #ff6b35;
 }
-
-/* Dark theme removed  Loopr is light-only by design. */
 
 @layer base {
   * {
@@ -242,7 +238,7 @@
     background-color: var(--brand-white);
   }
   .accent-strip-blue {
-    background: var(--brand-pink);
+    background: var(--brand-orange);
     border: 3px solid var(--brand-black);
     border-radius: 20px;
     box-shadow: 0 6px 0 var(--brand-black);
@@ -464,6 +460,23 @@
 }
 .animate-slide-up {
   animation: lt-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-float,
+  .animate-bar-grow,
+  .animate-spin-slow,
+  .animate-pulse-ring,
+  .animate-slide-in-left,
+  .animate-slide-up {
+    animation: none !important;
+  }
+  .neu-pressable,
+  .brutal-btn,
+  .brutal-btn-secondary {
+    transition: none;
+  }
 }
 
 /* Custom scrollbar */

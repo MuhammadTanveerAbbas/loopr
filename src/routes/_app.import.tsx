@@ -4,9 +4,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { NeuCard, NeuButton } from "@/components/ui/neu";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { sanitizeErrorMessage } from "@/lib/error-service";
 import { Upload, Download, CheckCircle2, AlertCircle } from "lucide-react";
+import Papa from "papaparse";
 
 export const Route = createFileRoute("/_app/import")({
   head: () => ({ meta: [{ title: "Import CSV | Loopr" }] }),
@@ -28,45 +30,20 @@ function ImportPage() {
       const file = e.target.files?.[0];
       if (!file) return;
       const text = await file.text();
-      const lines = text.split(/\n/).filter(Boolean);
-      if (lines.length < 2) {
+      const parsed = Papa.parse<CsvRow>(text, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (h) => h.trim().toLowerCase(),
+      });
+      if (parsed.errors.length > 0) {
+        toast.error(sanitizeErrorMessage(parsed.errors[0]!, "CSV format error"));
+        return;
+      }
+      if (parsed.data.length === 0) {
         toast.error("CSV must have a header row and at least one lead.");
         return;
       }
-      const parseCsvLine = (line: string): string[] => {
-        const result: string[] = [];
-        let current = "";
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          if (char === '"') {
-            if (inQuotes && line[i + 1] === '"') {
-              current += '"';
-              i++;
-            } else {
-              inQuotes = !inQuotes;
-            }
-          } else if (char === "," && !inQuotes) {
-            result.push(current.trim());
-            current = "";
-          } else {
-            current += char;
-          }
-        }
-        result.push(current.trim());
-        return result;
-      };
-
-      const headers = parseCsvLine(lines[0]!).map((h) => h.trim().toLowerCase());
-      const rows = lines.slice(1).map((l) => {
-        const vals = parseCsvLine(l);
-        const row: CsvRow = {};
-        headers.forEach((h, i) => {
-          row[h] = vals[i] ?? "";
-        });
-        return row;
-      });
-      setPreview(rows.slice(0, 5));
+      setPreview(parsed.data.slice(0, 5));
       setResult(null);
     } catch {
       toast.error("Failed to read file.");
@@ -78,44 +55,20 @@ function ImportPage() {
     setImporting(true);
     try {
       const text = await fileRef.current.files[0].text();
-      const lines = text.split(/\n/).filter(Boolean);
-
-      const parseCsvLine = (line: string): string[] => {
-        const result: string[] = [];
-        let current = "";
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          if (char === '"') {
-            if (inQuotes && line[i + 1] === '"') {
-              current += '"';
-              i++;
-            } else {
-              inQuotes = !inQuotes;
-            }
-          } else if (char === "," && !inQuotes) {
-            result.push(current.trim());
-            current = "";
-          } else {
-            current += char;
-          }
-        }
-        result.push(current.trim());
-        return result;
-      };
-
-      const headers = parseCsvLine(lines[0]!).map((h) => h.trim().toLowerCase());
-      const sanitize = (v: string) => v.replace(/^[=\-+@]/, " ").trim();
-
-      // Parse all rows first
-      const rows: CsvRow[] = lines.slice(1).map((line) => {
-        const vals = parseCsvLine(line);
-        const row: CsvRow = {};
-        headers.forEach((h, i) => {
-          row[h] = vals[i] ?? "";
-        });
-        return row;
+      const parsed = Papa.parse<CsvRow>(text, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (h) => h.trim().toLowerCase(),
       });
+
+      if (parsed.errors.length > 0) {
+        toast.error(sanitizeErrorMessage(parsed.errors[0]!, "CSV format error"));
+        setImporting(false);
+        return;
+      }
+
+      const rows = parsed.data;
+      const sanitize = (v: string) => v.replace(/^[=\-+@]/, " ").trim();
 
       // Bulk check existing emails to avoid N+1
       const emails = rows.map((r) => r.email).filter(Boolean) as string[];
@@ -139,11 +92,12 @@ function ImportPage() {
           skipped++;
           continue;
         }
+        const parsedDealValue = Number(row.deal_value);
         toInsert.push({
           name: sanitize(row.name || row.first_name + " " + row.last_name || "Unknown"),
           company: row.company ? sanitize(row.company) : undefined,
           email: email || undefined,
-          deal_value: row.deal_value ? Number(row.deal_value) : undefined,
+          deal_value: row.deal_value && !isNaN(parsedDealValue) ? parsedDealValue : undefined,
           stage: "New",
           user_id: user.id,
           source: row.source || "csv_import",

@@ -17,7 +17,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { LoopMark } from "@/components/ui/logo";
 
 const sections = [

@@ -1,6 +1,6 @@
-import { useLocation } from "@tanstack/react-router";
-import { useAuth } from "@/lib/auth";
-import { useRef, useState, useEffect } from "react";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/hooks/use-auth";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { LogOut, Settings, User, ChevronDown, Search } from "lucide-react";
 import { LoopMark } from "@/components/ui/logo";
 
@@ -19,21 +19,29 @@ const pageTitles: Record<string, string> = {
 
 export function Navbar() {
   const loc = useLocation();
+  const nav = useNavigate();
   const { user, signOut } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentPage = pageTitles[loc.pathname] || "Dashboard";
 
+  const close = useCallback(() => setDropdownOpen(false), []);
+
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
+    const handle = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) close();
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("mousedown", handle);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handle);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [close]);
 
   return (
     <header className="sticky top-0 z-40 bg-background border-b-3 border-black">
@@ -78,8 +86,8 @@ export function Navbar() {
                 </div>
                 <button
                   onClick={() => {
-                    window.location.href = "/settings";
-                    setDropdownOpen(false);
+                    nav({ to: "/settings" });
+                    close();
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-foreground hover:bg-foreground/5 transition-colors"
                 >
@@ -89,7 +97,7 @@ export function Navbar() {
                 <button
                   onClick={() => {
                     signOut();
-                    setDropdownOpen(false);
+                    close();
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-destructive hover:bg-destructive/5 transition-colors border-t-2 border-black"
                 >

@@ -48,9 +48,9 @@ function PrivacyPage() {
           </Section>
 
           <Section title="AI data handling">
-            AI briefings are generated via Supabase Edge Functions. Your lead data is sent to an LLM
+            AI briefings are generated via Supabase Edge Functions. Your lead data is sent to Groq
             only for the purpose of generating summaries and recommendations. We do not train models
-            on your data.
+            on your data; see Groq&apos;s privacy policy for how they handle API requests.
           </Section>
 
           <Section title="Data retention">

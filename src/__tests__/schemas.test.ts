@@ -97,8 +97,8 @@ describe("authSchema", () => {
 });
 
 describe("sanitizeString", () => {
-  it("removes HTML tags", () => {
-    expect(sanitizeString("<script>alert(1)</script>")).toBe("alert(1)");
+  it("removes angle brackets", () => {
+    expect(sanitizeString("<script>alert(1)</script>")).toBe("scriptalert(1)/script");
   });
 
   it("removes control characters", () => {

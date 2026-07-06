@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NeuCard } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import type { AuditLog } from "@/lib/leads-api";
 
 export const Route = createFileRoute("/_app/activity")({
@@ -43,7 +43,11 @@ function ActivityPage() {
   const { user } = useAuth();
   const [filter, setFilter] = useState<FilterTab>("all");
 
-  const { data: auditLogs = [], isLoading: auditLoading } = useQuery({
+  const {
+    data: auditLogs = [],
+    isLoading: auditLoading,
+    error: auditError,
+  } = useQuery({
     queryKey: ["audit_logs"],
     enabled: !!user,
     queryFn: async () => {
@@ -57,7 +61,11 @@ function ActivityPage() {
     },
   });
 
-  const { data: aiLogs = [], isLoading: aiLoading } = useQuery({
+  const {
+    data: aiLogs = [],
+    isLoading: aiLoading,
+    error: aiError,
+  } = useQuery({
     queryKey: ["ai_logs_recent"],
     enabled: !!user,
     queryFn: async () => {
@@ -72,9 +80,23 @@ function ActivityPage() {
   });
 
   const isLoading = auditLoading || aiLoading;
+  const error = auditError || aiError;
 
   const filteredAi = filter === "all" || filter === "ai" ? aiLogs : [];
   const filteredAudit = filter === "all" || filter === "system" ? auditLogs : [];
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="neu-raised rounded-2xl p-8 text-center">
+          <h2 className="text-lg font-bold text-foreground">Failed to load activity log</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Something went wrong loading your activity data.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

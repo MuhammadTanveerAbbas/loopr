@@ -21,7 +21,6 @@ export default defineConfig({
           if (id.includes("node_modules/react-dom")) return "vendor-react";
           if (id.includes("node_modules/react")) return "vendor-react";
           if (id.includes("node_modules/lucide")) return "vendor-icons";
-          if (id.includes("node_modules/recharts")) return "vendor-charts";
           if (id.includes("node_modules/@supabase")) return "vendor-supabase";
           if (id.includes("node_modules/@tanstack")) return "vendor-tanstack";
         },
