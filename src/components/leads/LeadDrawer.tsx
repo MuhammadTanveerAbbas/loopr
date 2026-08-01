@@ -93,7 +93,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-foreground/20 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-md bg-background h-full overflow-y-auto p-6 neu-raised-lg"
+        className="relative w-full sm:max-w-md bg-background h-full overflow-y-auto p-4 sm:p-6 neu-raised-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-5">

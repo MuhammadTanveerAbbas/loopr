@@ -4,6 +4,7 @@ import { useLeads, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorFallback } from "@/components/ui/error-fallback";
+import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";
 import { daysSilent } from "@/lib/signal-score";
 import { Copy, Sparkles, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,25 +94,18 @@ function Nurture() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 animate-fade-up">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Nurture</h1>
-        <p className="text-sm text-muted-foreground">
-          Leads that had momentum but went cold. Bring them back.
-        </p>
-      </header>
+    <PageContainer className="max-w-5xl animate-fade-up">
+      <PageHeader
+        title="Nurture"
+        subtitle="Leads that had momentum but went cold. Bring them back."
+      />
 
-      <NeuCard className="rounded-2xl">
+      <NeuCard className="rounded-2xl p-4 sm:p-5">
         {targets.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-3xl mb-2">&#10024;</div>
-            <p className="font-medium text-sm text-muted-foreground">
-              No leads need re-engaging right now.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Leads appear here when they have a reply but have been silent for more than 5 days.
-            </p>
-          </div>
+          <EmptyState
+            title="No leads need re-engaging right now."
+            message="Leads appear here when they have a reply but have been silent for more than 5 days."
+          />
         ) : (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -130,7 +124,7 @@ function Nurture() {
                   className="neu-raised-sm rounded-xl p-4 animate-fade-up"
                   style={{ animationDelay: `${i * 0.05}s` }}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-full bg-foreground/10 border-2 border-black flex items-center justify-center text-sm font-extrabold shrink-0">
                         {l.name.charAt(0).toUpperCase()}
@@ -173,6 +167,6 @@ function Nurture() {
           </div>
         )}
       </NeuCard>
-    </div>
+    </PageContainer>
   );
 }

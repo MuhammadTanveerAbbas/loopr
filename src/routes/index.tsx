@@ -175,7 +175,7 @@ function Hero() {
         className="hidden md:block absolute top-32 right-8 brutal-card-yellow px-3 py-2 text-xs font-extrabold uppercase rotate-6 animate-float"
         style={{ animationDelay: "1.5s" }}
       >
-        🎯 Built for solo
+        Built for solo
       </div>
 
       <div className="brutal-badge mb-8 animate-fade-up">
@@ -320,9 +320,9 @@ function MiniBars() {
       <div className="flex gap-2 mt-2">
         <div className="w-7" />
         <div className="flex-1 flex items-start justify-around gap-[3px] px-1">
-          {months.map((m) => (
+          {months.map((m, mi) => (
             <div
-              key={m}
+              key={`${m}-${mi}`}
               className="flex-1 text-center text-[10px] font-extrabold text-foreground/70 leading-tight"
             >
               {m}
@@ -423,7 +423,7 @@ function ChartShowcase() {
             align="left"
             eyebrow="Visual pipeline"
             title="Watch your pipeline breathe"
-            sub="Stage breakdown, reply rate, and at-risk alerts — pulled from your real pipeline data."
+            sub="Stage breakdown, reply rate, and at-risk alerts pulled from your real pipeline data."
           />
           <ul className="mt-8 space-y-3">
             {[
@@ -673,7 +673,7 @@ function Comparison() {
       <SectionHeader
         eyebrow="Compare"
         title="Loopr vs the usual suspects"
-        sub="Same job, different philosophy. Competitor rows are approximate — verify before you switch."
+        sub="Same job, different philosophy. Competitor rows are approximate, verify before you switch."
       />
       <Reveal>
         <div className="mt-12 brutal-card p-0 overflow-hidden">
@@ -830,7 +830,7 @@ function FAQ() {
   const items = [
     {
       q: "Is my data really mine?",
-      a: "Yes. Your leads live in your account only. Export to CSV at any time. We don't train models on your data; AI requests are sent to Groq — see their privacy policy for how they handle prompts.",
+      a: "Yes. Your leads live in your account only. Export to CSV at any time. We don't train models on your data; AI requests are sent to Groq. See their privacy policy for how they handle prompts.",
     },
     {
       q: "What does the AI actually do?",

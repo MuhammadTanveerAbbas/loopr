@@ -89,7 +89,11 @@ export const NeuSelect = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTML
   ({ className, children, ...rest }, ref) => (
     <select
       ref={ref}
-      className={cn("neu-input px-3 py-2 text-sm appearance-none cursor-pointer", className)}
+      className={cn(
+        "neu-input px-3 py-2 text-sm appearance-none cursor-pointer",
+        "bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2214%22 height=%2214%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a0a0a%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>')] bg-[length:14px_14px] bg-[center_right_0.75rem] bg-no-repeat pr-9",
+        className,
+      )}
       {...rest}
     >
       {children}

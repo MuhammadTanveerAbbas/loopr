@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Draft, AuditLog } from "@/integrations/supabase/supplemental-types";
@@ -26,7 +26,16 @@ export interface PaginatedLeads {
   hasMore: boolean;
 }
 
-const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_PAGE_SIZE = 500;
+
+function invalidateLeadQueries(qc: QueryClient) {
+  qc.invalidateQueries({ queryKey: ["leads"] });
+  qc.invalidateQueries({ queryKey: ["leads_trending"] });
+  qc.invalidateQueries({ queryKey: ["dashboard_stats"] });
+  qc.invalidateQueries({ queryKey: ["touches"] });
+  qc.invalidateQueries({ queryKey: ["drafts"] });
+  qc.invalidateQueries({ queryKey: ["stage_history"] });
+}
 
 async function verifyLeadOwnership(leadId: string, userId: string) {
   const { data, error } = await supabase.from("leads").select("user_id").eq("id", leadId).single();
@@ -129,7 +138,7 @@ export function useUpdateLead() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => invalidateLeadQueries(qc),
     onError: (err) => {
       if (err instanceof Error) {
         console.error("Failed to update lead:", err.message);
@@ -162,7 +171,7 @@ export function useCreateLead() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => invalidateLeadQueries(qc),
     onError: (err) => {
       if (err instanceof Error) {
         console.error("Failed to create lead:", err.message);
@@ -182,7 +191,7 @@ export function useDeleteLead() {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => invalidateLeadQueries(qc),
     onError: (err) => {
       if (err instanceof Error) {
         console.error("Failed to delete lead:", err.message);
@@ -199,7 +208,7 @@ export function useRecomputeSignalScore() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => invalidateLeadQueries(qc),
   });
 }
 
@@ -314,7 +323,7 @@ export function useHardDeleteLead() {
       const { error } = await supabase.rpc("hard_delete_lead", { lead_id: id });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => invalidateLeadQueries(qc),
     onError: (err) => {
       if (err instanceof Error) {
         console.error("Failed to permanently delete lead:", err.message);
@@ -367,9 +376,8 @@ export function useAddTouch() {
       if (updateError) throw updateError;
       return data;
     },
-    onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: ["leads"] });
-      qc.invalidateQueries({ queryKey: ["touches", vars.lead_id] });
+    onSuccess: () => {
+      invalidateLeadQueries(qc);
     },
     onError: (err) => {
       if (err instanceof Error) {

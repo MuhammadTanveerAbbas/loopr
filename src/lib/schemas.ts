@@ -56,8 +56,9 @@ export function sanitizeString(input: string): string {
     input
       .replace(/[<>]/g, "")
       .replace(/&(nbsp|amp|lt|gt|quot|#\d+|#x[\da-fA-F]+);?/g, "")
+      // Strip control chars but preserve newlines (\n), carriage returns (\r) and tabs (\t)
       // eslint-disable-next-line no-control-regex
-      .replace(/[\x00-\x1F\x7F]/g, "")
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
       .trim()
   );
 }

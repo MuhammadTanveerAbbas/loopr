@@ -287,13 +287,13 @@ BEGIN
   IF l.stage IN ('Replied', 'Call Booked', 'Negotiating') THEN score := score + 15; END IF;
   IF l.deal_value > 2000 THEN score := score + 10; END IF;
 
-  days_silent := ABS(EXTRACT(DAY FROM (COALESCE(l.last_contact, l.created_at) - now())));
+  days_silent := GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - COALESCE(l.last_contact, l.created_at))) / 86400));
 
   IF l.has_reply AND days_silent <= 7 THEN score := score + 10; END IF;
 
   SELECT MAX(touched_at) INTO latest_note_at FROM public.lead_touches
     WHERE lead_id = l.id AND note IS NOT NULL;
-  IF latest_note_at IS NOT NULL AND EXTRACT(DAY FROM (now() - latest_note_at)) <= 3 THEN
+  IF latest_note_at IS NOT NULL AND GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - latest_note_at)) / 86400)) <= 3 THEN
     score := score + 5;
   END IF;
 
@@ -372,7 +372,7 @@ BEGIN
     'won_count_month',   (SELECT COUNT(*) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage = 'Won' AND EXTRACT(MONTH FROM updated_at) = EXTRACT(MONTH FROM now()) AND EXTRACT(YEAR FROM updated_at) = EXTRACT(YEAR FROM now())),
     'won_value_month',   (SELECT COALESCE(SUM(deal_value), 0) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage = 'Won' AND EXTRACT(MONTH FROM updated_at) = EXTRACT(MONTH FROM now()) AND EXTRACT(YEAR FROM updated_at) = EXTRACT(YEAR FROM now())),
     'stage_counts',      (SELECT jsonb_object_agg(stage, cnt) FROM (SELECT stage, COUNT(*) AS cnt FROM public.leads WHERE user_id = uid AND deleted_at IS NULL GROUP BY stage) sub),
-    'at_risk',           (SELECT jsonb_agg(jsonb_build_object('id', id, 'name', name, 'company', company, 'stage', stage, 'deal_value', deal_value, 'days_silent', ABS(EXTRACT(DAY FROM (COALESCE(last_contact, created_at) - now()))))) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage NOT IN ('Won', 'Lost') AND ABS(EXTRACT(DAY FROM (COALESCE(last_contact, created_at) - now()))) >= 5 ORDER BY ABS(EXTRACT(DAY FROM (COALESCE(last_contact, created_at) - now()))) DESC LIMIT 10),
+    'at_risk',           (SELECT jsonb_agg(jsonb_build_object('id', id, 'name', name, 'company', company, 'stage', stage, 'deal_value', deal_value, 'days_silent', GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - COALESCE(last_contact, created_at))) / 86400)))) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage NOT IN ('Won', 'Lost') AND GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - COALESCE(last_contact, created_at))) / 86400)) >= 5 ORDER BY GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now() - COALESCE(last_contact, created_at))) / 86400)) DESC LIMIT 10),
     'total_won',         (SELECT COALESCE(SUM(deal_value), 0) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage = 'Won'),
     'won_count',         (SELECT COUNT(*) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage = 'Won'),
     'pipeline_leads',    (SELECT COUNT(*) FROM public.leads WHERE user_id = uid AND deleted_at IS NULL AND stage NOT IN ('Won', 'Lost')),

@@ -10,6 +10,7 @@ import {
 } from "@/lib/leads-api";
 import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
 import { useAuth } from "@/hooks/use-auth";
 import { Plus, Search, Trash2, Download } from "lucide-react";
@@ -184,130 +185,160 @@ function LeadsPage() {
       .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = url;
     a.download = all ? "leads-all.csv" : "leads-filtered.csv";
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-5">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Leads</h1>
-          <p className="text-sm text-muted-foreground">
-            {filtered.length} of {leads.length} leads
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative" ref={exportRef}>
-            <NeuButton
-              size="sm"
-              onClick={() => setExportOpen((v) => !v)}
-              aria-expanded={exportOpen}
-              aria-haspopup="true"
-            >
-              <Download className="h-3.5 w-3.5 mr-1.5 inline" />
-              Export
-            </NeuButton>
-            {exportOpen && (
-              <div
-                className="absolute right-0 top-full mt-1 w-40 rounded-xl neu-raised-sm bg-background p-1 z-10"
-                role="menu"
+    <PageContainer className="max-w-[1400px]">
+      <PageHeader
+        title="Leads"
+        subtitle={`${filtered.length} of ${leads.length} leads`}
+        actions={
+          <div className="flex items-center gap-2">
+            <div className="relative" ref={exportRef}>
+              <NeuButton
+                size="sm"
+                onClick={() => setExportOpen((v) => !v)}
+                aria-expanded={exportOpen}
+                aria-haspopup="true"
               >
-                <button
-                  onClick={() => {
-                    exportCsv(false);
-                    setExportOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
-                  role="menuitem"
+                <Download className="h-3.5 w-3.5 mr-1.5 inline" />
+                Export
+              </NeuButton>
+              {exportOpen && (
+                <div
+                  className="absolute right-0 top-full mt-1 w-40 rounded-xl neu-raised-sm bg-background p-1 z-10"
+                  role="menu"
                 >
-                  Export visible
-                </button>
-                <button
-                  onClick={() => {
-                    exportCsv(true);
-                    setExportOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
-                  role="menuitem"
-                >
-                  Export all leads
-                </button>
-              </div>
-            )}
+                  <button
+                    onClick={() => {
+                      exportCsv(false);
+                      setExportOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+                    role="menuitem"
+                  >
+                    Export visible
+                  </button>
+                  <button
+                    onClick={() => {
+                      exportCsv(true);
+                      setExportOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-foreground/5 rounded-lg"
+                    role="menuitem"
+                  >
+                    Export all leads
+                  </button>
+                </div>
+              )}
+            </div>
+            <NeuButton variant="primary" onClick={addLead}>
+              <Plus className="h-4 w-4 mr-1.5 inline" />
+              Add Lead
+            </NeuButton>
           </div>
-          <NeuButton variant="primary" onClick={addLead}>
-            <Plus className="h-4 w-4 mr-1.5 inline" />
-            Add Lead
-          </NeuButton>
-        </div>
-      </header>
+        }
+      />
 
       <NeuCard className="rounded-2xl">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="relative w-full">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <NeuInput
               placeholder="Search name or company..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
+              className="pl-10 w-full"
             />
           </div>
-          <NeuSelect value={stageFilter} onChange={(e) => setStageFilter(e.target.value)}>
-            <option value="all">All stages</option>
-            {STAGES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </NeuSelect>
-          <NeuSelect
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as "signal" | "silent" | "value" | "contact")}
-          >
-            <option value="signal">Sort: Signal</option>
-            <option value="silent">Sort: Days Silent</option>
-            <option value="value">Sort: Deal Value</option>
-            <option value="contact">Sort: Last Contact</option>
-          </NeuSelect>
+          <div className="flex gap-2">
+            <NeuSelect value={stageFilter} onChange={(e) => setStageFilter(e.target.value)} className="flex-1 min-w-0">
+              <option value="all">All stages</option>
+              {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </NeuSelect>
+            <NeuSelect value={sortBy} onChange={(e) => setSortBy(e.target.value as "signal" | "silent" | "value" | "contact")} className="flex-1 min-w-0">
+              <option value="signal">Sort: Signal</option>
+              <option value="silent">Sort: Silent</option>
+              <option value="value">Sort: Value</option>
+              <option value="contact">Sort: Contact</option>
+            </NeuSelect>
+          </div>
         </div>
 
         {selectedIds.size > 0 && (
-          <div className="neu-raised-sm rounded-xl mb-3 p-3 flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-extrabold text-foreground bg-foreground/10 px-2 py-1 rounded-lg">
-              {selectedIds.size} selected
-            </span>
-            <div className="h-4 w-px bg-black/20 mx-1" />
-            {STAGES.filter((s) => !["Won", "Lost"].includes(s)).map((s) => (
+          <div className="neu-raised-sm rounded-xl mb-3 p-3 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 min-w-max">
+              <span className="text-xs font-extrabold text-foreground bg-foreground/10 px-2 py-1 rounded-lg">
+                {selectedIds.size} selected
+              </span>
+              <div className="h-4 w-px bg-black/20 mx-1" />
+              {STAGES.filter((s) => !["Won", "Lost"].includes(s)).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => bulkStageUpdate(s)}
+                  className="text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-foreground/10 border-2 border-black/30 transition-all whitespace-nowrap"
+                >
+                  {s}
+                </button>
+              ))}
+              <div className="h-4 w-px bg-black/20 mx-1" />
               <button
-                key={s}
-                onClick={() => bulkStageUpdate(s)}
-                className="text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-foreground/10 border-2 border-black/30 transition-all"
+                onClick={bulkDelete}
+                className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-destructive hover:bg-destructive/10 border-2 border-destructive/30"
               >
-                {s}
+                Delete
               </button>
-            ))}
-            <div className="h-4 w-px bg-black/20 mx-1" />
-            <button
-              onClick={bulkDelete}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-destructive hover:bg-destructive/10 border-2 border-destructive/30 ml-auto"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-foreground/10 border-2 border-black/20"
-            >
-              Clear
-            </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-foreground/10 border-2 border-black/20"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         )}
 
         <div className="overflow-x-auto neu-inset rounded-xl p-2">
-          <table className="w-full text-sm">
+          {/* Mobile card list */}
+          <div className="sm:hidden space-y-2">
+            {filtered.map((l) => {
+              const ds = daysSilent(l.last_contact);
+              const sc = scoreColor(l.signal_score);
+              return (
+                <div
+                  key={l.id}
+                  className="bg-white border-2 border-black rounded-xl p-3 shadow-[0_3px_0_#0a0a0a] cursor-pointer"
+                  onClick={() => setOpenLead(l)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-bold text-sm text-foreground truncate">{l.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">{l.company || "—"}</div>
+                    </div>
+                    <NeuBadge color={sc === "red" ? "red" : sc === "amber" ? "amber" : "green"}>{l.signal_score}</NeuBadge>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span className="text-xs font-extrabold text-foreground">${Number(l.deal_value).toLocaleString()}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground border border-black/20 px-1.5 py-0.5 rounded-full">{l.stage}</span>
+                    {ds !== null && <span className={`text-[10px] font-semibold ${ds >= 5 ? "text-destructive" : "text-muted-foreground"}`}>{ds}d silent</span>}
+                  </div>
+                </div>
+              );
+            })}
+            {filtered.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-10">
+                {leads.length === 0 ? "No leads yet. Click Add Lead to start." : "No leads match your filters."}
+              </p>
+            )}
+          </div>
+          {/* Desktop table */}
+          <table className="w-full text-sm hidden sm:table">
             <thead>
               <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
                 <th className="w-8 px-1 py-2">
@@ -514,6 +545,6 @@ function LeadsPage() {
       </AlertDialog>
 
       {openLead && <LeadDrawer lead={openLead} onClose={() => setOpenLead(null)} />}
-    </div>
+    </PageContainer>
   );
 }

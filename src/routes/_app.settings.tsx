@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { NeuCard, NeuButton, NeuInput, NeuTextarea } from "@/components/ui/neu";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -63,16 +64,11 @@ function Settings() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5 animate-fade-up">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Customize how the AI thinks about your pipeline.
-        </p>
-      </header>
+    <PageContainer className="max-w-2xl animate-fade-up">
+      <PageHeader title="Settings" subtitle="Customize how the AI thinks about your pipeline." />
 
-      <NeuCard className="rounded-2xl space-y-5">
-        <div className="flex items-center gap-4 pb-4 border-b-2 border-black">
+      <NeuCard className="rounded-2xl space-y-5 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-4 border-b-2 border-black">
           <div className="w-14 h-14 rounded-full bg-foreground/10 border-3 border-black flex items-center justify-center text-xl font-extrabold shrink-0">
             {user?.email?.charAt(0).toUpperCase() || "U"}
           </div>
@@ -92,8 +88,12 @@ function Settings() {
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Email
           </label>
-          <div className="flex items-center gap-2">
-            <NeuInput value={user?.email ?? ""} disabled className="mt-1.5 opacity-60 flex-1" />
+          <div className="flex flex-wrap items-center gap-2">
+            <NeuInput
+              value={user?.email ?? ""}
+              disabled
+              className="mt-1.5 opacity-60 flex-1 min-w-[180px]"
+            />
             {user?.email_confirmed_at ? (
               <span className="mt-1.5 text-[11px] font-semibold text-green-600 whitespace-nowrap flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3" /> Verified
@@ -123,7 +123,7 @@ function Settings() {
             <span className="text-[10px] text-muted-foreground">{icp.length} chars</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <NeuButton variant="primary" onClick={save} disabled={busy}>
             {busy ? "Saving..." : "Save changes"}
           </NeuButton>
@@ -140,7 +140,7 @@ function Settings() {
           <AlertTriangle className="h-4 w-4" /> Danger zone
         </h3>
         <p className="text-xs text-muted-foreground mt-1">Sign out of this device.</p>
-        <div className="flex gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-3">
           <NeuButton onClick={signOut} className="text-destructive">
             Sign out
           </NeuButton>
@@ -183,6 +183,6 @@ function Settings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

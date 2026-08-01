@@ -238,34 +238,34 @@
     background-color: var(--brand-white);
   }
   .accent-strip-blue {
-    background: var(--brand-orange);
-    border: 3px solid var(--brand-black);
+    background: var(--brand-yellow);
+    border: 2px solid var(--brand-black);
     border-radius: 20px;
-    box-shadow: 0 6px 0 var(--brand-black);
+    box-shadow: 0 5px 0 var(--brand-black);
   }
   .accent-strip-green {
     background: var(--success);
-    border: 3px solid var(--brand-black);
+    border: 2px solid var(--brand-black);
     border-radius: 20px;
-    box-shadow: 0 6px 0 var(--brand-black);
+    box-shadow: 0 5px 0 var(--brand-black);
   }
   .accent-strip-amber {
     background: var(--brand-yellow);
-    border: 3px solid var(--brand-black);
+    border: 2px solid var(--brand-black);
     border-radius: 20px;
-    box-shadow: 0 6px 0 var(--brand-black);
+    box-shadow: 0 5px 0 var(--brand-black);
   }
   .accent-strip-red {
     background: var(--destructive);
-    border: 3px solid var(--brand-black);
+    border: 2px solid var(--brand-black);
     border-radius: 20px;
-    box-shadow: 0 6px 0 var(--brand-black);
+    box-shadow: 0 5px 0 var(--brand-black);
   }
   .accent-strip-purple {
     background: var(--brand-pink);
-    border: 3px solid var(--brand-black);
+    border: 2px solid var(--brand-black);
     border-radius: 20px;
-    box-shadow: 0 6px 0 var(--brand-black);
+    box-shadow: 0 5px 0 var(--brand-black);
   }
 
   /* Brutal building blocks */
@@ -374,6 +374,15 @@
     border: 0;
     border-top: 2px solid var(--brand-black);
   }
+
+  .neu-dashed {
+    background-color: rgba(10, 10, 10, 0.03);
+    border: 2.5px dashed var(--brand-black);
+    border-radius: 16px;
+  }
+  .neu-dashed:hover {
+    background-color: rgba(10, 10, 10, 0.06);
+  }
 }
 
 @keyframes lt-fade-up {
@@ -477,6 +486,15 @@
   .brutal-btn-secondary {
     transition: none;
   }
+}
+
+/* Hide scrollbar but keep scrollability */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom scrollbar */

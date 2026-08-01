@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { NeuCard, NeuButton } from "@/components/ui/neu";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { sanitizeErrorMessage } from "@/lib/error-service";
@@ -93,8 +94,11 @@ function ImportPage() {
           continue;
         }
         const parsedDealValue = Number(row.deal_value);
+        const first = (row.first_name || "").trim();
+        const last = (row.last_name || "").trim();
+        const fullName = [first, last].filter(Boolean).join(" ");
         toInsert.push({
-          name: sanitize(row.name || row.first_name + " " + row.last_name || "Unknown"),
+          name: sanitize((row.name || fullName || "Unknown").trim()),
           company: row.company ? sanitize(row.company) : undefined,
           email: email || undefined,
           deal_value: row.deal_value && !isNaN(parsedDealValue) ? parsedDealValue : undefined,
@@ -125,15 +129,13 @@ function ImportPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Import CSV</h1>
-        <p className="text-sm text-muted-foreground">
-          Upload leads from a CSV file. Duplicates (by email) are skipped.
-        </p>
-      </header>
+    <PageContainer className="max-w-2xl">
+      <PageHeader
+        title="Import CSV"
+        subtitle="Upload leads from a CSV file. Duplicates (by email) are skipped."
+      />
 
-      <NeuCard className="rounded-2xl p-6 space-y-4">
+      <NeuCard className="rounded-2xl p-4 sm:p-6 space-y-4">
         <div className="neu-dashed rounded-xl p-8 text-center">
           <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
           <p className="text-sm text-muted-foreground mb-3">
@@ -225,11 +227,12 @@ function ImportPage() {
             a.href = URL.createObjectURL(blob);
             a.download = "loopr_template.csv";
             a.click();
+            URL.revokeObjectURL(a.href);
           }}
         >
           <Download className="h-3 w-3 mr-1 inline" /> Download Template
         </NeuButton>
       </NeuCard>
-    </div>
+    </PageContainer>
   );
 }

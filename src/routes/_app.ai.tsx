@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import { useState, useMemo } from "react";
 import { NeuCard, NeuButton, NeuTextarea, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";
 import { Brain, RefreshCw, Search, MessageSquare, Calendar, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -57,15 +58,13 @@ function AiPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 animate-fade-up">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">AI Workspace</h1>
-        <p className="text-sm text-muted-foreground">
-          Five tools, one workspace. They run only when you ask.
-        </p>
-      </header>
+    <PageContainer className="max-w-5xl animate-fade-up">
+      <PageHeader
+        title="AI Workspace"
+        subtitle="Five tools, one workspace. They run only when you ask."
+      />
 
-      <div className="grid lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <BriefingTool leads={leads} />
         <ReplyAnalyzer />
         <IcpScorer userId={user?.id} />
@@ -78,11 +77,10 @@ function AiPage() {
           <h2 className="text-sm font-semibold text-foreground">Deal Autopsies</h2>
         </div>
         {autopsies.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-xs text-muted-foreground">
-              When you mark a deal as Lost, an autopsy will appear here.
-            </p>
-          </div>
+          <EmptyState
+            title="No autopsies yet."
+            message="When you mark a deal as Lost, an autopsy will appear here."
+          />
         ) : (
           <div className="space-y-2">
             {autopsies.map((a, i) => (
@@ -100,7 +98,7 @@ function AiPage() {
           </div>
         )}
       </NeuCard>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -144,7 +142,7 @@ function BriefingTool({ leads }: { leads: Lead[] }) {
       const summary = [
         `Active leads: ${leads.filter((l) => !["Won", "Lost"].includes(l.stage)).length}`,
         `Stages: ${JSON.stringify(stageBreakdown)}`,
-        `At-risk: ${atRisk.length} — ${atRisk
+        `At-risk: ${atRisk.length}: ${atRisk
           .slice(0, 10)
           .map((l) => l.name)
           .join(", ")}`,

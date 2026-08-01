@@ -105,6 +105,11 @@ describe("sanitizeString", () => {
     expect(sanitizeString("hello\x00world")).toBe("helloworld");
   });
 
+  it("preserves newlines and tabs (multi-line notes)", () => {
+    expect(sanitizeString("line one\nline two")).toBe("line one\nline two");
+    expect(sanitizeString("col\tvalue")).toBe("col\tvalue");
+  });
+
   it("trims whitespace", () => {
     expect(sanitizeString("  hello  ")).toBe("hello");
   });

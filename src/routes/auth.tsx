@@ -13,9 +13,9 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { LoopMark } from "@/components/ui/logo";
 
 const authFormSchema = z.object({
-  email: z.string().email("Enter a valid email address"),
+  email: z.string().trim().email("Enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(1, "Name is required").max(100).optional(),
+  name: z.string().trim().min(1, "Name is required").max(100).optional(),
 });
 
 type AuthForm = z.infer<typeof authFormSchema>;
@@ -42,15 +42,10 @@ function AuthPage() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<AuthForm>({
     resolver: zodResolver(authFormSchema),
     defaultValues: { email: "", password: "", name: "" },
   });
-
-  const watchedEmail = watch("email");
-  const watchedPassword = watch("password");
-  const hasValues = mode === "reset" ? !!watchedEmail : !!watchedEmail && !!watchedPassword;
 
   useEffect(() => {
     if (!loading && user) nav({ to: "/dashboard" });
@@ -227,12 +222,12 @@ function AuthPage() {
             <button
               type="button"
               onClick={() => setMode("reset")}
-              className="text-xs text-muted-foreground hover:text-foreground self-end -mt-2"
+              className="text-xs text-muted-foreground hover:text-foreground self-end mt-2"
             >
               Forgot password?
             </button>
           )}
-          <NeuButton type="submit" variant="primary" disabled={busy || !hasValues} className="mt-2">
+          <NeuButton type="submit" variant="primary" disabled={busy} className="mt-2">
             {busy ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />

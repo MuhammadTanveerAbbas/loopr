@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NeuCard } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";
 import { useAuth } from "@/hooks/use-auth";
 import type { AuditLog } from "@/lib/leads-api";
 
@@ -120,13 +121,10 @@ function ActivityPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5 animate-fade-up">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Activity</h1>
-        <p className="text-sm text-muted-foreground">Recent AI calls and system events.</p>
-      </header>
+    <PageContainer className="max-w-4xl animate-fade-up">
+      <PageHeader title="Activity" subtitle="Recent AI calls and system events." />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {(["all", "ai", "system"] as const).map((t) => (
           <button
             key={t}
@@ -196,15 +194,17 @@ function ActivityPage() {
 
       {filteredAi.length === 0 && filteredAudit.length === 0 && (
         <NeuCard className="rounded-2xl">
-          <p className="text-center text-sm text-muted-foreground py-12">
-            {filter === "ai"
-              ? "No AI activity yet."
-              : filter === "system"
-                ? "No system events yet."
-                : "No activity yet."}
-          </p>
+          <EmptyState
+            title={
+              filter === "ai"
+                ? "No AI activity yet."
+                : filter === "system"
+                  ? "No system events yet."
+                  : "No activity yet."
+            }
+          />
         </NeuCard>
       )}
-    </div>
+    </PageContainer>
   );
 }

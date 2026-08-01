@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useSyncExternalStore } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useLeads } from "@/lib/leads-api";
+import { commandPaletteStore } from "@/lib/command-palette-store";
 import {
   CommandDialog,
   CommandInput,
@@ -32,8 +33,9 @@ const pages = [
 ];
 
 export function CommandPalette() {
-  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const open = useSyncExternalStore(commandPaletteStore.subscribe, commandPaletteStore.getSnapshot);
+  const setOpen = useCallback((v: boolean) => commandPaletteStore.setOpen(v), []);
   const nav = useNavigate();
   const { data } = useLeads();
   const leads = useMemo(() => data?.leads ?? [], [data]);
@@ -42,12 +44,12 @@ export function CommandPalette() {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((o) => !o);
+        setOpen(!open);
       }
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [setOpen, open]);
 
   const run = useCallback(
     (to: string) => {
@@ -55,7 +57,7 @@ export function CommandPalette() {
       setSearch("");
       nav({ to });
     },
-    [nav],
+    [nav, setOpen],
   );
 
   const filteredLeads = leads

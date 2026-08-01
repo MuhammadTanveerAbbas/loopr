@@ -14,6 +14,24 @@ export const Route = createFileRoute("/changelog")({
 
 const entries = [
   {
+    date: "July 2026",
+    version: "v1.1.0",
+    title: "Design & reliability overhaul",
+    items: [
+      "Redesigned sidebar: no scrollbar, permanent-fit sections, cleaner active states",
+      "Navbar search now opens the Command Palette (⌘K)",
+      "Consistent page headers, KPI cards, and empty states across all dashboard pages",
+      "Responsive landing page and every dashboard page for mobile, tablet, and desktop",
+      "Improved analytics: pipeline conversion funnel, responsive charts, compact revenue bars",
+      "Fixed multi-line notes being flattened by sanitization",
+      "Fixed real error messages being hidden behind generic fallbacks",
+      "Fixed CSV import producing 'undefined undefined' names",
+      "Dashboard stats now refresh immediately after lead updates",
+      "Added 'New' stage for consistency across import, pipeline, and analytics",
+      "Fixed signal-score day calculations in database functions",
+    ],
+  },
+  {
     date: "May 2026",
     version: "v1.0.0",
     title: "Initial launch",

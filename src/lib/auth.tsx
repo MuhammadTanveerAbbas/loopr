@@ -8,24 +8,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setLoading(false);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        supabase.auth.getUser().then(({ data: userData, error }) => {
-          if (error || !userData?.user) {
-            supabase.auth.signOut();
-            setSession(null);
-          } else {
-            setSession(data.session);
-          }
-          setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);

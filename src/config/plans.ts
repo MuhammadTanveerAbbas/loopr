@@ -1,4 +1,5 @@
 export const STAGES = [
+  "New",
   "Contacted",
   "Replied",
   "Call Booked",
@@ -11,6 +12,7 @@ export type Stage = (typeof STAGES)[number];
 
 export const STAGE_COLOR: Record<string, "blue" | "amber" | "green" | "purple" | "red" | "muted"> =
   {
+    New: "muted",
     Contacted: "muted",
     Replied: "blue",
     "Call Booked": "amber",

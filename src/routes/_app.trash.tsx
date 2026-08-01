@@ -4,6 +4,7 @@ import { useLeads, useHardDeleteLead, type Lead } from "@/lib/leads-api";
 import { NeuCard, NeuButton } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorFallback } from "@/components/ui/error-fallback";
+import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";
 import { Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -86,29 +87,21 @@ function TrashPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Trash</h1>
-        <p className="text-sm text-muted-foreground">
-          Deleted leads are kept for 30 days before permanent removal.
-        </p>
-      </header>
+    <PageContainer className="max-w-4xl">
+      <PageHeader
+        title="Trash"
+        subtitle="Deleted leads are kept for 30 days before permanent removal."
+      />
 
       <NeuCard className="rounded-2xl">
         {deleted.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-sm font-medium text-muted-foreground">Trash is empty.</p>
-            <p className="text-xs text-muted-foreground mt-1">Deleted leads will appear here.</p>
-          </div>
+          <EmptyState title="Trash is empty." message="Deleted leads will appear here." />
         ) : (
           <div className="space-y-2">
             {deleted.map((l: Lead) => {
               const daysLeft = getDaysUntilPurge(l.deleted_at);
               return (
-                <div
-                  key={l.id}
-                  className="neu-raised-sm rounded-xl p-4 flex items-center justify-between"
-                >
+                <div key={l.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 sm:p-4 border-b border-black/5 last:border-0">
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-foreground">{l.name}</div>
                     <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
@@ -122,7 +115,7 @@ function TrashPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <NeuButton
                       size="sm"
                       onClick={() => restore.mutate(l.id)}
@@ -172,6 +165,6 @@ function TrashPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

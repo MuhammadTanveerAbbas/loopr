@@ -63,10 +63,21 @@ export function sanitizeErrorMessage(
   error: unknown,
   fallback = "Something went wrong. Please try again.",
 ): string {
-  const msg = error instanceof Error ? error.message : String(error ?? fallback);
+  const msg =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : error &&
+            typeof error === "object" &&
+            "message" in error &&
+            typeof (error as { message: unknown }).message === "string"
+          ? (error as { message: string }).message
+          : String(error ?? fallback);
   for (const [key, friendly] of Object.entries(KNOWN_ERROR_MAP)) {
     if (msg.toLowerCase().includes(key.toLowerCase())) return friendly;
   }
-  if (msg.length > 120) return fallback;
+  // Return the real message when it's short enough to show safely, otherwise fall back.
+  if (msg.length > 0 && msg.length <= 140 && !msg.includes("[object")) return msg;
   return fallback;
 }

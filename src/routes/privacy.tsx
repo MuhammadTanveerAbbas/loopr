@@ -6,7 +6,7 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy  Loopr" },
-      { name: "description", content: "Loopr privacy policy — how we handle your data." },
+      { name: "description", content: "Loopr privacy policy: how we handle your data." },
     ],
   }),
   component: PrivacyPage,
@@ -43,7 +43,7 @@ function PrivacyPage() {
           </Section>
 
           <Section title="How we use it">
-            Your data is used solely to power the CRM functionality — displaying your leads,
+            Your data is used solely to power the CRM functionality: displaying your leads,
             generating AI briefings, and syncing across sessions. We never sell your data.
           </Section>
 

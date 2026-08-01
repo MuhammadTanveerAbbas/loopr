@@ -6,5 +6,6 @@ export function scoreColor(score: number): "red" | "amber" | "green" {
 
 export function daysSilent(lastContact: string | null): number | null {
   if (!lastContact) return null;
-  return Math.floor((Date.now() - new Date(lastContact).getTime()) / 86400000);
+  const days = Math.floor((Date.now() - new Date(lastContact).getTime()) / 86400000);
+  return Math.max(0, days);
 }
