@@ -1,6 +1,9 @@
 // AI task router. Calls configurable AI Gateway with task-specific prompts.
+// AI access is centralized behind ./ai-client.ts, which adds model discovery,
+// model fallback, and bounded retries for rate limits and transient failures.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { ChatError, generateText } from "./ai-client.ts";
 
 const CORS_ORIGIN = Deno.env.get("CORS_ORIGIN");
 if (!CORS_ORIGIN) {
@@ -11,9 +14,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": CORS_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const AI_TIMEOUT_MS = 30_000;
-const MAX_RETRIES = 1;
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
@@ -135,60 +135,39 @@ serve(async (req) => {
     const { system, user } = PROMPTS[task](sanitizedPayload);
 
     let output = "";
-    let lastError: Error | null = null;
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
-
-        const r = await fetch(AI_ENDPOINT, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: AI_MODEL,
-            messages: [
-              { role: "system", content: sanitizeInput(system, 4000) },
-              { role: "user", content: sanitizeInput(user, 4000) },
-            ],
-            max_tokens: 1024,
-            temperature: 0.7,
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-
-        if (r.status === 429) {
-          if (attempt < MAX_RETRIES) {
-            await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
-            continue;
-          }
-          return jsonResp({ error: "Rate limit. Try again in a moment." }, 429);
-        }
-        if (r.status === 401)
-          return jsonResp({ error: "AI credentials invalid. Check API key." }, 401);
-        if (!r.ok) {
-          console.error("AI gateway error", r.status, await r.text());
-          return jsonResp({ error: "AI request failed" }, 500);
-        }
-
-        const data = await r.json();
-        output = data.choices?.[0]?.message?.content ?? "";
-        break;
-      } catch (e) {
-        lastError = e instanceof Error ? e : new Error("Unknown fetch error");
-        if (lastError.name === "AbortError") {
-          return jsonResp({ error: "AI request timed out. Try again." }, 504);
-        }
-        if (attempt < MAX_RETRIES) {
-          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
-          continue;
+    try {
+      const result = await generateText({
+        apiKey: AI_API_KEY,
+        endpoint: AI_ENDPOINT,
+        preferredModel: AI_MODEL,
+        messages: [
+          { role: "system", content: sanitizeInput(system, 4000) },
+          { role: "user", content: sanitizeInput(user, 4000) },
+        ],
+        maxTokens: 1024,
+        temperature: 0.7,
+      });
+      output = result.output;
+    } catch (e) {
+      if (e instanceof ChatError) {
+        console.error(`ai-task: completion failed (${e.code})`, e.status ?? "", e.message);
+        switch (e.code) {
+          case "rate_limit":
+            return jsonResp({ error: "Rate limit. Try again in a moment." }, 429);
+          case "timeout":
+            return jsonResp({ error: "AI request timed out. Try again." }, 504);
+          case "auth":
+            return jsonResp({ error: "AI credentials invalid. Check API key." }, 401);
+          case "model_invalid":
+          case "no_model":
+            return jsonResp({ error: "AI model unavailable. Try again later." }, 500);
+          case "transient":
+          case "fatal":
+          default:
+            return jsonResp({ error: "AI request failed. Try again." }, 500);
         }
       }
-    }
-
-    if (!output && lastError) {
-      console.error("ai-task error after retries", lastError);
+      console.error("ai-task: unexpected completion error", e);
       return jsonResp({ error: "Internal server error" }, 500);
     }
 

@@ -78,14 +78,17 @@ function AuthPage() {
           toast.error("An account with this email already exists.");
           return;
         }
-        toast.success("Account created. Check your email to confirm your sign-up.");
+        toast.success("Account created! Check your email and click the confirmation link before signing in.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error, data: signInData } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
         if (error) throw error;
-        toast.success("Welcome back.");
+        if (signInData.session) {
+          toast.success("Welcome back.");
+          nav({ to: "/dashboard" });
+        }
       }
     } catch (err) {
       toast.error(sanitizeErrorMessage(err, "Authentication failed. Please try again."));

@@ -104,7 +104,21 @@ AI_ENDPOINT=https://api.openai.com/v1/chat/completions
 
 Get your keys:
 - **Supabase**: https://supabase.com
-- **OpenAI**: https://platform.openai.com
+- **Groq**: https://console.groq.com
+
+---
+
+## 🛡 Reliability & Self-Healing
+
+The `ai-task` edge function self-heals around Groq outages without any app changes:
+
+- **Model discovery** — available Groq models are fetched from the `/models` endpoint and cached server-side (15 min TTL), so the list is never fetched on every request.
+- **Automatic model fallback** — if the configured `AI_MODEL` is removed or unsupported, the function refreshes the model list and retries once with a compatible model.
+- **Rate limits** — HTTP 429 responses respect `Retry-After` and otherwise use bounded exponential backoff with jitter (max 3 attempts).
+- **Transient failures** — network errors, timeouts, and 5xx responses are retried with backoff, then fail gracefully with a friendly in-app message.
+- **No secret leakage** — API keys stay server-side and are never logged.
+
+`/health` reports Supabase connectivity with a read-only check and fails clearly (with a 10s timeout) instead of hanging when Supabase is unavailable.
 
 ---
 
