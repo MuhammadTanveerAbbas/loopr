@@ -31,9 +31,9 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Loopr by The MVP Guy. A lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings  built for high-touch outbound, not mass spam.",
+          "A lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings built for high-touch outbound, not mass spam.",
       },
-      { property: "og:title", content: "Loopr | Focused CRM by The MVP Guy" },
+      { property: "og:title", content: "Loopr | Focused CRM" },
       {
         property: "og:description",
         content:
@@ -72,14 +72,6 @@ function Landing() {
     }
   }, [user, loading, nav]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="brutal-card px-5 py-3 text-sm font-bold">Loading…</div>
-      </div>
-    );
-  }
-
   return (
     <main className="min-h-screen overflow-hidden bg-background">
       <Header />
@@ -108,7 +100,7 @@ function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-brand-yellow border-b-[3px] border-black">
+    <header className="sticky top-0 z-30 bg-brand-yellow border-b-3 border-black">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
         <BrandLockup size={42} />
         <nav className="hidden md:flex items-center gap-7 text-sm font-bold uppercase tracking-wide">
@@ -125,13 +117,13 @@ function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             to="/auth"
-            className="brutal-btn px-3 sm:px-4 py-2 text-xs inline-flex items-center gap-2 min-h-[44px]"
+            className="brutal-btn px-3 sm:px-4 py-2 text-xs inline-flex items-center gap-2 min-h-11"
           >
             Sign in <ArrowRight className="h-4 w-4" />
           </Link>
           <button
             type="button"
-            className="md:hidden neu-pressable rounded-xl p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="md:hidden neu-pressable rounded-xl p-2.5 min-w-11 min-h-11 flex items-center justify-center"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
@@ -141,13 +133,13 @@ function Header() {
         </div>
       </div>
       {menuOpen && (
-        <nav className="md:hidden border-t-[3px] border-black px-4 py-4 flex flex-col gap-3 bg-brand-yellow">
+        <nav className="md:hidden border-t-3 border-black px-4 py-4 flex flex-col gap-3 bg-brand-yellow">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-wide py-2 min-h-[44px] flex items-center"
+              className="text-sm font-bold uppercase tracking-wide py-2 min-h-11 flex items-center"
             >
               {l.label}
             </a>
@@ -188,7 +180,7 @@ function Hero() {
         A really good notebook
         <br />
         <span
-          className="inline-block bg-brand-orange text-white px-4 -rotate-1 border-[3px] border-black mt-2"
+          className="inline-block bg-brand-orange text-white px-4 -rotate-1 border-3 border-black mt-2"
           style={{ boxShadow: "0 6px 0 #0A0A0A" }}
         >
           that also thinks.
@@ -237,9 +229,9 @@ function HeroPreview() {
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {[
-            { label: "Pipeline value", value: "—", trend: "Your data", bg: "brutal-card-orange" },
-            { label: "Active leads", value: "—", trend: "Your data", bg: "brutal-card-yellow" },
-            { label: "Reply rate", value: "—", trend: "Your data", bg: "brutal-card-pink" },
+            { label: "Pipeline value", value: "-", trend: "Your data", bg: "brutal-card-orange" },
+            { label: "Active leads", value: "-", trend: "Your data", bg: "brutal-card-yellow" },
+            { label: "Reply rate", value: "-", trend: "Your data", bg: "brutal-card-pink" },
           ].map((k, i) => (
             <div
               key={k.label}
@@ -293,11 +285,11 @@ function MiniBars() {
               style={{ top: `${(i / (ticks.length - 1)) * 100}%` }}
             />
           ))}
-          <div className="absolute inset-0 flex items-end justify-around gap-[3px] px-1 pb-0">
+          <div className="absolute inset-0 flex items-end justify-around gap-0.75 px-1 pb-0">
             {data.map((h, i) => (
               <div
                 key={i}
-                className="flex-1 flex flex-col items-center justify-end h-full gap-1 max-w-[30px]"
+                className="flex-1 flex flex-col items-center justify-end h-full gap-1 max-w-7.5"
               >
                 <div className="text-[10px] font-extrabold text-foreground/70 leading-none">
                   {h}
@@ -319,7 +311,7 @@ function MiniBars() {
       </div>
       <div className="flex gap-2 mt-2">
         <div className="w-7" />
-        <div className="flex-1 flex items-start justify-around gap-[3px] px-1">
+        <div className="flex-1 flex items-start justify-around gap-0.75 px-1">
           {months.map((m, mi) => (
             <div
               key={`${m}-${mi}`}
@@ -385,7 +377,7 @@ function Features() {
       <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((f, i) => (
           <Reveal key={f.title} delay={i * 0.06}>
-            <div className="brutal-card p-6 h-full hover:translate-y-[3px] transition-transform">
+            <div className="brutal-card p-6 h-full hover:translate-y-0.75 transition-transform">
               <div
                 className="w-12 h-12 mb-4 border-[2.5px] border-black rounded-xl flex items-center justify-center"
                 style={{ background: f.color, boxShadow: "0 3px 0 #0A0A0A" }}
@@ -482,7 +474,7 @@ function ChartShowcase() {
                 {stages.map((s, i) => (
                   <div
                     key={s.name}
-                    className="flex-1 flex flex-col items-center justify-end h-full gap-2 max-w-[48px]"
+                    className="flex-1 flex flex-col items-center justify-end h-full gap-2 max-w-12"
                   >
                     <div className="text-sm font-extrabold text-foreground">{s.count}</div>
                     <div
@@ -558,7 +550,7 @@ function Donut({ label, value, sample }: { label: string; value: number; sample?
       </svg>
       <div className="text-left">
         <div className="text-lg font-extrabold text-black leading-none">
-          {sample ? "—" : `${value}%`}
+          {sample ? "-" : `${value}%`}
         </div>
         <div className="text-[10px] font-bold uppercase text-black/70 mt-1">{label}</div>
       </div>
@@ -599,7 +591,7 @@ function Workflow_() {
         {steps.map((s, i) => (
           <Reveal key={s.title} delay={i * 0.08}>
             <div
-              className={`${colors[i]} p-6 h-full relative hover:translate-y-[3px] transition-transform`}
+              className={`${colors[i]} p-6 h-full relative hover:translate-y-0.75 transition-transform`}
             >
               <div
                 className="absolute -top-4 -right-4 w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-extrabold text-base border-[2.5px] border-black"
@@ -678,16 +670,16 @@ function Comparison() {
       <Reveal>
         <div className="mt-12 brutal-card p-0 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-center">
+            <table className="w-full min-w-160 text-center">
               <thead>
-                <tr className="border-b-[3px] border-black">
+                <tr className="border-b-3 border-black">
                   <th className="text-left px-6 py-5 text-xs font-extrabold uppercase tracking-wider text-foreground/70">
                     Feature
                   </th>
-                  <th className="px-4 py-5 bg-brand-orange border-l-[3px] border-r-[3px] border-black">
+                  <th className="px-4 py-5 bg-brand-orange border-l-3 border-r-3 border-black">
                     <div className="text-white font-extrabold text-base">Loopr</div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-white/80 mt-1">
-                      by The MVP Guy
+                      Focused CRM
                     </div>
                   </th>
                   <th className="px-4 py-5">
@@ -696,7 +688,7 @@ function Comparison() {
                       Big CRM
                     </div>
                   </th>
-                  <th className="px-4 py-5 border-l-[3px] border-black">
+                  <th className="px-4 py-5 border-l-3 border-black">
                     <div className="font-extrabold text-base text-foreground">Spreadsheets</div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mt-1">
                       DIY
@@ -713,13 +705,13 @@ function Comparison() {
                     <td className="text-left px-6 py-4 text-sm font-bold text-foreground">
                       {r.label}
                     </td>
-                    <td className="px-4 py-4 bg-brand-yellow/40 border-l-[3px] border-r-[3px] border-black">
+                    <td className="px-4 py-4 bg-brand-yellow/40 border-l-3 border-r-3 border-black">
                       <Cell v={r.loopr} accent />
                     </td>
                     <td className="px-4 py-4">
                       <Cell v={r.hubspot} />
                     </td>
-                    <td className="px-4 py-4 border-l-[3px] border-black">
+                    <td className="px-4 py-4 border-l-3 border-black">
                       <Cell v={r.sheets} />
                     </td>
                   </tr>
@@ -926,56 +918,103 @@ function Footer() {
     {
       title: "Product",
       links: [
-        { label: "Features", href: "#features" },
-        { label: "Pricing", href: "#pricing" },
-        { label: "Workflow", href: "#workflow" },
-        { label: "FAQ", href: "#faq" },
-        { label: "Changelog", href: "/changelog" },
+        { label: "Features", href: "#features", icon: Layout },
+        { label: "Pricing", href: "#pricing", icon: TrendingUp },
+        { label: "Workflow", href: "#workflow", icon: Workflow },
+        { label: "FAQ", href: "#faq", icon: ChevronDown },
       ],
     },
     {
       title: "Legal",
       links: [
-        { label: "Privacy", href: "/privacy" },
-        { label: "Terms", href: "/terms" },
-        { label: "Security", href: "/security" },
+        { label: "Privacy", href: "/privacy", icon: Shield },
+        { label: "Terms", href: "/terms", icon: CheckCircle2 },
+        { label: "Security", href: "/security", icon: Shield },
+      ],
+    },
+    {
+      title: "Connect",
+      links: [
+        { label: "Twitter / X", href: "https://x.com/m_tanveerabbas", icon: Twitter },
+        { label: "GitHub", href: "https://github.com/muhammadtanveerabbas", icon: Github },
+        { label: "LinkedIn", href: "https://linkedin.com/in/muhammadtanveerabbas", icon: Linkedin },
       ],
     },
   ];
+
+  const highlights = [
+    { icon: Brain, label: "AI Daily Briefing" },
+    { icon: Target, label: "Signal Scoring" },
+    { icon: BarChart3, label: "Pipeline Analytics" },
+    { icon: Shield, label: "Your Data, Yours" },
+    { icon: Clock, label: "Calm by Design" },
+    { icon: Sparkles, label: "Reply Analyzer" },
+  ];
+
   return (
-    <footer className="bg-brand-yellow border-t-[3px] border-black mt-10">
-      <div className="max-w-6xl mx-auto px-6 py-14">
-        <div className="grid md:grid-cols-5 gap-10">
-          {/* Brand col */}
-          <div className="md:col-span-2">
+    <footer className="bg-brand-yellow border-t-3 border-black mt-10">
+      {/* ── Row 1: Brand + Nav cols ── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-14 pb-10">
+        {/* Brand block — full width on mobile, 2/5 on desktop */}
+        <div className="mb-10 md:hidden">
+          <div className="flex items-center gap-3">
+            <LoopMark size={44} />
+            <div className="leading-none">
+              <div className="font-extrabold text-2xl text-foreground">Loopr</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 mt-1">
+                Focused CRM
+              </div>
+            </div>
+          </div>
+          <p className="mt-4 text-sm font-semibold text-foreground/80 max-w-sm">
+            A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just deals.
+          </p>
+          <div className="mt-4 flex items-center gap-3">
+            {[
+              { Icon: Twitter, href: "https://x.com/m_tanveerabbas", label: "Twitter" },
+              { Icon: Github, href: "https://github.com/muhammadtanveerabbas", label: "GitHub" },
+              { Icon: Linkedin, href: "https://linkedin.com/in/muhammadtanveerabbas", label: "LinkedIn" },
+            ].map(({ Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                className="w-11 h-11 bg-white border-[2.5px] border-black rounded-xl flex items-center justify-center hover:translate-y-0.5 transition-transform"
+                style={{ boxShadow: "0 4px 0 #0A0A0A" }}
+              >
+                <Icon className="h-4 w-4 text-black" strokeWidth={2.5} />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Nav cols — 3-col grid on mobile, 5-col on desktop */}
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-6 md:gap-10">
+          {/* Brand col — desktop only */}
+          <div className="hidden md:block md:col-span-2">
             <div className="flex items-center gap-3">
               <LoopMark size={48} />
               <div className="leading-none">
                 <div className="font-extrabold text-2xl text-foreground">Loopr</div>
                 <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 mt-1">
-                  by The MVP Guy
+                  Focused CRM
                 </div>
               </div>
             </div>
             <p className="mt-5 text-sm font-semibold text-foreground/80 max-w-xs">
-              A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just
-              deals.
+              A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just deals.
             </p>
             <div className="mt-5 flex items-center gap-3">
               {[
                 { Icon: Twitter, href: "https://x.com/m_tanveerabbas", label: "Twitter" },
                 { Icon: Github, href: "https://github.com/muhammadtanveerabbas", label: "GitHub" },
-                {
-                  Icon: Linkedin,
-                  href: "https://linkedin.com/in/muhammadtanveerabbas",
-                  label: "LinkedIn",
-                },
+                { Icon: Linkedin, href: "https://linkedin.com/in/muhammadtanveerabbas", label: "LinkedIn" },
               ].map(({ Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-10 h-10 bg-white border-[2.5px] border-black rounded-xl flex items-center justify-center hover:translate-y-[2px] transition-transform"
+                  className="w-10 h-10 bg-white border-[2.5px] border-black rounded-xl flex items-center justify-center hover:translate-y-0.5 transition-transform"
                   style={{ boxShadow: "0 4px 0 #0A0A0A" }}
                 >
                   <Icon className="h-4 w-4 text-black" strokeWidth={2.5} />
@@ -984,19 +1023,19 @@ function Footer() {
             </div>
           </div>
 
-          {/* Link cols */}
           {cols.map((col) => (
             <div key={col.title}>
-              <div className="text-xs font-extrabold uppercase tracking-wider text-foreground mb-4">
+              <div className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-foreground mb-3 sm:mb-4">
                 {col.title}
               </div>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2 sm:space-y-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <a
                       href={l.href}
-                      className="text-sm font-semibold text-foreground/80 hover:text-foreground hover:underline underline-offset-4 decoration-2"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-foreground/80 hover:text-foreground hover:underline underline-offset-4 decoration-2 min-h-[36px] sm:min-h-0"
                     >
+                      <l.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 opacity-70" strokeWidth={2.5} />
                       {l.label}
                     </a>
                   </li>
@@ -1005,16 +1044,55 @@ function Footer() {
             </div>
           ))}
         </div>
+      </div>
 
-        <hr className="brutal-divider my-10" />
-
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-xs font-bold text-foreground/80">
-            © {new Date().getFullYear()} Loopr. All rights reserved.
+      {/* ── Row 2: Feature highlights strip ── */}
+      <div className="border-t-3 border-black bg-black/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap md:justify-center gap-3 md:gap-6">
+            {highlights.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2">
+                <div
+                  className="w-7 h-7 bg-white border-2 border-black rounded-lg flex items-center justify-center shrink-0"
+                  style={{ boxShadow: "0 2px 0 #0A0A0A" }}
+                >
+                  <Icon className="h-3.5 w-3.5 text-black" strokeWidth={2.5} />
+                </div>
+                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-foreground/80 leading-tight">
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
-          <div className="text-xs font-bold text-foreground/80 flex items-center gap-1.5">
-            Crafted with <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" /> by
-            <span className="font-extrabold text-foreground">The MVP Guy</span>
+        </div>
+      </div>
+
+      {/* ── Row 3: Copyright bar ── */}
+      <div className="border-t-3 border-black">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-foreground/80">
+              <LoopMark size={18} />
+              © {new Date().getFullYear()} Loopr. All rights reserved.
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="/privacy" className="text-xs font-bold text-foreground/70 hover:text-foreground hover:underline underline-offset-4 min-h-[36px] flex items-center">
+                Privacy
+              </a>
+              <span className="text-foreground/30 text-xs">·</span>
+              <a href="/terms" className="text-xs font-bold text-foreground/70 hover:text-foreground hover:underline underline-offset-4 min-h-[36px] flex items-center">
+                Terms
+              </a>
+            </div>
+            <div className="text-xs font-bold text-foreground/80 flex items-center gap-1.5">
+              Crafted with <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" /> by{" "}
+              <a
+                href="https://muhammadtanveerabbas.vercel.app"
+                className="font-extrabold text-foreground hover:underline underline-offset-4"
+              >
+                Tanveer
+              </a>
+            </div>
           </div>
         </div>
       </div>

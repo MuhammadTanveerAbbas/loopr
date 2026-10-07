@@ -39,7 +39,7 @@ export const NeuButton = forwardRef<
     size?: "sm" | "md";
   }
 >(({ className, variant = "secondary", size = "md", ...rest }, ref) => {
-  const sizes = size === "sm" ? "px-3 py-1.5 text-xs" : "px-5 py-2.5 text-sm";
+  const sizes = size === "sm" ? "px-4 py-3 text-xs min-h-[44px]" : "px-5 py-3 text-sm min-h-[44px]";
   const variants =
     variant === "primary"
       ? "brutal-btn"
@@ -61,7 +61,7 @@ export const NeuInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInp
     <input
       ref={ref}
       className={cn(
-        "neu-input px-4 py-2.5 text-sm w-full placeholder:text-[rgba(10,10,10,0.5)]",
+        "neu-input px-4 py-3 text-sm w-full placeholder:text-[rgba(10,10,10,0.5)] min-h-[44px]",
         className,
       )}
       {...rest}
@@ -77,7 +77,7 @@ export const NeuTextarea = forwardRef<
   <textarea
     ref={ref}
     className={cn(
-      "neu-input px-4 py-3 text-sm w-full placeholder:text-[rgba(10,10,10,0.5)] resize-none",
+      "neu-input px-4 py-3 text-sm w-full placeholder:text-[rgba(10,10,10,0.5)] resize-none min-h-[44px]",
       className,
     )}
     {...rest}
@@ -90,7 +90,7 @@ export const NeuSelect = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTML
     <select
       ref={ref}
       className={cn(
-        "neu-input px-3 py-2 text-sm appearance-none cursor-pointer",
+        "neu-input px-3 py-3 text-sm appearance-none cursor-pointer min-h-[44px]",
         "bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2214%22 height=%2214%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230a0a0a%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>')] bg-[length:14px_14px] bg-[center_right_0.75rem] bg-no-repeat pr-9",
         className,
       )}
@@ -122,7 +122,7 @@ export function NeuBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center px-3 py-1 rounded-full text-[12px] font-extrabold border-2 border-black",
+        "inline-flex items-center px-3 py-2 rounded-full text-[12px] font-extrabold border-2 border-black min-h-[44px]",
         styles[color],
         className,
       )}

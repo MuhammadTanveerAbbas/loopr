@@ -177,7 +177,7 @@ function Pipeline() {
                           {isCollapsible && (
                             <button
                               onClick={() => setCollapsed({ ...collapsed, [stage]: true })}
-                              className="p-0.5 rounded hover:bg-black/10 transition-colors"
+                              className="p-2 rounded hover:bg-black/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                             >
                               <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
                             </button>
@@ -272,7 +272,7 @@ const KanbanCard = memo(function KanbanCard({ lead, onClick }: { lead: Lead; onC
       {/* Drag handle */}
       <div
         {...listeners}
-        className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-40 transition-opacity cursor-grab active:cursor-grabbing"
+        className="absolute top-2.5 right-2.5 transition-opacity cursor-grab active:cursor-grabbing md:opacity-0 md:group-hover:opacity-40 min-w-[44px] min-h-[44px] flex items-center justify-center"
       >
         <GripVertical className="h-3.5 w-3.5 text-foreground" />
       </div>

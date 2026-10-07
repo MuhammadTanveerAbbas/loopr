@@ -1,7 +1,8 @@
 -- =============================================================================
--- Loopr CRM — Complete Database Schema
+-- Loopr CRM - Complete Database Schema
 -- Fully re-runnable. Transaction-safe. Production-ready.
 -- Apply in Supabase SQL editor: copy-paste entire file.
+-- Updated with enhanced security and performance optimizations
 -- =============================================================================
 
 -- Safe cleanup: drop only if table exists (avoids error on re-run)
@@ -34,6 +35,7 @@ DROP FUNCTION IF EXISTS public.cleanup_old_deleted_leads();
 DROP FUNCTION IF EXISTS public.get_dashboard_stats();
 DROP FUNCTION IF EXISTS public.hard_delete_lead(UUID);
 DROP FUNCTION IF EXISTS public.delete_user_account(UUID);
+DROP FUNCTION IF EXISTS public.validate_lead_data();
 
 DROP TABLE IF EXISTS public.drafts CASCADE;
 DROP TABLE IF EXISTS public.audit_logs CASCADE;
@@ -189,13 +191,15 @@ CREATE POLICY "drafts_delete_own" ON public.drafts FOR DELETE USING (auth.uid() 
 -- INDEXES
 -- =============================================================================
 
--- Leads: partial indexes for active (non-deleted) records — covers 95% of queries
+-- Leads: partial indexes for active (non-deleted) records - covers 95% of queries
 CREATE INDEX idx_leads_user_active     ON public.leads(user_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_leads_user_stage      ON public.leads(user_id, stage) WHERE deleted_at IS NULL;
 CREATE INDEX idx_leads_user_signal     ON public.leads(user_id, signal_score DESC) WHERE deleted_at IS NULL;
 CREATE INDEX idx_leads_user_contact    ON public.leads(user_id, last_contact DESC NULLS LAST) WHERE deleted_at IS NULL;
 CREATE INDEX idx_leads_user_created    ON public.leads(user_id, created_at DESC) WHERE deleted_at IS NULL;
 CREATE UNIQUE INDEX idx_leads_email_dedup ON public.leads(user_id, LOWER(email)) WHERE email IS NOT NULL AND deleted_at IS NULL;
+-- Enhanced: Composite index for pagination with ordering
+CREATE INDEX idx_leads_user_paginated ON public.leads(user_id, updated_at DESC) WHERE deleted_at IS NULL;
 
 -- Leads: for cleanup queries (deleted records)
 CREATE INDEX idx_leads_deleted ON public.leads(deleted_at) WHERE deleted_at IS NOT NULL;
@@ -224,6 +228,31 @@ CREATE INDEX idx_drafts_user_lead ON public.drafts(user_id, lead_id);
 -- =============================================================================
 -- FUNCTIONS
 -- =============================================================================
+
+-- Enhanced: Add constraint validation function
+CREATE OR REPLACE FUNCTION public.validate_lead_data()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  -- Validate email format if provided
+  IF NEW.email IS NOT NULL AND NEW.email != '' THEN
+    IF NEW.email !~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
+      RAISE EXCEPTION 'Invalid email format';
+    END IF;
+  END IF;
+  
+  -- Validate deal value is non-negative
+  IF NEW.deal_value < 0 THEN
+    RAISE EXCEPTION 'Deal value must be non-negative';
+  END IF;
+  
+  -- Validate signal score is within valid range
+  IF NEW.signal_score < 0 OR NEW.signal_score > 100 THEN
+    RAISE EXCEPTION 'Signal score must be between 0 and 100';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
@@ -428,6 +457,11 @@ CREATE TRIGGER trg_leads_audit
   AFTER INSERT OR UPDATE OR DELETE ON public.leads
   FOR EACH ROW EXECUTE FUNCTION public.log_lead_changes();
 
+-- Data validation trigger (optional - can be disabled if client-side validation is preferred)
+-- CREATE TRIGGER trg_leads_validate
+--   BEFORE INSERT OR UPDATE ON public.leads
+--   FOR EACH ROW EXECUTE FUNCTION public.validate_lead_data();
+
 -- =============================================================================
 -- COMMENTS
 -- =============================================================================
@@ -443,3 +477,4 @@ COMMENT ON FUNCTION public.recompute_signal_score(UUID) IS 'Calculates 0-100 eng
 COMMENT ON FUNCTION public.cleanup_old_deleted_leads()   IS 'Hard-deletes leads trashed more than 30 days ago.';
 COMMENT ON FUNCTION public.get_dashboard_stats()          IS 'Returns aggregated dashboard stats for the authenticated user.';
 COMMENT ON FUNCTION public.hard_delete_lead(UUID)         IS 'Permanently deletes a lead. User-scoped via auth.uid().';
+COMMENT ON FUNCTION public.validate_lead_data()         IS 'Validates lead data integrity before insert/update operations.';

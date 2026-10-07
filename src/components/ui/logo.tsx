@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-/** Loopr brand mark  flat neobrutal infinity loop. */
+/** Loopr brand mark flat neobrutal infinity loop. */
 export function LoopMark({ size = 40, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden="true">
@@ -46,11 +46,7 @@ export function BrandLockup({
       <LoopMark size={size} className="transition-transform group-hover:rotate-[-6deg]" />
       <div className="flex flex-col leading-none">
         <span className="font-extrabold text-[22px] text-foreground tracking-tight">Loopr</span>
-        {showTag && (
-          <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/70 mt-0.5">
-            by The MVP Guy
-          </span>
-        )}
+
       </div>
     </Link>
   );

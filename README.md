@@ -22,20 +22,21 @@
 
 Loopr is a lightweight, AI-assisted CRM designed specifically for solo founders running high-touch outbound campaigns. Unlike bloated CRMs designed for enterprise sales teams, Loopr focuses on what matters: tracking leads, analyzing responses, and getting daily AI-powered briefings on what to do next.
 
-Built with the philosophy of "calm productivity" — no notifications, no streaks, no spam features. Just you and your pipeline.
+Built with the philosophy of "calm productivity" - no notifications, no streaks, no spam features. Just you and your pipeline.
 
 ---
 
 ## ✨ Features
 
-- 📊 **Sheet & Kanban Views** — Two views of one pipeline. Edit in place or drag to advance deals.
-- 🧠 **AI Daily Briefing** — Each morning, AI surfaces who to follow up with and why.
-- 🎯 **Signal Score** — Every lead gets a 0–100 score based on engagement signals.
-- 💬 **Reply Analyzer** — Paste any reply to get sentiment analysis and suggested next steps.
-- 📈 **Analytics** — KPI cards, pipeline-by-stage chart, conversion funnel, at-risk alerts, and monthly revenue breakdown.
-- 🔒 **Your Data, Yours Alone** — Single-tenant architecture. Export to CSV anytime.
-- 📱 **Fully Responsive** — Optimized landing page and every dashboard page for mobile, tablet, and desktop.
-- 🎨 **Calm by Design** — No notifications, no streaks, no dark patterns.
+- 📊 **Sheet & Kanban Views** - Two views of one pipeline. Edit in place or drag to advance deals.
+- 🧠 **AI Daily Briefing** - Each morning, AI surfaces who to follow up with and why.
+- 🎯 **Signal Score** - Every lead gets a 0-100 score based on engagement signals.
+- 💬 **Reply Analyzer** - Paste any reply to get sentiment analysis and suggested next steps.
+- 📈 **Analytics** - KPI cards, pipeline-by-stage chart, conversion funnel, at-risk alerts, and monthly revenue breakdown with time range filtering.
+- 🔒 **Your Data, Yours Alone** - Single-tenant architecture. Export to CSV anytime.
+- 📱 **Fully Responsive** - Optimized landing page and every dashboard page for mobile, tablet, and desktop with WCAG-compliant touch targets.
+- 🎨 **Calm by Design** - No notifications, no streaks, no dark patterns.
+- ⚡ **Performance Optimized** - Pagination, debounced search, and retry logic for smooth operation.
 
 ---
 
@@ -112,13 +113,21 @@ Get your keys:
 
 The `ai-task` edge function self-heals around Groq outages without any app changes:
 
-- **Model discovery** — available Groq models are fetched from the `/models` endpoint and cached server-side (15 min TTL), so the list is never fetched on every request.
-- **Automatic model fallback** — if the configured `AI_MODEL` is removed or unsupported, the function refreshes the model list and retries once with a compatible model.
-- **Rate limits** — HTTP 429 responses respect `Retry-After` and otherwise use bounded exponential backoff with jitter (max 3 attempts).
-- **Transient failures** — network errors, timeouts, and 5xx responses are retried with backoff, then fail gracefully with a friendly in-app message.
-- **No secret leakage** — API keys stay server-side and are never logged.
+- **Model discovery** - available Groq models are fetched from the `/models` endpoint and cached server-side (15 min TTL), so the list is never fetched on every request.
+- **Automatic model fallback** - if the configured `AI_MODEL` is removed or unsupported, the function refreshes the model list and retries once with a compatible model.
+- **Rate limits** - HTTP 429 responses respect `Retry-After` and otherwise use bounded exponential backoff with jitter (max 3 attempts).
+- **Transient failures** - network errors, timeouts, and 5xx responses are retried with backoff, then fail gracefully with a friendly in-app message.
+- **No secret leakage** - API keys stay server-side and are never logged.
 
 `/health` reports Supabase connectivity with a read-only check and fails clearly (with a 10s timeout) instead of hanging when Supabase is unavailable.
+
+### Enhanced Error Handling & Performance
+
+- **Exponential backoff retry** - Network errors are automatically retried with intelligent backoff strategies
+- **Debounced search** - Search operations are debounced to reduce unnecessary API calls
+- **Pagination** - Large datasets are loaded in pages for better performance
+- **Enhanced sanitization** - Improved input sanitization to prevent XSS and injection attacks
+- **WCAG-compliant touch targets** - All interactive elements meet 44x44px minimum touch target requirements
 
 ---
 
@@ -185,6 +194,13 @@ pnpm test
 pnpm test:watch
 ```
 
+## 🔒 Security
+
+- **Input sanitization** - All user inputs are sanitized to prevent XSS and injection attacks
+- **Row-level security** - Supabase RLS policies ensure users can only access their own data
+- **Type-safe validation** - Zod schemas validate all data before database operations
+- **No secret exposure** - API keys are server-side only and never logged
+
 ---
 
 ## 🌐 Deployment
@@ -208,10 +224,13 @@ This project is deployed on **Vercel** using TanStack Start + Nitro.
 - [x] Signal Score for leads
 - [x] Reply analyzer
 - [x] CSV import & export
-- [x] Analytics: KPIs, funnel, at-risk alerts, monthly revenue
-- [x] Fully responsive landing + dashboard
+- [x] Analytics: KPIs, funnel, at-risk alerts, monthly revenue with time range filtering
+- [x] Fully responsive landing + dashboard with WCAG compliance
+- [x] Performance optimizations (pagination, debounced search, retry logic)
+- [x] Enhanced security (improved sanitization, input validation)
 - [ ] Team/collaboration features
 - [ ] Email integration
+- [ ] Real-time updates with Supabase subscriptions
 
 ---
 
@@ -233,15 +252,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-## 👨‍💻 Built by The MVP Guy
+## 👨💻 Built by Muhammad Tanveer Abbas
 
 <div align="center">
 
 **Muhammad Tanveer Abbas**  
 SaaS Developer | Building production-ready MVPs in 14–21 days
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-themvpguy.vercel.app-black?style=for-the-badge)](https://themvpguy.vercel.app)
-[![Twitter](https://img.shields.io/badge/Twitter-@themvpguy-1DA1F2?style=for-the-badge&logo=twitter)](https://x.com/themvpguy)
+[![Twitter](https://img.shields.io/badge/Twitter-@m_tanveerabbas-1DA1F2?style=for-the-badge&logo=twitter)](https://x.com/m_tanveerabbas)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/muhammadtanveerabbas)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github)](https://github.com/MuhammadTanveerAbbas)
 

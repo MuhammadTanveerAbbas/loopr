@@ -51,14 +51,38 @@ export const authSchema = z.object({
   name: z.string().min(1, "Name is required").max(100).optional(),
 });
 
+export const draftSchema = z.object({
+  lead_id: z.string().uuid(),
+  subject: z.string().max(200).optional().nullable(),
+  body: z.string().min(1).max(10000),
+});
+
 export function sanitizeString(input: string): string {
+  if (!input) return "";
+  
   return (
     input
-      .replace(/[<>]/g, "")
+      // Remove potentially dangerous HTML tags and attributes
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+      .replace(/<embed\b[^>]*>/gi, "")
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, "")
+      .replace(/javascript:/gi, "")
+      .replace(/data:/gi, "")
+      // Remove HTML comments
+      .replace(/<!--[\s\S]*?-->/g, "")
+      // Remove common HTML entities
       .replace(/&(nbsp|amp|lt|gt|quot|#\d+|#x[\da-fA-F]+);?/g, "")
+      // Remove zero-width characters and other invisible characters
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
       // Strip control chars but preserve newlines (\n), carriage returns (\r) and tabs (\t)
       // eslint-disable-next-line no-control-regex
       .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+      // Remove potentially dangerous Unicode characters
+      .replace(/[\uFFF0-\uFFFF]/g, "")
+      // Remove excessive whitespace
+      .replace(/\s+/g, " ")
       .trim()
   );
 }

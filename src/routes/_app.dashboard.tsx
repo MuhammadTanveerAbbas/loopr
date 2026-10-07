@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useDashboardStats, useTrendingLeads } from "@/lib/leads-api";
-import { NeuButton } from "@/components/ui/neu";
+import { NeuButton, NeuSelect } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowRight,
@@ -73,7 +73,7 @@ function StatCard({
         </div>
         {trend !== undefined && trend !== null && (
           <div className={`flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border border-black/15
-            ${trend > 0 ? "bg-black/10 text-foreground" : trend < 0 ? "bg-black/10 text-foreground" : "bg-black/5 text-foreground/60"}`}>
+            ${trend > 0 ? "bg-green-100 text-green-800 border-green-300" : trend < 0 ? "bg-red-100 text-red-800 border-red-300" : "bg-black/5 text-foreground/60"}`}>
             {trend > 0 ? <TrendingUp className="h-3 w-3" /> : trend < 0 ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
             {trend > 0 ? "+" : ""}{trend}
           </div>
@@ -112,6 +112,7 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 
 /* ── Dashboard ── */
 function Dashboard() {
+  const [timeRange, setTimeRange] = useState<"this_week" | "this_month" | "this_quarter">("this_month");
   const { data: stats, isLoading, error, refetch } = useDashboardStats();
   const { data: recentLeads = [] } = useTrendingLeads(5);
 
@@ -156,12 +157,23 @@ function Dashboard() {
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Your pipeline at a glance.</p>
         </div>
-        <Link
-          to="/leads"
-          className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide bg-foreground text-background border-2 border-black rounded-xl px-3 py-2 shadow-[0_3px_0_#0a0a0a] hover:shadow-none hover:translate-y-px transition-all shrink-0"
-        >
-          All leads <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <NeuSelect
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value as "this_week" | "this_month" | "this_quarter")}
+            className="text-xs"
+          >
+            <option value="this_week">This Week</option>
+            <option value="this_month">This Month</option>
+            <option value="this_quarter">This Quarter</option>
+          </NeuSelect>
+          <Link
+            to="/leads"
+            className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide bg-foreground text-background border-2 border-black rounded-xl px-3 py-2 shadow-[0_3px_0_#0a0a0a] hover:shadow-none hover:translate-y-px transition-all shrink-0"
+          >
+            All leads <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
 
       {/* KPI row */}

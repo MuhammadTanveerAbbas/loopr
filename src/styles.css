@@ -1,5 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap");
 @import "tailwindcss" source(none);
+
+/* Hide scrollbars globally while keeping scroll functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
 @source "../src";
 @import "tw-animate-css";
 

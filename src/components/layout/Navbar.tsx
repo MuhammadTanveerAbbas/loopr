@@ -51,7 +51,7 @@ export function Navbar() {
         </h1>
 
         <div className="flex items-center gap-2 ml-auto">
-          {/* Search — hidden on mobile */}
+          {/* Search - hidden on mobile */}
           <button
             onClick={() => commandPaletteStore.setOpen(true)}
             className="hidden sm:flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-background border-2 border-black rounded-xl px-3 py-1.5 shadow-[0_2px_0_#0a0a0a] hover:shadow-none hover:translate-y-px transition-all"

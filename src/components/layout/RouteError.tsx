@@ -8,7 +8,7 @@ export function RouteError({ error, reset }: { error: Error; reset: () => void }
       <div className="neu-raised-lg rounded-3xl p-8 max-w-md text-center">
         <h1 className="text-xl font-bold text-foreground">Something broke</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          An unexpected error occurred. Please try again if it keeps happening, refresh the page.
+          An unexpected error occurred. Please try again. If it keeps happening, refresh the page.
         </p>
         <button
           onClick={() => {

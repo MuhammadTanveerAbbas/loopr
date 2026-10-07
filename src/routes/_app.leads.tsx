@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useRef, useEffect } from "react";
 import {
-  useLeads,
+  useLeadsInfinite,
   useUpdateLead,
   useCreateLead,
   useDeleteLead,
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { daysSilent, scoreColor } from "@/lib/signal-score";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Plus, Search, Trash2, Download } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import {
@@ -37,12 +38,13 @@ export const Route = createFileRoute("/_app/leads")({
 
 function LeadsPage() {
   const { user } = useAuth();
-  const { data, isLoading, error, refetch } = useLeads();
-  const leads = useMemo(() => data?.leads ?? [], [data]);
+  const { data, isLoading, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = useLeadsInfinite();
+  const leads = useMemo(() => data?.pages.flatMap(page => page.leads) ?? [], [data]);
   const update = useUpdateLead();
   const create = useCreateLead();
   const del = useDeleteLead();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"signal" | "silent" | "value" | "contact">("signal");
   const [openLead, setOpenLead] = useState<Lead | null>(null);
@@ -69,8 +71,8 @@ function LeadsPage() {
 
   const filtered = useMemo(() => {
     let r = leads.slice();
-    if (search) {
-      const s = search.toLowerCase();
+    if (debouncedSearch) {
+      const s = debouncedSearch.toLowerCase();
       r = r.filter(
         (l: Lead) =>
           l.name.toLowerCase().includes(s) || (l.company ?? "").toLowerCase().includes(s),
@@ -84,7 +86,7 @@ function LeadsPage() {
     if (sortBy === "contact")
       r.sort((a, b) => (b.last_contact || "").localeCompare(a.last_contact || ""));
     return r;
-  }, [leads, search, stageFilter, sortBy]);
+  }, [leads, debouncedSearch, stageFilter, sortBy]);
 
   if (error) {
     return (
@@ -197,7 +199,7 @@ function LeadsPage() {
     <PageContainer className="max-w-[1400px]">
       <PageHeader
         title="Leads"
-        subtitle={`${filtered.length} of ${leads.length} leads`}
+        subtitle={`${filtered.length} of ${leads.length} leads${data?.pages[0]?.total ? ` (Total: ${data.pages[0].total})` : ''}`}
         actions={
           <div className="flex items-center gap-2">
             <div className="relative" ref={exportRef}>
@@ -519,6 +521,18 @@ function LeadsPage() {
           </table>
         </div>
       </NeuCard>
+
+      {hasNextPage && (
+        <div className="flex justify-center mt-4">
+          <NeuButton
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            variant="secondary"
+          >
+            {isFetchingNextPage ? "Loading..." : "Load more"}
+          </NeuButton>
+        </div>
+      )}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>

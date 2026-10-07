@@ -117,7 +117,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
           </div>
           <button
             onClick={onClose}
-            className="neu-pressable rounded-xl p-2 ml-2"
+            className="neu-pressable rounded-xl p-3 ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Close drawer"
           >
             <X className="h-4 w-4" />
@@ -131,7 +131,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             </NeuBadge>
             <button
               onClick={() => recomputeScore.mutate(lead.id)}
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-foreground/10 text-[9px] font-bold flex items-center justify-center hover:bg-foreground/20"
+              className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-foreground/10 text-[9px] font-bold flex items-center justify-center hover:bg-foreground/20 min-w-[44px] min-h-[44px]"
               title="Recompute signal score"
               aria-label="Recompute signal score"
             >
@@ -276,7 +276,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
                       saveDraft.mutate({ lead_id: lead.id, body: draft });
                       toast.success("Draft saved");
                     }}
-                    className="neu-pressable rounded-lg p-2"
+                    className="neu-pressable rounded-lg p-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     title="Save draft"
                     aria-label="Save draft"
                   >
@@ -287,7 +287,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
                       navigator.clipboard.writeText(draft);
                       toast.success("Copied");
                     }}
-                    className="neu-pressable rounded-lg p-2"
+                    className="neu-pressable rounded-lg p-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label="Copy draft to clipboard"
                   >
                     <Copy className="h-3 w-3" />
@@ -349,14 +349,14 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             <div className="space-y-1 mt-2">
               {historyLoading ? (
                 <p className="text-xs text-muted-foreground animate-pulse">
-                  Loading stage history…
+                  Loading stage history...
                 </p>
               ) : stageHistory.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No stage changes recorded.</p>
               ) : (
                 stageHistory.slice(0, 10).map((s) => (
                   <div key={s.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-semibold">{s.from_stage ?? "—"}</span>
+                    <span className="font-semibold">{s.from_stage ?? "-"}</span>
                     <span className="text-[10px]">→</span>
                     <span className="font-semibold text-foreground">{s.to_stage}</span>
                     <span className="ml-auto text-[10px]">
@@ -374,7 +374,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead; onClose: () => void 
             </label>
             <div className="space-y-2 mt-2">
               {touchesLoading ? (
-                <p className="text-xs text-muted-foreground animate-pulse">Loading timeline…</p>
+                <p className="text-xs text-muted-foreground animate-pulse">Loading timeline...</p>
               ) : touches.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No touches logged yet.</p>
               ) : (

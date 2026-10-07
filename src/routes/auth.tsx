@@ -24,7 +24,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in - Loopr" },
-      { name: "description", content: "Sign in or create an account for Loopr by The MVP Guy." },
+      { name: "description", content: "Sign in or create an account for Loopr." },
     ],
   }),
   component: AuthPage,
@@ -85,10 +85,11 @@ function AuthPage() {
           password: data.password,
         });
         if (error) throw error;
-        if (signInData.session) {
-          toast.success("Welcome back.");
-          nav({ to: "/dashboard" });
+        if (!signInData.session) {
+          toast.error("Please confirm your email before signing in.");
+          return;
         }
+        toast.success("Welcome back.");
       }
     } catch (err) {
       toast.error(sanitizeErrorMessage(err, "Authentication failed. Please try again."));
@@ -132,7 +133,7 @@ function AuthPage() {
         <div className="leading-none">
           <div className="font-extrabold text-xl text-foreground">Loopr</div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/70 mt-1">
-            by The MVP Guy
+            Focused CRM
           </div>
         </div>
       </Link>
@@ -176,6 +177,7 @@ function AuthPage() {
             <div>
               <NeuInput
                 placeholder="Your name"
+                autoComplete="name"
                 {...register("name")}
                 aria-invalid={!!errors.name}
               />
@@ -188,6 +190,7 @@ function AuthPage() {
             <NeuInput
               type="email"
               placeholder="you@company.com"
+              autoComplete="email"
               {...register("email")}
               aria-invalid={!!errors.email}
             />
@@ -201,6 +204,7 @@ function AuthPage() {
                 <NeuInput
                   type={showPw ? "text" : "password"}
                   placeholder="Password"
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   {...register("password")}
                   aria-invalid={!!errors.password}
                   className="pr-12"

@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Draft, AuditLog } from "@/integrations/supabase/supplemental-types";
-import { updateLeadSchema, createTouchSchema, sanitizeString } from "./schemas";
+import { updateLeadSchema, createTouchSchema, draftSchema, sanitizeString } from "./schemas";
 import { STAGES, STAGE_COLOR } from "@/config/plans";
 import type { Stage } from "@/config/plans";
 
@@ -24,12 +24,14 @@ export interface PaginatedLeads {
   leads: Lead[];
   total: number;
   hasMore: boolean;
+  page?: number;
 }
 
-const DEFAULT_PAGE_SIZE = 500;
+const DEFAULT_PAGE_SIZE = 50;
 
 function invalidateLeadQueries(qc: QueryClient) {
   qc.invalidateQueries({ queryKey: ["leads"] });
+  qc.invalidateQueries({ queryKey: ["leads_infinite"] });
   qc.invalidateQueries({ queryKey: ["leads_trending"] });
   qc.invalidateQueries({ queryKey: ["dashboard_stats"] });
   qc.invalidateQueries({ queryKey: ["touches"] });
@@ -70,8 +72,55 @@ export function useLeads(options?: { pageSize?: number; includeDeleted?: boolean
         leads: (data ?? []) as Lead[],
         total: count ?? 0,
         hasMore: (data?.length ?? 0) >= pageSize,
+        page: 0,
       } as PaginatedLeads;
     },
+    retry: (failureCount, error) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+        return failureCount < 3;
+      }
+      return false;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 30000,
+  });
+}
+
+export function useLeadsInfinite(options?: { pageSize?: number; includeDeleted?: boolean }) {
+  const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE;
+  const includeDeleted = options?.includeDeleted ?? false;
+
+  return useInfiniteQuery({
+    queryKey: ["leads_infinite", pageSize, includeDeleted],
+    queryFn: async ({ pageParam = 0 }) => {
+      let query = supabase.from("leads").select("*", { count: "exact" });
+      if (!includeDeleted) {
+        query = query.is("deleted_at", null);
+      }
+      const { data, error, count } = await query
+        .order("updated_at", { ascending: false })
+        .range(pageParam * pageSize, (pageParam + 1) * pageSize - 1);
+      if (error) throw error;
+      return {
+        leads: (data ?? []) as Lead[],
+        total: count ?? 0,
+        page: pageParam,
+        hasMore: (data?.length ?? 0) >= pageSize,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasMore ? lastPage.page + 1 : undefined;
+    },
+    retry: (failureCount, error) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+        return failureCount < 3;
+      }
+      return false;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -312,7 +361,14 @@ export function useDashboardStats() {
       return computeDashboardStats(leads ?? []);
     },
     staleTime: 30000,
-    retry: 1,
+    retry: (failureCount, error) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+        return failureCount < 3;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -421,8 +477,17 @@ export function useSaveDraft(userId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (draft: { lead_id: string; subject?: string; body: string }) => {
+      const sanitizedBody = sanitizeString(draft.body);
+      const sanitizedSubject = draft.subject ? sanitizeString(draft.subject) : null;
+      
+      const parsed = draftSchema.parse({
+        lead_id: draft.lead_id,
+        subject: sanitizedSubject,
+        body: sanitizedBody,
+      });
+      
       const { error } = await supabase.from("drafts").insert({
-        ...draft,
+        ...parsed,
         user_id: userId,
       });
       if (error) throw error;

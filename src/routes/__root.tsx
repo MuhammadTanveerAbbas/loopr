@@ -19,7 +19,7 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
       {
         name: "description",
         content:
-          "Loopr by The MVP Guy. Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings built for high-touch outbound.",
+          "Loopr. Lightweight, AI-assisted pipeline tracker. Sheet, Kanban, and daily briefings built for high-touch outbound.",
       },
       // OG
       { property: "og:type", content: "website" },

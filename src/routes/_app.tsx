@@ -19,14 +19,7 @@ function AppLayout() {
     if (!loading && !user) nav({ to: "/auth" });
   }, [user, loading, nav]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="brutal-card px-5 py-3 text-sm font-bold">Loading…</div>
-      </div>
-    );
-  }
-  if (!user) return null;
+  if (loading || !user) return null;
 
   return (
     <div className="min-h-screen flex bg-background">

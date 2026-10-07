@@ -112,7 +112,7 @@ function SidebarNav({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      {/* Logo — no bottom divider */}
+      {/* Logo - no bottom divider */}
       <Link
         to="/dashboard"
         onClick={onNav}
@@ -162,7 +162,7 @@ function SidebarNav({
           </div>
         )}
 
-        {/* Collapse toggle — only on desktop sidebar (onCollapse provided) */}
+        {/* Collapse toggle - only on desktop sidebar (onCollapse provided) */}
         {onCollapse && (
           <div className="relative group/tip">
             <button
@@ -206,10 +206,10 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile hamburger — inside navbar area, no overlap */}
+      {/* Mobile hamburger - inside navbar area, no overlap */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-3.5 left-3.5 z-50 w-8 h-8 rounded-xl bg-background border-2 border-black shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
+        className="md:hidden fixed top-3.5 left-3.5 z-50 w-12 h-12 rounded-xl bg-background border-2 border-black shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
         aria-label="Open menu"
       >
         <Menu className="h-4 w-4" />
@@ -225,7 +225,7 @@ export function Sidebar() {
           <aside className="relative w-[272px] h-full bg-background border-r-[3px] border-black p-4 flex flex-col overflow-y-auto no-scrollbar animate-slide-in-left">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-3.5 right-3.5 w-8 h-8 rounded-xl border-2 border-black bg-background shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
+              className="absolute top-3.5 right-3.5 w-12 h-12 rounded-xl border-2 border-black bg-background shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
               aria-label="Close menu"
             >
               <X className="h-4 w-4" />
