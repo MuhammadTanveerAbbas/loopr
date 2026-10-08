@@ -61,8 +61,9 @@ export const Route = createRootRouteWithContext<RouterCtx>()({
   notFoundComponent: NotFound,
 });
 
-function ErrorBoundary({ error }: { error: Error }) {
-  const isAuthError = error.message?.includes("Unauthorized") || error.message?.includes("auth");
+function ErrorBoundary({ error }: { error: unknown }) {
+  const err = error instanceof Error ? error : null;
+  const isAuthError = err?.message?.includes("Unauthorized") || err?.message?.includes("auth");
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-background">
@@ -76,7 +77,7 @@ function ErrorBoundary({ error }: { error: Error }) {
         <p className="mt-2 text-foreground/70 text-sm">
           {isAuthError
             ? "Your session has expired. Please sign in again."
-            : "An unexpected error occurred. Please try again."}
+            : err?.message ?? "An unexpected error occurred. Please try again."}
         </p>
         <button
           onClick={() => window.location.reload()}

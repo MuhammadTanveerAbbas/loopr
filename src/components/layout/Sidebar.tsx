@@ -13,7 +13,6 @@ import {
   Trash2,
   Activity,
   Upload,
-  Menu,
   X,
   PanelLeftClose,
   PanelLeftOpen,
@@ -71,7 +70,7 @@ function SidebarNav({
 }) {
   const loc = useLocation();
   const nav = useNavigate();
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
 
   const NavItem = ({
     to,
@@ -99,11 +98,7 @@ function SidebarNav({
         >
           <Icon className="h-4 w-4 shrink-0" strokeWidth={active ? 2.5 : 2} aria-hidden />
           {!collapsed && <span className="truncate">{label}</span>}
-          {!collapsed && shortcut && !active && (
-            <kbd className="ml-auto text-[9px] font-bold text-muted-foreground/40 bg-foreground/[0.06] px-1.5 py-0.5 rounded hidden lg:inline">
-              {shortcut}
-            </kbd>
-          )}
+
         </Link>
         {collapsed && <Tooltip label={label} shortcut={shortcut} />}
       </div>
@@ -130,7 +125,7 @@ function SidebarNav({
       {/* Nav sections */}
       <div className="flex-1 min-h-0 space-y-4 overflow-y-auto no-scrollbar">
         {sections.map((section) => (
-          <div key={section.label} className="space-y-1">
+          <div key={section.label} className="space-y-1.5">
             {!collapsed ? (
               <div className="px-3 pt-0.5 text-[10px] font-extrabold tracking-[0.12em] text-muted-foreground/70 uppercase select-none">
                 {section.label}
@@ -146,22 +141,7 @@ function SidebarNav({
       </div>
 
       {/* Bottom area: user + collapse toggle + logout */}
-      <div className="shrink-0 border-t-2 border-black pt-2 mt-2 space-y-1">
-        {/* User info */}
-        {user && !collapsed && (
-          <div className="flex items-center gap-2.5 px-3 py-1.5">
-            <div className="w-7 h-7 rounded-full bg-brand-yellow border-2 border-black flex items-center justify-center text-[11px] font-extrabold shrink-0">
-              {user.email?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-bold text-foreground truncate">
-                {user.user_metadata?.name || user.email?.split("@")[0] || "User"}
-              </div>
-              <div className="text-[9px] text-muted-foreground truncate">{user.email}</div>
-            </div>
-          </div>
-        )}
-
+      <div className="shrink-0 border-t-2 border-black pt-2 mt-2 space-y-1.5">
         {/* Collapse toggle - only on desktop sidebar (onCollapse provided) */}
         {onCollapse && (
           <div className="relative group/tip">
@@ -200,37 +180,27 @@ function SidebarNav({
   );
 }
 
-export function Sidebar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobileClose?: () => void }) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <>
-      {/* Mobile hamburger - inside navbar area, no overlap */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-3.5 left-3.5 z-50 w-12 h-12 rounded-xl bg-background border-2 border-black shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
-        aria-label="Open menu"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
-
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
             className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
+            onClick={onMobileClose}
           />
           <aside className="relative w-[272px] h-full bg-background border-r-[3px] border-black p-4 flex flex-col overflow-y-auto no-scrollbar animate-slide-in-left">
             <button
-              onClick={() => setMobileOpen(false)}
+              onClick={onMobileClose}
               className="absolute top-3.5 right-3.5 w-12 h-12 rounded-xl border-2 border-black bg-background shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
               aria-label="Close menu"
             >
               <X className="h-4 w-4" />
             </button>
-            <SidebarNav collapsed={false} onNav={() => setMobileOpen(false)} />
+            <SidebarNav collapsed={false} onNav={onMobileClose} />
           </aside>
         </div>
       )}

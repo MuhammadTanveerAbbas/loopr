@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { LogOut, Settings, ChevronDown, Search } from "lucide-react";
+import { LogOut, Settings, ChevronDown, Search, Menu } from "lucide-react";
 import { commandPaletteStore } from "@/lib/command-palette-store";
 
 const pageTitles: Record<string, string> = {
@@ -17,7 +17,7 @@ const pageTitles: Record<string, string> = {
   "/settings":  "Settings",
 };
 
-export function Navbar() {
+export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) {
   const loc = useLocation();
   const nav = useNavigate();
   const { user, signOut } = useAuth();
@@ -44,7 +44,15 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-background border-b-[3px] border-black">
-      <div className="flex items-center justify-between h-14 px-4 md:px-6 pl-14 md:pl-6">
+      <div className="flex items-center justify-between h-14 px-4 md:px-6">
+        {/* Mobile hamburger - sits in navbar left corner */}
+        <button
+          onClick={onMobileMenuOpen}
+          className="md:hidden w-9 h-9 rounded-xl bg-background border-2 border-black shadow-[0_2px_0_#0a0a0a] flex items-center justify-center shrink-0 mr-2"
+          aria-label="Open menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
 
         <h1 className="text-sm font-extrabold text-foreground truncate md:hidden">
           {currentPage}

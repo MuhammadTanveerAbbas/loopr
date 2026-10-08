@@ -16,6 +16,7 @@ import {
   TrendingDown,
   Minus,
   Brain,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -221,9 +222,11 @@ function Dashboard() {
           <PipelineBarChart stageCounts={stageCounts} />
         </Card>
 
-        <Card>
+        <Card className="flex flex-col">
           <SectionTitle>Conversion funnel</SectionTitle>
-          <FunnelChart stageCounts={stageCounts} />
+          <div className="flex-1 flex flex-col">
+            <FunnelChart stageCounts={stageCounts} />
+          </div>
         </Card>
       </div>
 
@@ -231,7 +234,7 @@ function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 
         {/* Recent activity */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 flex flex-col">
           <SectionTitle
             action={
               <Link to="/activity" className="text-xs font-bold text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors">
@@ -241,32 +244,45 @@ function Dashboard() {
           >
             Recent activity
           </SectionTitle>
-          <div className="space-y-2">
+          <div className="flex-1 flex flex-col">
             {recentLeads.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">No recent leads.</p>
-            ) : recentLeads.map((lead, i) => (
-              <div
-                key={lead.id}
-                className="flex items-center gap-3 p-2.5 rounded-xl border-2 border-black/8 hover:border-black/20 hover:bg-foreground/[0.02] transition-all animate-fade-up"
-                style={{ animationDelay: `${i * 0.05}s` }}
-              >
-                <div className="w-8 h-8 rounded-xl bg-brand-yellow border-2 border-black flex items-center justify-center text-xs font-extrabold shrink-0">
-                  {lead.name.charAt(0).toUpperCase()}
+              <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
+                <div className="w-10 h-10 rounded-xl bg-foreground/[0.05] border-2 border-black/10 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold text-foreground truncate">{lead.name}</div>
-                  <div className="text-[11px] text-muted-foreground truncate">{lead.company || "—"} · {lead.stage}</div>
-                </div>
-                <div className="text-xs font-extrabold text-foreground shrink-0">
-                  ${Number(lead.deal_value).toLocaleString()}
-                </div>
+                <p className="text-sm font-bold text-foreground">No recent leads</p>
+                <p className="text-xs text-muted-foreground">Add your first lead to get started.</p>
+                <Link to="/leads" className="mt-1 text-xs font-extrabold underline underline-offset-2 text-foreground hover:text-foreground/70 transition-colors">
+                  Go to Leads
+                </Link>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-2">
+                {recentLeads.map((lead, i) => (
+                  <div
+                    key={lead.id}
+                    className="flex items-center gap-3 p-2.5 rounded-xl border-2 border-black/8 hover:border-black/20 hover:bg-foreground/[0.02] transition-all animate-fade-up"
+                    style={{ animationDelay: `${i * 0.05}s` }}
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-brand-yellow border-2 border-black flex items-center justify-center text-xs font-extrabold shrink-0">
+                      {lead.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-foreground truncate">{lead.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{lead.company || "—"} · {lead.stage}</div>
+                    </div>
+                    <div className="text-xs font-extrabold text-foreground shrink-0">
+                      ${Number(lead.deal_value).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Card>
 
         {/* At-risk */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 flex flex-col">
           <SectionTitle
             action={
               atRisk.length > 0 ? (
@@ -280,32 +296,39 @@ function Dashboard() {
               <Flame className="h-3.5 w-3.5 text-destructive" /> At-risk leads
             </span>
           </SectionTitle>
-          <div className="space-y-2 max-h-64 overflow-y-auto no-scrollbar">
+          <div className="flex-1 flex flex-col">
             {atRisk.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-2xl mb-1">🎉</div>
-                <p className="text-xs font-semibold text-muted-foreground">No at-risk leads. Keep it up!</p>
-              </div>
-            ) : atRisk.map((l, i) => (
-              <div
-                key={l.id}
-                className="flex items-center justify-between gap-2 p-2.5 rounded-xl border-2 border-destructive/30 bg-destructive/[0.04] animate-fade-up"
-                style={{ animationDelay: `${i * 0.05}s` }}
-              >
-                <div className="min-w-0">
-                  <div className="text-sm font-bold text-foreground truncate">{l.name}</div>
-                  <div className="text-[11px] text-muted-foreground truncate">{l.company || "—"}</div>
+              <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
+                <div className="w-10 h-10 rounded-xl bg-[var(--success)]/20 border-2 border-[var(--success)]/40 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-[var(--success)]" />
                 </div>
-                <span className="shrink-0 text-[10px] font-extrabold text-destructive bg-destructive/10 border border-destructive/30 px-2 py-0.5 rounded-full whitespace-nowrap">
-                  {l.days_silent}d silent
-                </span>
+                <p className="text-sm font-bold text-foreground">All clear!</p>
+                <p className="text-xs text-muted-foreground">No at-risk leads. Keep it up!</p>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto no-scrollbar">
+                {atRisk.map((l, i) => (
+                  <div
+                    key={l.id}
+                    className="flex items-center justify-between gap-2 p-2.5 rounded-xl border-2 border-destructive/30 bg-destructive/[0.04] animate-fade-up"
+                    style={{ animationDelay: `${i * 0.05}s` }}
+                  >
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-foreground truncate">{l.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{l.company || "—"}</div>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-extrabold text-destructive bg-destructive/10 border border-destructive/30 px-2 py-0.5 rounded-full whitespace-nowrap">
+                      {l.days_silent}d silent
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Card>
 
         {/* Quick stats + CTA */}
-        <Card className="lg:col-span-1 flex flex-col gap-4">
+        <Card className="lg:col-span-1 flex flex-col gap-4 md:col-span-2 lg:col-span-1">
           <div>
             <SectionTitle>
               <span className="flex items-center gap-1.5">
@@ -452,7 +475,13 @@ function FunnelChart({ stageCounts }: { stageCounts: Record<string, number> }) {
   const max = Math.max(1, ...steps.map(s => s.count));
 
   if (steps.length === 0) return (
-    <p className="text-xs text-muted-foreground text-center py-8">No data yet.</p>
+    <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
+      <div className="w-10 h-10 rounded-xl bg-foreground/[0.05] border-2 border-black/10 flex items-center justify-center">
+        <TrendingUp className="h-5 w-5 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-bold text-foreground">No pipeline data yet</p>
+      <p className="text-xs text-muted-foreground">Add leads and move them through stages to see your funnel.</p>
+    </div>
   );
 
   return (

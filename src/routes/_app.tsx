@@ -4,7 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { OnboardingModal } from "@/components/layout/OnboardingModal";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
@@ -15,6 +15,8 @@ function AppLayout() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) nav({ to: "/auth" });
   }, [user, loading, nav]);
@@ -23,9 +25,9 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Sidebar />
+      <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <Navbar onMobileMenuOpen={() => setMobileOpen(true)} />
         <main className="flex-1 p-3 sm:p-5 lg:p-8 min-w-0 overflow-x-hidden overflow-y-auto">
           <Outlet />
         </main>
