@@ -1,3 +1,5 @@
 import { defineNitroConfig } from "nitro/config";
 
-export default defineNitroConfig({});
+export default defineNitroConfig({
+  preset: "vercel",
+});

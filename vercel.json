@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm build",
+  "framework": null,
   "installCommand": "pnpm install",
-  "outputDirectory": "dist/client",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "outputDirectory": ".vercel/output"
 }
