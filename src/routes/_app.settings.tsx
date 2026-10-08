@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { NeuCard, NeuButton, NeuInput, NeuTextarea } from "@/components/ui/neu";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { toast } from "sonner";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import {

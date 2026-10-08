@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { AuthContext } from "@/lib/auth-context";
 
 export function AuthProvider({ children }: { children: ReactNode }) {

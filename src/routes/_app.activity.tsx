@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { NeuCard } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";

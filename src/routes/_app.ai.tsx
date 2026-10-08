@@ -5,7 +5,7 @@ import { NeuCard, NeuButton, NeuTextarea, NeuBadge } from "@/components/ui/neu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";
 import { Brain, RefreshCw, Search, MessageSquare, Calendar, Skull } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useLeads, type Lead } from "@/lib/leads-api";
 import { daysSilent } from "@/lib/signal-score";

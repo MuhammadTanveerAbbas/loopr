@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-import type { Draft, AuditLog } from "@/integrations/supabase/supplemental-types";
+import { supabase } from "@/integrations/supabase";
+import type { Database } from "@/integrations/supabase";
+import type { Draft, AuditLog } from "@/integrations/supabase";
 import { updateLeadSchema, createTouchSchema, draftSchema, sanitizeString } from "./schemas";
 import { STAGES, STAGE_COLOR } from "@/config/plans";
 import type { Stage } from "@/config/plans";
@@ -10,7 +10,7 @@ type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
 export type Lead = LeadRow;
 export type Touch = Database["public"]["Tables"]["lead_touches"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-export type { Draft, AuditLog } from "@/integrations/supabase/supplemental-types";
+export type { Draft, AuditLog } from "@/integrations/supabase";
 export { STAGES, STAGE_COLOR };
 export type { Stage };
 

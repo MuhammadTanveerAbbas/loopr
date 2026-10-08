@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase";
+import type { Database } from "@/integrations/supabase";
 import { NeuCard, NeuButton } from "@/components/ui/neu";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { useAuth } from "@/hooks/use-auth";

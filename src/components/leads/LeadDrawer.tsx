@@ -13,7 +13,7 @@ import {
 } from "@/lib/leads-api";
 import { NeuButton, NeuInput, NeuTextarea, NeuSelect, NeuBadge } from "@/components/ui/neu";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { X, Plus, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { scoreColor } from "@/lib/signal-score";

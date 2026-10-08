@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { NeuButton, NeuCard, NeuInput } from "@/components/ui/neu";
 import { GoogleIcon } from "@/components/ui/google-icon";
@@ -41,6 +41,7 @@ function AuthPage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<AuthForm>({
     resolver: zodResolver(authFormSchema),
@@ -75,18 +76,32 @@ function AuthPage() {
         });
         if (error) throw error;
         if (signupData?.user?.identities?.length === 0) {
-          toast.error("An account with this email already exists.");
+          toast.error("This email is already registered. Please sign in instead.");
+          reset();
+          setMode("login");
           return;
         }
-        toast.success("Account created! Check your email and click the confirmation link before signing in.");
+        toast.success("Account created! Check your email for a confirmation link, then sign in.");
+        reset();
+        setMode("login");
+        return;
       } else {
         const { error, data: signInData } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message?.toLowerCase().includes("email not confirmed")) {
+            toast.error("Please confirm your email first — check your inbox for the confirmation link.");
+          } else if (error.message?.toLowerCase().includes("invalid login")) {
+            toast.error("Incorrect email or password.");
+          } else {
+            throw error;
+          }
+          return;
+        }
         if (!signInData.session) {
-          toast.error("Please confirm your email before signing in.");
+          toast.error("Please confirm your email first — check your inbox for the confirmation link.");
           return;
         }
         toast.success("Welcome back.");
@@ -228,7 +243,7 @@ function AuthPage() {
           {mode === "login" && (
             <button
               type="button"
-              onClick={() => setMode("reset")}
+              onClick={() => { setMode("reset"); reset(); }}
               className="text-xs text-muted-foreground hover:text-foreground self-end mt-2"
             >
               Forgot password?
@@ -252,9 +267,11 @@ function AuthPage() {
 
         <button
           type="button"
-          onClick={() =>
-            setMode(mode === "login" ? "signup" : mode === "reset" ? "login" : "login")
-          }
+          onClick={() => {
+            const next = mode === "login" ? "signup" : "login";
+            setMode(next);
+            reset();
+          }}
           className="mt-6 text-sm text-muted-foreground hover:text-foreground w-full text-center"
         >
           {mode === "login"

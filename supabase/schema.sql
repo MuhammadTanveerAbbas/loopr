@@ -36,6 +36,8 @@ DROP FUNCTION IF EXISTS public.get_dashboard_stats();
 DROP FUNCTION IF EXISTS public.hard_delete_lead(UUID);
 DROP FUNCTION IF EXISTS public.delete_user_account(UUID);
 DROP FUNCTION IF EXISTS public.validate_lead_data();
+DROP EVENT TRIGGER IF EXISTS ensure_rls;
+DROP FUNCTION IF EXISTS public.rls_auto_enable();
 
 DROP TABLE IF EXISTS public.drafts CASCADE;
 DROP TABLE IF EXISTS public.audit_logs CASCADE;
@@ -231,7 +233,7 @@ CREATE INDEX idx_drafts_user_lead ON public.drafts(user_id, lead_id);
 
 -- Enhanced: Add constraint validation function
 CREATE OR REPLACE FUNCTION public.validate_lead_data()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   -- Validate email format if provided
   IF NEW.email IS NOT NULL AND NEW.email != '' THEN
@@ -255,7 +257,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   NEW.updated_at = now();
   RETURN NEW;
@@ -276,7 +278,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.log_lead_changes()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   INSERT INTO public.audit_logs (user_id, action, table_name, record_id, old_data, new_data)
   VALUES (
@@ -292,7 +294,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.track_stage_change()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   IF OLD.stage IS DISTINCT FROM NEW.stage THEN
     INSERT INTO public.stage_history (lead_id, user_id, from_stage, to_stage)
@@ -303,7 +305,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.recompute_signal_score(lead_id UUID)
-RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS INTEGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 DECLARE
   l public.leads%ROWTYPE;
   score INTEGER := 50;
@@ -343,7 +345,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.recompute_all_signal_scores()
-RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS INTEGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 DECLARE
   r RECORD;
   updated_count INTEGER := 0;
@@ -357,7 +359,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.restore_lead(lead_id UUID)
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   UPDATE public.leads SET deleted_at = NULL WHERE id = lead_id AND user_id = auth.uid();
 END;
@@ -368,7 +370,7 @@ CREATE OR REPLACE FUNCTION public.bulk_update_leads_stage(
   new_stage TEXT,
   p_user_id UUID
 )
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   UPDATE public.leads
   SET stage = new_stage, stage_changed_at = now(), updated_at = now()
@@ -377,7 +379,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.cleanup_old_deleted_leads()
-RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS INTEGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 DECLARE
   deleted_count INTEGER;
 BEGIN
@@ -389,7 +391,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.get_dashboard_stats()
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 DECLARE
   result JSONB;
   uid UUID := auth.uid();
@@ -413,14 +415,14 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.hard_delete_lead(lead_id UUID)
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   DELETE FROM public.leads WHERE id = lead_id AND user_id = auth.uid();
 END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.delete_user_account(p_user_id UUID)
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
 BEGIN
   DELETE FROM public.leads WHERE user_id = p_user_id;
   DELETE FROM public.profiles WHERE id = p_user_id;
@@ -428,6 +430,27 @@ BEGIN
   DELETE FROM public.drafts WHERE user_id = p_user_id;
 END;
 $$;
+
+-- =============================================================================
+-- REVOKE PUBLIC EXECUTE — lock down all RPC-exposed functions
+-- =============================================================================
+-- Strip PUBLIC (covers anon + authenticated) then grant back only what's needed.
+
+REVOKE EXECUTE ON FUNCTION public.recompute_signal_score(UUID)                    FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.recompute_all_signal_scores()                    FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.restore_lead(UUID)                               FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.bulk_update_leads_stage(UUID[], TEXT, UUID)      FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.cleanup_old_deleted_leads()                      FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.get_dashboard_stats()                            FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.hard_delete_lead(UUID)                           FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.delete_user_account(UUID)                        FROM PUBLIC, anon, authenticated;
+
+-- Grant back to authenticated only for user-callable functions
+GRANT EXECUTE ON FUNCTION public.recompute_signal_score(UUID)               TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_dashboard_stats()                      TO authenticated;
+GRANT EXECUTE ON FUNCTION public.restore_lead(UUID)                         TO authenticated;
+GRANT EXECUTE ON FUNCTION public.hard_delete_lead(UUID)                     TO authenticated;
+GRANT EXECUTE ON FUNCTION public.bulk_update_leads_stage(UUID[], TEXT, UUID) TO authenticated;
 
 -- =============================================================================
 -- TRIGGERS

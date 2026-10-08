@@ -7,7 +7,7 @@ import { ErrorFallback } from "@/components/ui/error-fallback";
 import { PageContainer, PageHeader, EmptyState } from "@/components/ui/page";
 import { daysSilent } from "@/lib/signal-score";
 import { Copy, Sparkles, Mail } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/nurture")({
