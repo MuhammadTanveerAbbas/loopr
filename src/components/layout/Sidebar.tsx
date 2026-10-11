@@ -182,30 +182,91 @@ function SidebarNav({
 
 export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobileClose?: () => void }) {
   const [collapsed, setCollapsed] = useState(false);
+  const loc = useLocation();
+  const nav = useNavigate();
+  const { signOut } = useAuth();
 
   return (
     <>
-      {/* Mobile drawer */}
+      {/* ── Mobile left-side drawer ── */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
             onClick={onMobileClose}
           />
-          <aside className="relative w-[272px] h-full bg-background border-r-[3px] border-black p-4 flex flex-col overflow-y-auto no-scrollbar animate-slide-in-left">
-            <button
-              onClick={onMobileClose}
-              className="absolute top-3.5 right-3.5 w-12 h-12 rounded-xl border-2 border-black bg-background shadow-[0_2px_0_#0a0a0a] flex items-center justify-center"
-              aria-label="Close menu"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <SidebarNav collapsed={false} onNav={onMobileClose} />
-          </aside>
+
+          {/* Drawer panel — slides in from left, full height, sits at top */}
+          <div
+            className="relative w-72 max-w-[85vw] h-full bg-background border-r-[3px] border-black flex flex-col animate-slide-in-left overflow-hidden"
+            style={{ boxShadow: "6px 0 0 #0a0a0a" }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b-[2px] border-black/10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <LoopMark size={28} />
+                <div className="leading-none">
+                  <div className="font-extrabold text-foreground text-sm tracking-tight">Loopr</div>
+                  <div className="text-[9px] font-bold uppercase tracking-widest text-foreground/45">CRM · v1.0</div>
+                </div>
+              </div>
+              <button
+                onClick={onMobileClose}
+                className="w-9 h-9 rounded-xl border-2 border-black bg-background shadow-[0_2px_0_#0a0a0a] flex items-center justify-center shrink-0"
+                aria-label="Close menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Nav sections — full list rows */}
+            <div className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-5">
+              {sections.map((section) => (
+                <div key={section.label}>
+                  <div className="px-2 mb-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-foreground/40 select-none">
+                    {section.label}
+                  </div>
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = loc.pathname === item.to || loc.pathname.startsWith(item.to + "/");
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={onMobileClose}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all
+                            ${active
+                              ? "bg-brand-yellow border-2 border-black shadow-[0_3px_0_#0a0a0a] text-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] border-2 border-transparent"
+                            }`}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" strokeWidth={active ? 2.5 : 2} aria-hidden />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom: logout */}
+            <div className="shrink-0 border-t-2 border-black/10 px-3 py-4">
+              <button
+                onClick={async () => { await signOut(); nav({ to: "/auth" }); onMobileClose?.(); }}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border-2 border-black text-sm font-bold text-foreground bg-background shadow-[0_2px_0_#0a0a0a] hover:bg-foreground/5 transition-all"
+              >
+                <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
+                Sign out
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Desktop sidebar */}
+      {/* ── Desktop sidebar (unchanged) ── */}
       <aside
         className={`hidden md:flex flex-col h-screen sticky top-0 p-4 bg-background border-r-[3px] border-black shrink-0 transition-all duration-300
           ${collapsed ? "w-[68px]" : "w-[248px]"}`}

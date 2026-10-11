@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import {
   ArrowRight,
@@ -21,6 +21,22 @@ import {
   TrendingUp,
   X,
   Menu,
+  DollarSign,
+  Users,
+  MessageSquare,
+  Rocket,
+  Timer,
+  Bot,
+  Gauge,
+  MailSearch,
+  Columns2,
+  CreditCard,
+  BellOff,
+  Download,
+  UserCheck,
+  Building2,
+  Table,
+  LayoutList,
 } from "lucide-react";
 import { LoopMark, BrandLockup } from "@/components/ui/logo";
 
@@ -91,7 +107,6 @@ function Landing() {
 /* ============================== HEADER ============================== */
 
 function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const links = [
     { href: "#features", label: "Features" },
     { href: "#workflow", label: "Workflow" },
@@ -114,38 +129,13 @@ function Header() {
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            to="/auth"
-            className="brutal-btn px-3 sm:px-4 py-2 text-xs inline-flex items-center gap-2 min-h-11"
-          >
-            Sign in <ArrowRight className="h-4 w-4" />
-          </Link>
-          <button
-            type="button"
-            className="md:hidden neu-pressable rounded-xl p-2.5 min-w-11 min-h-11 flex items-center justify-center"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
+        <Link
+          to="/auth"
+          className="brutal-btn px-3 sm:px-4 py-2 text-xs inline-flex items-center gap-2 min-h-11"
+        >
+          Sign in <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
-      {menuOpen && (
-        <nav className="md:hidden border-t-3 border-black px-4 py-4 flex flex-col gap-3 bg-brand-yellow">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => setMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-wide py-2 min-h-11 flex items-center"
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
-      )}
     </header>
   );
 }
@@ -170,8 +160,28 @@ function Hero() {
         Built for solo
       </div>
 
-      <div className="brutal-badge mb-8 animate-fade-up">
-        <span className="w-2 h-2 rounded-full bg-white" /> v1.0 NOW LIVE
+      <div
+        className="mb-8 animate-fade-up inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl font-extrabold text-sm tracking-wide select-none"
+        style={{
+          background: "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fdba74 100%)",
+          border: "2.5px solid #0a0a0a",
+          boxShadow: "0 6px 0 #0a0a0a",
+          color: "#fff",
+          textShadow: "0 1px 2px rgba(0,0,0,0.25)",
+        }}
+      >
+        <span
+          className="flex items-center justify-center w-6 h-6 rounded-lg shrink-0"
+          style={{
+            background: "rgba(0,0,0,0.18)",
+            border: "1.5px solid rgba(0,0,0,0.2)",
+            boxShadow: "0 2px 0 rgba(0,0,0,0.25)",
+          }}
+          aria-hidden
+        >
+          <Rocket className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+        </span>
+        Your pipeline, under control.
       </div>
       <h1
         className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-foreground leading-[1.02] animate-fade-up"
@@ -227,26 +237,86 @@ function HeroPreview() {
           <div className="w-3.5 h-3.5 rounded-full bg-success border-2 border-black" />
           <div className="ml-3 text-xs font-bold text-foreground/60">Example dashboard preview</div>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {[
-            { label: "Pipeline value", value: "-", trend: "Your data", bg: "brutal-card-orange" },
-            { label: "Active leads", value: "-", trend: "Your data", bg: "brutal-card-yellow" },
-            { label: "Reply rate", value: "-", trend: "Your data", bg: "brutal-card-pink" },
-          ].map((k, i) => (
-            <div
-              key={k.label}
-              className={`${k.bg} p-4 animate-fade-up`}
-              style={{ animationDelay: `${0.4 + i * 0.1}s` }}
-            >
-              <div className="text-xs font-bold uppercase opacity-90">{k.label}</div>
-              <div className="mt-1 flex items-baseline gap-2">
-                <div className="text-3xl font-extrabold">{k.value}</div>
-                <div className="text-[11px] font-extrabold bg-black/20 px-2 py-0.5 rounded-full">
-                  {k.trend}
+            {
+              label: "Pipeline value",
+              value: "$84,200",
+              trend: "Up 12% from last month",
+              trendUp: true,
+              bg: "brutal-card-orange",
+              sparkline: [30, 45, 38, 60, 52, 71, 65, 84],
+              Icon: DollarSign,
+            },
+            {
+              label: "Active leads",
+              value: "47",
+              trend: "9 new leads this week",
+              trendUp: true,
+              bg: "brutal-card-yellow",
+              sparkline: [20, 28, 25, 33, 38, 40, 44, 47],
+              Icon: Users,
+            },
+            {
+              label: "Reply rate",
+              value: "68%",
+              trend: "5 pts better than last week",
+              trendUp: true,
+              bg: "brutal-card-pink",
+              sparkline: [40, 52, 48, 55, 60, 58, 63, 68],
+              Icon: MessageSquare,
+            },
+          ].map((k, i) => {
+            const sparkMax = Math.max(...k.sparkline);
+            return (
+              <div
+                key={k.label}
+                className={`${k.bg} p-4 md:p-5 animate-fade-up flex flex-col gap-3`}
+                style={{ animationDelay: `${0.4 + i * 0.1}s` }}
+              >
+                {/* Header row */}
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-extrabold uppercase tracking-wider opacity-80">{k.label}</div>
+                  <span
+                    className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-black shrink-0"
+                    style={{ background: "rgba(0,0,0,0.12)", boxShadow: "0 2px 0 rgba(0,0,0,0.22)" }}
+                  >
+                    <k.Icon className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                  </span>
+                </div>
+
+                {/* Value */}
+                <div className="text-3xl md:text-4xl font-extrabold leading-none tracking-tight">
+                  {k.value}
+                </div>
+
+                {/* Sparkline */}
+                <div className="flex items-end gap-0.5 h-8">
+                  {k.sparkline.map((v, si) => (
+                    <div
+                      key={si}
+                      className="flex-1 rounded-sm border border-black/20 animate-bar-grow"
+                      style={{
+                        height: `${(v / sparkMax) * 100}%`,
+                        background: "rgba(0,0,0,0.18)",
+                        animationDelay: `${0.5 + si * 0.04}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Trend badge */}
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-full border border-black/20"
+                    style={{ background: "rgba(0,0,0,0.12)" }}
+                  >
+                    {k.trendUp ? "▲" : "▼"} {k.trend}
+                  </span>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="mt-5 brutal-card-yellow p-5">
           <MiniBars />
@@ -259,72 +329,40 @@ function HeroPreview() {
 function MiniBars() {
   const data = [40, 65, 50, 80, 70, 95, 85, 100, 75, 90, 110, 120];
   const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-  const max = Math.max(...data);
-  const niceMax = Math.ceil(max / 20) * 20;
-  const ticks = [
-    niceMax,
-    Math.round((niceMax * 3) / 4),
-    Math.round(niceMax / 2),
-    Math.round(niceMax / 4),
-    0,
-  ];
+  const niceMax = Math.ceil(Math.max(...data) / 20) * 20;
 
   return (
     <div>
-      <div className="flex gap-2">
-        <div className="flex flex-col justify-between text-[10px] font-extrabold text-foreground/50 py-1 w-7 text-right leading-none">
-          {ticks.map((t) => (
-            <span key={t}>{t}</span>
-          ))}
-        </div>
-        <div className="flex-1 relative h-36 border-l-2 border-b-2 border-black">
-          {ticks.slice(0, -1).map((_, i) => (
+      <div className="relative h-36 flex items-end gap-1 px-1">
+        {data.map((h, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
             <div
-              key={i}
-              className="absolute left-0 right-0 border-t border-dashed border-black/10"
-              style={{ top: `${(i / (ticks.length - 1)) * 100}%` }}
+              className="w-full border-2 border-black animate-bar-grow"
+              style={{
+                height: `${(h / niceMax) * 100}%`,
+                background: "linear-gradient(180deg, #ff6b9d, #ff6b35)",
+                animationDelay: `${i * 0.05}s`,
+                borderRadius: "6px 6px 0 0",
+                boxShadow: "0 3px 0 #0A0A0A",
+              }}
             />
-          ))}
-          <div className="absolute inset-0 flex items-end justify-around gap-0.75 px-1 pb-0">
-            {data.map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 flex flex-col items-center justify-end h-full gap-1 max-w-7.5"
-              >
-                <div className="text-[10px] font-extrabold text-foreground/70 leading-none">
-                  {h}
-                </div>
-                <div
-                  className="w-full border-2 border-black animate-bar-grow"
-                  style={{
-                    height: `${(h / niceMax) * 100}%`,
-                    background: "linear-gradient(180deg, #ff6b9d, #ff6b35)",
-                    animationDelay: `${i * 0.05}s`,
-                    borderRadius: "6px 6px 0 0",
-                    boxShadow: "0 3px 0 #0A0A0A",
-                  }}
-                />
-              </div>
-            ))}
           </div>
-        </div>
+        ))}
       </div>
-      <div className="flex gap-2 mt-2">
-        <div className="w-7" />
-        <div className="flex-1 flex items-start justify-around gap-0.75 px-1">
-          {months.map((m, mi) => (
-            <div
-              key={`${m}-${mi}`}
-              className="flex-1 text-center text-[10px] font-extrabold text-foreground/70 leading-tight"
-            >
-              {m}
-            </div>
-          ))}
-        </div>
+      <div className="flex gap-1 mt-1.5 px-1">
+        {months.map((m, mi) => (
+          <div
+            key={`${m}-${mi}`}
+            className="flex-1 text-center text-[10px] font-extrabold text-foreground/70"
+          >
+            {m}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
 
 /* ============================== FEATURES ============================== */
 
@@ -438,7 +476,7 @@ function ChartShowcase() {
         </div>
         <div
           ref={ref}
-          className={`brutal-card p-7 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"}`}
+          className={`brutal-card p-5 sm:p-7 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"}`}
         >
           <div className="flex items-center justify-between mb-5">
             <div>
@@ -448,64 +486,45 @@ function ChartShowcase() {
               <div className="text-xl font-extrabold text-foreground">Example stages</div>
             </div>
             <div
-              className="w-10 h-10 bg-brand-orange border-[2.5px] border-black rounded-xl flex items-center justify-center"
+              className="w-10 h-10 bg-brand-orange border-[2.5px] border-black rounded-xl flex items-center justify-center shrink-0"
               style={{ boxShadow: "0 3px 0 #0A0A0A" }}
             >
               <BarChart3 className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
           </div>
-          <div className="flex gap-3">
-            <div className="flex flex-col justify-between text-[10px] font-extrabold text-foreground/50 py-1 w-7 text-right leading-none">
-              {[max, Math.round((max * 3) / 4), Math.round(max / 2), Math.round(max / 4), 0].map(
-                (t) => (
-                  <span key={t}>{t}</span>
-                ),
-              )}
-            </div>
-            <div className="flex-1 relative h-56 border-l-2 border-b-2 border-black">
-              {[0, 1, 2, 3].map((i) => (
+
+          {/* Bar chart */}
+          <div className="relative h-44 sm:h-56 flex items-end gap-1.5 px-1">
+            {stages.map((s, i) => (
+              <div key={s.name} className="flex-1 flex flex-col items-center justify-end h-full">
                 <div
-                  key={i}
-                  className="absolute left-0 right-0 border-t border-dashed border-black/10"
-                  style={{ top: `${(i / 4) * 100}%` }}
+                  className="w-full border-[2.5px] border-black animate-bar-grow"
+                  style={{
+                    height: `${(s.count / max) * 100}%`,
+                    background: s.color,
+                    animationDelay: `${i * 0.12}s`,
+                    borderRadius: "6px 6px 0 0",
+                    boxShadow: "0 3px 0 #0A0A0A",
+                  }}
                 />
-              ))}
-              <div className="absolute inset-0 flex items-end justify-around gap-2 px-2 pb-0">
-                {stages.map((s, i) => (
-                  <div
-                    key={s.name}
-                    className="flex-1 flex flex-col items-center justify-end h-full gap-2 max-w-12"
-                  >
-                    <div className="text-sm font-extrabold text-foreground">{s.count}</div>
-                    <div
-                      className="w-full border-[2.5px] border-black animate-bar-grow"
-                      style={{
-                        height: `${(s.count / max) * 100}%`,
-                        background: s.color,
-                        animationDelay: `${i * 0.12}s`,
-                        borderRadius: "8px 8px 0 0",
-                        boxShadow: "0 3px 0 #0A0A0A",
-                      }}
-                    />
-                  </div>
-                ))}
               </div>
-            </div>
+            ))}
           </div>
-          <div className="flex gap-3 mt-2">
-            <div className="w-7" />
-            <div className="flex-1 flex items-start justify-around gap-2 px-2">
-              {stages.map((s) => (
-                <div
-                  key={s.name}
-                  className="flex-1 text-center text-[11px] font-extrabold text-foreground uppercase leading-tight"
-                >
-                  {s.name}
-                </div>
-              ))}
-            </div>
+
+          {/* X-axis labels */}
+          <div className="flex gap-1.5 mt-1.5 px-1">
+            {stages.map((s) => (
+              <div
+                key={s.name}
+                className="flex-1 text-center text-[9px] sm:text-[11px] font-extrabold text-foreground uppercase leading-tight"
+              >
+                {s.name}
+              </div>
+            ))}
           </div>
-          <div className="mt-6 grid grid-cols-3 gap-3">
+
+          {/* Donut row */}
+          <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
             <Donut label="Convert" value={28} sample />
             <Donut label="Reply" value={42} sample />
             <Donut label="Win" value={18} sample />
@@ -524,8 +543,8 @@ function Donut({ label, value, sample }: { label: string; value: number; sample?
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
   return (
-    <div className="brutal-card-yellow p-3 flex items-center gap-3">
-      <svg width="56" height="56" viewBox="0 0 56 56" className="-rotate-90 shrink-0">
+    <div className="brutal-card-yellow p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
+      <svg width="44" height="44" viewBox="0 0 56 56" className="-rotate-90 shrink-0">
         <circle
           cx="28"
           cy="28"
@@ -548,11 +567,11 @@ function Donut({ label, value, sample }: { label: string; value: number; sample?
           strokeDashoffset={offset}
         />
       </svg>
-      <div className="text-left">
-        <div className="text-lg font-extrabold text-black leading-none">
+      <div className="text-left min-w-0">
+        <div className="text-base sm:text-lg font-extrabold text-black leading-none">
           {sample ? "-" : `${value}%`}
         </div>
-        <div className="text-[10px] font-bold uppercase text-black/70 mt-1">{label}</div>
+        <div className="text-[9px] sm:text-[10px] font-bold uppercase text-black/70 mt-1 truncate">{label}</div>
       </div>
     </div>
   );
@@ -620,19 +639,20 @@ function Workflow_() {
 function Comparison() {
   const rows: {
     label: string;
+    icon: React.ComponentType<{ className?: string; strokeWidth?: number | string }>;
     loopr: boolean | string;
     hubspot: boolean | string;
     sheets: boolean | string;
   }[] = [
-    { label: "Setup time", loopr: "< 1 min", hubspot: "Hours", sheets: "Manual" },
-    { label: "AI daily briefing", loopr: true, hubspot: false, sheets: false },
-    { label: "Signal Score (0–100)", loopr: true, hubspot: "Add-on", sheets: false },
-    { label: "Reply analyzer", loopr: true, hubspot: "Enterprise", sheets: false },
-    { label: "Sheet + Kanban views", loopr: true, hubspot: true, sheets: false },
-    { label: "Per-seat pricing", loopr: false, hubspot: true, sheets: false },
-    { label: "Bloat & nags", loopr: false, hubspot: true, sheets: false },
-    { label: "Own your data (CSV export)", loopr: true, hubspot: "Limited", sheets: true },
-    { label: "Built for solo operators", loopr: true, hubspot: false, sheets: false },
+    { label: "Setup time",            icon: Timer,       loopr: "Under 1 min",  hubspot: "Hours",       sheets: "Manual"   },
+    { label: "AI daily briefing",     icon: Bot,         loopr: true,           hubspot: false,         sheets: false      },
+    { label: "Signal score (0-100)",  icon: Gauge,       loopr: true,           hubspot: "Add-on",      sheets: false      },
+    { label: "Reply analyzer",        icon: MailSearch,  loopr: true,           hubspot: "Enterprise",  sheets: false      },
+    { label: "Sheet and Kanban views",icon: Columns2,    loopr: true,           hubspot: true,          sheets: false      },
+    { label: "Per-seat pricing",      icon: CreditCard,  loopr: false,          hubspot: true,          sheets: false      },
+    { label: "Bloat and nags",        icon: BellOff,     loopr: false,          hubspot: true,          sheets: false      },
+    { label: "Export your data",      icon: Download,    loopr: true,           hubspot: "Limited",     sheets: true       },
+    { label: "Built for solo ops",    icon: UserCheck,   loopr: true,           hubspot: false,         sheets: false      },
   ];
 
   const Cell = ({ v, accent }: { v: boolean | string; accent?: boolean }) => {
@@ -654,71 +674,182 @@ function Comparison() {
       );
     }
     return (
-      <div className={`text-sm font-extrabold ${accent ? "text-black" : "text-foreground/80"}`}>
+      <div className={`text-xs font-extrabold leading-tight ${accent ? "text-black" : "text-foreground/80"}`}>
         {v}
       </div>
     );
   };
 
+  const competitors = [
+    { key: "hubspot" as const, label: "HubSpot", sub: "Big CRM" },
+    { key: "sheets" as const, label: "Spreadsheets", sub: "DIY" },
+  ];
+
   return (
-    <section className="max-w-6xl mx-auto px-6 py-24">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 py-24">
       <SectionHeader
         eyebrow="Compare"
         title="Loopr vs the usual suspects"
         sub="Same job, different philosophy. Competitor rows are approximate, verify before you switch."
       />
       <Reveal>
-        <div className="mt-12 brutal-card p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-160 text-center">
-              <thead>
-                <tr className="border-b-3 border-black">
-                  <th className="text-left px-6 py-5 text-xs font-extrabold uppercase tracking-wider text-foreground/70">
-                    Feature
-                  </th>
-                  <th className="px-4 py-5 bg-brand-orange border-l-3 border-r-3 border-black">
-                    <div className="text-white font-extrabold text-base">Loopr</div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-white/80 mt-1">
-                      Focused CRM
+        {/* ── Desktop table (md+) ── */}
+        <div className="hidden md:block mt-12 brutal-card p-0 overflow-hidden">
+          <table className="w-full text-center">
+            <thead>
+              <tr className="border-b-3 border-black">
+                <th className="text-left px-5 py-6 text-xs font-extrabold uppercase tracking-wider text-foreground/60 w-[25%]">
+                  <div className="flex flex-col items-start gap-2">
+                    <div
+                      className="w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center bg-white"
+                      style={{ boxShadow: "0 3px 0 #0a0a0a" }}
+                    >
+                      <LayoutList className="h-5 w-5 text-foreground" strokeWidth={2} />
                     </div>
-                  </th>
-                  <th className="px-4 py-5">
-                    <div className="font-extrabold text-base text-foreground">HubSpot</div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mt-1">
-                      Big CRM
+                    <span>Feature</span>
+                  </div>
+                </th>
+                <th className="px-5 py-6 bg-brand-orange border-l-3 border-r-3 border-black w-[25%]">
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded-xl border-2 border-white/40 flex items-center justify-center"
+                      style={{ background: "rgba(0,0,0,0.18)", boxShadow: "0 3px 0 rgba(0,0,0,0.3)" }}
+                    >
+                      <LoopMark size={22} className="text-white" />
                     </div>
-                  </th>
-                  <th className="px-4 py-5 border-l-3 border-black">
-                    <div className="font-extrabold text-base text-foreground">Spreadsheets</div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mt-1">
-                      DIY
+                    <div>
+                      <div className="text-white font-extrabold text-base leading-tight">Loopr</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-white/75 mt-0.5">Focused CRM</div>
                     </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r, i) => (
+                  </div>
+                </th>
+                <th className="px-5 py-6 w-[25%]">
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center bg-white"
+                      style={{ boxShadow: "0 3px 0 #0a0a0a" }}
+                    >
+                      <Building2 className="h-5 w-5 text-foreground" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-base text-foreground leading-tight">HubSpot</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">Big CRM</div>
+                    </div>
+                  </div>
+                </th>
+                <th className="px-5 py-6 border-l-3 border-black w-[25%]">
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center bg-white"
+                      style={{ boxShadow: "0 3px 0 #0a0a0a" }}
+                    >
+                      <Table className="h-5 w-5 text-foreground" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-base text-foreground leading-tight">Spreadsheets</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">DIY</div>
+                    </div>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => {
+                const Icon = r.icon;
+                return (
                   <tr
                     key={r.label}
-                    className={`${i !== rows.length - 1 ? "border-b-2 border-black/15" : ""}`}
+                    className={`${i !== rows.length - 1 ? "border-b-2 border-black/10" : ""} ${i % 2 === 0 ? "" : "bg-foreground/[0.015]"}`}
                   >
-                    <td className="text-left px-6 py-4 text-sm font-bold text-foreground">
-                      {r.label}
+                    <td className="text-left px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg border-2 border-black flex items-center justify-center shrink-0"
+                          style={{ background: "var(--brand-yellow)", boxShadow: "0 2px 0 #0a0a0a" }}
+                        >
+                          <Icon className="h-4 w-4 text-foreground" strokeWidth={2.5} />
+                        </div>
+                        <span className="text-sm font-bold text-foreground">{r.label}</span>
+                      </div>
                     </td>
-                    <td className="px-4 py-4 bg-brand-yellow/40 border-l-3 border-r-3 border-black">
+                    <td className="px-6 py-4 bg-brand-yellow/30 border-l-3 border-r-3 border-black">
                       <Cell v={r.loopr} accent />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-6 py-4">
                       <Cell v={r.hubspot} />
                     </td>
-                    <td className="px-4 py-4 border-l-3 border-black">
+                    <td className="px-6 py-4 border-l-3 border-black">
                       <Cell v={r.sheets} />
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ── Mobile cards (< md) ── */}
+        <div className="md:hidden mt-10 space-y-5">
+          {/* Loopr card */}
+          <div className="brutal-card p-0 overflow-hidden">
+            <div className="bg-brand-orange px-5 py-4 flex items-center justify-between">
+              <div>
+                <div className="text-white font-extrabold text-lg leading-tight">Loopr</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Focused CRM</div>
+              </div>
+              <span className="text-xs font-extrabold uppercase tracking-wider bg-white/20 text-white px-2.5 py-1 rounded-md border border-white/30">
+                That is us
+              </span>
+            </div>
+            <div className="bg-brand-yellow/30 divide-y divide-black/10">
+              {rows.map((r) => {
+                const Icon = r.icon;
+                return (
+                  <div key={r.label} className="flex items-center justify-between px-4 py-3 gap-3">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <div
+                        className="w-7 h-7 rounded-lg border-2 border-black flex items-center justify-center shrink-0"
+                        style={{ background: "var(--brand-yellow)", boxShadow: "0 2px 0 #0a0a0a" }}
+                      >
+                        <Icon className="h-3.5 w-3.5 text-foreground" strokeWidth={2.5} />
+                      </div>
+                      <span className="text-sm font-bold text-foreground truncate">{r.label}</span>
+                    </div>
+                    <Cell v={r.loopr} accent />
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Competitor cards */}
+          {competitors.map((c) => (
+            <div key={c.key} className="brutal-card p-0 overflow-hidden">
+              <div className="bg-foreground/5 border-b-3 border-black px-5 py-4">
+                <div className="font-extrabold text-base text-foreground">{c.label}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">{c.sub}</div>
+              </div>
+              <div className="divide-y divide-black/10">
+                {rows.map((r) => {
+                  const Icon = r.icon;
+                  return (
+                    <div key={r.label} className="flex items-center justify-between px-4 py-3 gap-3">
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div
+                          className="w-7 h-7 rounded-lg border-2 border-black/30 flex items-center justify-center shrink-0"
+                          style={{ background: "var(--background)" }}
+                        >
+                          <Icon className="h-3.5 w-3.5 text-foreground/60" strokeWidth={2} />
+                        </div>
+                        <span className="text-sm font-semibold text-foreground/70 truncate">{r.label}</span>
+                      </div>
+                      <Cell v={r[c.key]} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </Reveal>
     </section>
@@ -880,31 +1011,32 @@ function FAQ() {
 
 function CTA() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-20">
-      <div className="brutal-card-orange p-12 md:p-16 text-center relative overflow-hidden">
+    <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+      <div className="brutal-card-orange p-8 sm:p-12 md:p-16 text-center relative overflow-hidden">
+        {/* Sticker decorations — hidden on very small screens so they don't overlap text */}
         <div
           aria-hidden
-          className="absolute top-6 left-6 brutal-card-yellow px-3 py-1.5 text-xs font-extrabold uppercase -rotate-6"
+          className="hidden xs:block absolute top-4 sm:top-6 left-4 sm:left-6 brutal-card-yellow px-2.5 py-1 text-[10px] sm:text-xs font-extrabold uppercase -rotate-6"
         >
           🔥 Free tier
         </div>
         <div
           aria-hidden
-          className="absolute bottom-6 right-6 brutal-card-pink px-3 py-1.5 text-xs font-extrabold uppercase rotate-[5deg]"
+          className="hidden xs:block absolute bottom-4 sm:bottom-6 right-4 sm:right-6 brutal-card-pink px-2.5 py-1 text-[10px] sm:text-xs font-extrabold uppercase rotate-[5deg]"
         >
-          ⚡ No credit card
+          ⚡ No card
         </div>
-        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+        <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
           Ready to track calmly?
         </h2>
-        <p className="mt-4 text-lg font-bold opacity-90 max-w-xl mx-auto">
+        <p className="mt-3 sm:mt-4 text-base sm:text-lg font-bold opacity-90 max-w-xl mx-auto px-2">
           Free for your first 50 leads. No credit card. No nags.
         </p>
         <Link
           to="/auth"
-          className="mt-8 inline-flex items-center gap-2 brutal-btn-secondary px-8 py-4 text-base"
+          className="mt-6 sm:mt-8 inline-flex items-center gap-2 brutal-btn-secondary px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base"
         >
-          Get started free <ArrowRight className="h-5 w-5" />
+          Get started free <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
         </Link>
       </div>
     </section>
@@ -1074,15 +1206,6 @@ function Footer() {
             <div className="flex items-center gap-2 text-xs font-bold text-foreground/80">
               <LoopMark size={18} />
               © {new Date().getFullYear()} Loopr. All rights reserved.
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="/privacy" className="text-xs font-bold text-foreground/70 hover:text-foreground hover:underline underline-offset-4 min-h-[36px] flex items-center">
-                Privacy
-              </a>
-              <span className="text-foreground/30 text-xs">·</span>
-              <a href="/terms" className="text-xs font-bold text-foreground/70 hover:text-foreground hover:underline underline-offset-4 min-h-[36px] flex items-center">
-                Terms
-              </a>
             </div>
             <div className="text-xs font-bold text-foreground/80 flex items-center gap-1.5">
               Crafted with <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" /> by{" "}

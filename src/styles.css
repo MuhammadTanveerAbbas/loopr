@@ -479,6 +479,19 @@
 .animate-slide-up {
   animation: lt-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+@keyframes lt-slide-in-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-slide-in-up {
+  animation: lt-slide-in-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
