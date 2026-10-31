@@ -5,6 +5,8 @@
 -- Updated with enhanced security and performance optimizations
 -- =============================================================================
 
+BEGIN;
+
 -- Safe cleanup: drop only if table exists (avoids error on re-run)
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'leads' AND schemaname = 'public') THEN
@@ -36,7 +38,6 @@ DROP FUNCTION IF EXISTS public.get_dashboard_stats();
 DROP FUNCTION IF EXISTS public.hard_delete_lead(UUID);
 DROP FUNCTION IF EXISTS public.delete_user_account(UUID);
 DROP FUNCTION IF EXISTS public.validate_lead_data();
-DROP EVENT TRIGGER IF EXISTS ensure_rls;
 DROP FUNCTION IF EXISTS public.rls_auto_enable();
 
 DROP TABLE IF EXISTS public.drafts CASCADE;
@@ -161,7 +162,7 @@ ALTER TABLE public.ai_logs       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.drafts        ENABLE ROW LEVEL SECURITY;
 
--- Each policy scopes to auth.uid() — users only see their own data
+-- Each policy scopes to auth.uid() users only see their own data
 CREATE POLICY "profiles_select_own" ON public.profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "profiles_insert_own" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE USING (auth.uid() = id);
@@ -183,6 +184,7 @@ CREATE POLICY "ai_logs_select_own" ON public.ai_logs FOR SELECT USING (auth.uid(
 CREATE POLICY "ai_logs_insert_own" ON public.ai_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "audit_logs_select_own" ON public.audit_logs FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "audit_logs_insert_own" ON public.audit_logs FOR INSERT WITH CHECK (auth.uid() = user_id OR user_id IS NOT NULL);
 
 CREATE POLICY "drafts_select_own" ON public.drafts FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "drafts_insert_own" ON public.drafts FOR INSERT WITH CHECK (auth.uid() = user_id);
@@ -241,17 +243,17 @@ BEGIN
       RAISE EXCEPTION 'Invalid email format';
     END IF;
   END IF;
-  
+
   -- Validate deal value is non-negative
   IF NEW.deal_value < 0 THEN
     RAISE EXCEPTION 'Deal value must be non-negative';
   END IF;
-  
+
   -- Validate signal score is within valid range
   IF NEW.signal_score < 0 OR NEW.signal_score > 100 THEN
     RAISE EXCEPTION 'Signal score must be between 0 and 100';
   END IF;
-  
+
   RETURN NEW;
 END;
 $$;
@@ -278,7 +280,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.log_lead_changes()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   INSERT INTO public.audit_logs (user_id, action, table_name, record_id, old_data, new_data)
   VALUES (
@@ -432,7 +434,7 @@ END;
 $$;
 
 -- =============================================================================
--- REVOKE PUBLIC EXECUTE — lock down all RPC-exposed functions
+-- REVOKE PUBLIC EXECUTE | lock down all RPC-exposed functions
 -- =============================================================================
 -- Strip PUBLIC (covers anon + authenticated) then grant back only what's needed.
 
@@ -501,3 +503,5 @@ COMMENT ON FUNCTION public.cleanup_old_deleted_leads()   IS 'Hard-deletes leads 
 COMMENT ON FUNCTION public.get_dashboard_stats()          IS 'Returns aggregated dashboard stats for the authenticated user.';
 COMMENT ON FUNCTION public.hard_delete_lead(UUID)         IS 'Permanently deletes a lead. User-scoped via auth.uid().';
 COMMENT ON FUNCTION public.validate_lead_data()         IS 'Validates lead data integrity before insert/update operations.';
+
+COMMIT;

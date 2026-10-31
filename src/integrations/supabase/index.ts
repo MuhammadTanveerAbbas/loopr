@@ -1,5 +1,5 @@
 // =============================================================================
-// Supabase Integration — single unified entry point
+// Supabase Integration single unified entry point
 //
 // Client-side:
 //   import { supabase } from "@/integrations/supabase"
@@ -365,7 +365,7 @@ export type Database = {
 };
 
 // ---------------------------------------------------------------------------
-// Supplemental types (not generated — maintained manually)
+// Supplemental types (not generated maintained manually)
 // ---------------------------------------------------------------------------
 
 export interface Draft {
@@ -416,8 +416,9 @@ export type Tables<
     ? R
     : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends { Row: infer R }
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
+      }
       ? R
       : never
     : never;
@@ -491,7 +492,20 @@ export const Constants = {
 
 import { createClient } from "@supabase/supabase-js";
 
-function createSupabaseClient() {
+type SupabaseClient = ReturnType<typeof createClient<Database>>;
+
+// Use a globalThis key so the single instance survives SSR → client hydration
+// module re-evaluation. Without this, two instances are created and both try
+// to acquire the same NavigatorLock on the auth token, causing:
+//   "Acquiring an exclusive lock … immediately failed"
+// which silently breaks sign-in.
+const GLOBAL_KEY = "__loopr_supabase__";
+
+function getSupabaseClient(): SupabaseClient {
+  if ((globalThis as Record<string, unknown>)[GLOBAL_KEY]) {
+    return (globalThis as Record<string, unknown>)[GLOBAL_KEY] as SupabaseClient;
+  }
+
   const SUPABASE_URL =
     (typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined) ||
     process.env.SUPABASE_URL;
@@ -506,30 +520,30 @@ function createSupabaseClient() {
     );
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: typeof window !== "undefined" ? localStorage : undefined,
       persistSession: true,
       autoRefreshToken: true,
     },
   });
-}
 
-let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
+  (globalThis as Record<string, unknown>)[GLOBAL_KEY] = client;
+  return client;
+}
 
 /**
  * Browser Supabase client (anon key, RLS-enforced).
  * Import: `import { supabase } from "@/integrations/supabase"`
  */
-export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
   get(_, prop, receiver) {
-    if (!_supabase) _supabase = createSupabaseClient();
-    return Reflect.get(_supabase, prop, receiver);
+    return Reflect.get(getSupabaseClient(), prop, receiver);
   },
 });
 
 // ---------------------------------------------------------------------------
-// Server-side Supabase client (service role key — bypasses RLS)
+// Server-side Supabase client (service role key bypasses RLS)
 // SECURITY: Only use inside server functions / server routes. Never send to browser.
 // ---------------------------------------------------------------------------
 
@@ -555,7 +569,7 @@ function createSupabaseAdminClient() {
 let _supabaseAdmin: ReturnType<typeof createSupabaseAdminClient> | undefined;
 
 /**
- * Server-only admin client (service role — bypasses RLS).
+ * Server-only admin client (service role bypasses RLS).
  * Import: `import { supabaseAdmin } from "@/integrations/supabase"`
  */
 export const supabaseAdmin = new Proxy({} as ReturnType<typeof createSupabaseAdminClient>, {

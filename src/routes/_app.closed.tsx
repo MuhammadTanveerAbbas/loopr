@@ -175,16 +175,25 @@ function Closed() {
             {/* Mobile cards */}
             <div className="sm:hidden space-y-2">
               {won.map((l) => (
-                <div key={l.id} className="bg-white border-2 border-black rounded-xl p-3 shadow-[0_3px_0_#0a0a0a]">
+                <div
+                  key={l.id}
+                  className="bg-white border-2 border-black rounded-xl p-3 shadow-[0_3px_0_#0a0a0a]"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="font-bold text-sm text-foreground truncate">{l.name}</div>
                       <div className="text-xs text-muted-foreground">{l.company || "—"}</div>
                     </div>
-                    <span className="text-sm font-extrabold text-foreground shrink-0">${Number(l.deal_value).toLocaleString()}</span>
+                    <span className="text-sm font-extrabold text-foreground shrink-0">
+                      ${Number(l.deal_value).toLocaleString()}
+                    </span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-1.5">{new Date(l.updated_at).toLocaleDateString()}</div>
-                  {l.notes && <div className="text-xs text-muted-foreground mt-1 truncate">{l.notes}</div>}
+                  <div className="text-[10px] text-muted-foreground mt-1.5">
+                    {new Date(l.updated_at).toLocaleDateString()}
+                  </div>
+                  {l.notes && (
+                    <div className="text-xs text-muted-foreground mt-1 truncate">{l.notes}</div>
+                  )}
                 </div>
               ))}
             </div>
@@ -205,9 +214,15 @@ function Closed() {
                     <tr key={l.id} className="hover:bg-foreground/[0.02] transition-colors">
                       <td className="px-3 py-2.5 font-medium text-foreground">{l.name}</td>
                       <td className="px-3 py-2.5 text-muted-foreground">{l.company || ""}</td>
-                      <td className="px-3 py-2.5 text-right font-semibold text-foreground">${Number(l.deal_value).toLocaleString()}</td>
-                      <td className="px-3 py-2.5 text-muted-foreground text-xs">{new Date(l.updated_at).toLocaleDateString()}</td>
-                      <td className="px-3 py-2.5 text-muted-foreground text-xs truncate max-w-xs">{l.notes || ""}</td>
+                      <td className="px-3 py-2.5 text-right font-semibold text-foreground">
+                        ${Number(l.deal_value).toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2.5 text-muted-foreground text-xs">
+                        {new Date(l.updated_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-2.5 text-muted-foreground text-xs truncate max-w-xs">
+                        {l.notes || ""}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

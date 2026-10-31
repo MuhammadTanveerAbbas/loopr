@@ -6,15 +6,15 @@ import { commandPaletteStore } from "@/lib/command-palette-store";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/leads":     "Leads",
-  "/pipeline":  "Pipeline",
-  "/nurture":   "Nurture",
-  "/closed":    "Closed Won",
-  "/import":    "Import CSV",
-  "/ai":        "AI Workspace",
-  "/activity":  "Activity",
-  "/trash":     "Trash",
-  "/settings":  "Settings",
+  "/leads": "Leads",
+  "/pipeline": "Pipeline",
+  "/nurture": "Nurture",
+  "/closed": "Closed Won",
+  "/import": "Import CSV",
+  "/ai": "AI Workspace",
+  "/activity": "Activity",
+  "/trash": "Trash",
+  "/settings": "Settings",
 };
 
 export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) {
@@ -33,7 +33,9 @@ export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) 
     const onMouse = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) close();
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
     document.addEventListener("mousedown", onMouse);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -54,9 +56,7 @@ export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) 
           <Menu className="h-4 w-4" />
         </button>
 
-        <h1 className="text-sm font-extrabold text-foreground truncate md:hidden">
-          {currentPage}
-        </h1>
+        <h1 className="text-sm font-extrabold text-foreground truncate md:hidden">{currentPage}</h1>
 
         <div className="flex items-center gap-2 ml-auto">
           {/* Search - hidden on mobile */}
@@ -67,7 +67,9 @@ export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) 
           >
             <Search className="h-3.5 w-3.5" />
             <span className="hidden md:inline">Search</span>
-            <kbd className="text-[10px] bg-foreground/10 px-1.5 py-0.5 rounded font-bold hidden md:inline">⌘K</kbd>
+            <kbd className="text-[10px] bg-foreground/10 px-1.5 py-0.5 rounded font-bold hidden md:inline">
+              ⌘K
+            </kbd>
           </button>
 
           {/* Avatar dropdown */}
@@ -97,7 +99,9 @@ export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) 
                     {avatarLetter}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-extrabold text-foreground truncate">{displayName}</div>
+                    <div className="text-sm font-extrabold text-foreground truncate">
+                      {displayName}
+                    </div>
                     <div className="text-[10px] text-muted-foreground truncate">{user?.email}</div>
                   </div>
                 </div>
@@ -105,14 +109,20 @@ export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) 
                 {/* Menu items */}
                 <div className="p-1.5 space-y-0.5">
                   <button
-                    onClick={() => { nav({ to: "/settings" }); close(); }}
+                    onClick={() => {
+                      nav({ to: "/settings" });
+                      close();
+                    }}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-foreground rounded-xl hover:bg-foreground/[0.06] transition-colors"
                   >
                     <Settings className="h-4 w-4 shrink-0" />
                     Settings
                   </button>
                   <button
-                    onClick={() => { commandPaletteStore.setOpen(true); close(); }}
+                    onClick={() => {
+                      commandPaletteStore.setOpen(true);
+                      close();
+                    }}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-foreground rounded-xl hover:bg-foreground/[0.06] transition-colors sm:hidden"
                   >
                     <Search className="h-4 w-4 shrink-0" />
@@ -122,7 +132,10 @@ export function Navbar({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) 
 
                 <div className="p-1.5 border-t-2 border-black">
                   <button
-                    onClick={() => { signOut(); close(); }}
+                    onClick={() => {
+                      signOut();
+                      close();
+                    }}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-destructive rounded-xl hover:bg-destructive/[0.07] transition-colors"
                   >
                     <LogOut className="h-4 w-4 shrink-0" />

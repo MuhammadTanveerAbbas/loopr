@@ -59,7 +59,7 @@ export const draftSchema = z.object({
 
 export function sanitizeString(input: string): string {
   if (!input) return "";
-  
+
   return (
     input
       // Remove potentially dangerous HTML tags and attributes

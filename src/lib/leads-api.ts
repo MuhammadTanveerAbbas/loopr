@@ -1,4 +1,10 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase";
 import type { Database } from "@/integrations/supabase";
 import type { Draft, AuditLog } from "@/integrations/supabase";
@@ -77,7 +83,7 @@ export function useLeads(options?: { pageSize?: number; includeDeleted?: boolean
     },
     retry: (failureCount, error) => {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+      if (errorMessage.includes("NetworkError") || errorMessage.includes("fetch")) {
         return failureCount < 3;
       }
       return false;
@@ -115,7 +121,7 @@ export function useLeadsInfinite(options?: { pageSize?: number; includeDeleted?:
     },
     retry: (failureCount, error) => {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+      if (errorMessage.includes("NetworkError") || errorMessage.includes("fetch")) {
         return failureCount < 3;
       }
       return false;
@@ -363,7 +369,7 @@ export function useDashboardStats() {
     staleTime: 30000,
     retry: (failureCount, error) => {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+      if (errorMessage.includes("NetworkError") || errorMessage.includes("fetch")) {
         return failureCount < 3;
       }
       return failureCount < 2;
@@ -479,13 +485,13 @@ export function useSaveDraft(userId: string) {
     mutationFn: async (draft: { lead_id: string; subject?: string; body: string }) => {
       const sanitizedBody = sanitizeString(draft.body);
       const sanitizedSubject = draft.subject ? sanitizeString(draft.subject) : null;
-      
+
       const parsed = draftSchema.parse({
         lead_id: draft.lead_id,
         subject: sanitizedSubject,
         body: sanitizedBody,
       });
-      
+
       const { error } = await supabase.from("drafts").insert({
         ...parsed,
         user_id: userId,

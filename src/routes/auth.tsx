@@ -15,7 +15,7 @@ import { LoopMark } from "@/components/ui/logo";
 const authFormSchema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().trim().min(1, "Name is required").max(100).optional(),
+  name: z.string().trim().max(100).optional(),
 });
 
 type AuthForm = z.infer<typeof authFormSchema>;
@@ -54,6 +54,7 @@ function AuthPage() {
 
   const submit = async (data: AuthForm) => {
     setBusy(true);
+    console.log("[AUTH DEBUG] submit called, mode:", mode, "email:", data.email);
     try {
       if (mode === "reset") {
         const redirectOrigin = import.meta.env.VITE_PUBLIC_ORIGIN || window.location.origin;
@@ -66,6 +67,11 @@ function AuthPage() {
         return;
       }
       if (mode === "signup") {
+        if (!data.name?.trim()) {
+          toast.error("Please enter your name.");
+          setBusy(false);
+          return;
+        }
         const { error, data: signupData } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
@@ -90,10 +96,13 @@ function AuthPage() {
           email: data.email,
           password: data.password,
         });
+        console.log("[AUTH DEBUG] signInWithPassword result:", { error, session: signInData?.session, user: signInData?.user?.email });
         if (error) {
           if (error.message?.toLowerCase().includes("email not confirmed")) {
-            toast.error("Please confirm your email first — check your inbox for the confirmation link.");
-          } else if (error.message?.toLowerCase().includes("invalid login")) {
+            toast.error(
+              "Please confirm your email first check your inbox for the confirmation link.",
+            );
+          } else if (error.message?.toLowerCase().includes("invalid login credentials") || error.message?.toLowerCase().includes("invalid login")) {
             toast.error("Incorrect email or password.");
           } else {
             throw error;
@@ -101,14 +110,22 @@ function AuthPage() {
           return;
         }
         if (!signInData.session) {
-          toast.error("Please confirm your email first — check your inbox for the confirmation link.");
+          toast.error(
+            "Please confirm your email first check your inbox for the confirmation link.",
+          );
           return;
         }
         toast.success("Welcome back.");
+        console.log("[AUTH DEBUG] navigating to /dashboard");
+        // Navigate immediately don't rely solely on the onAuthStateChange useEffect
+        // which can miss the redirect if the effect already ran with stale state.
+        nav({ to: "/dashboard" });
       }
     } catch (err) {
+      console.log("[AUTH DEBUG] caught error:", err);
       toast.error(sanitizeErrorMessage(err, "Authentication failed. Please try again."));
     } finally {
+      console.log("[AUTH DEBUG] finally, busy=false");
       setBusy(false);
     }
   };
@@ -187,7 +204,9 @@ function AuthPage() {
           <div className="flex-1 h-px bg-muted-foreground/15" />
         </div>
 
-        <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit(submit, (validationErrors) => {
+          console.log("[AUTH DEBUG] form validation failed:", validationErrors);
+        })} className="flex flex-col gap-3">
           {mode === "signup" && (
             <div>
               <NeuInput
@@ -241,13 +260,18 @@ function AuthPage() {
             </div>
           )}
           {mode === "login" && (
-            <button
-              type="button"
-              onClick={() => { setMode("reset"); reset(); }}
-              className="text-xs text-muted-foreground hover:text-foreground self-end mt-2"
-            >
-              Forgot password?
-            </button>
+            <div className="flex justify-center mt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("reset");
+                  reset();
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Forgot password?
+              </button>
+            </div>
           )}
           <NeuButton type="submit" variant="primary" disabled={busy} className="mt-2">
             {busy ? (

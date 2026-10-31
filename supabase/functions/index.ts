@@ -1,5 +1,5 @@
 // =============================================================================
-// ai-task edge function — self-contained (ai-client merged in)
+// ai-task edge function self-contained (ai-client merged in)
 // Handles all AI tasks: briefing, email_draft, reply_analysis, icp_score,
 // recap, reengage, autopsy.
 // Self-healing: model discovery + fallback + bounded retry with backoff.
@@ -219,7 +219,7 @@ const corsHeaders = {
 };
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 20;
+const RATE_LIMIT_MAX_REQUESTS = 60;
 
 function sanitize(input: string, max = 2000): string {
   // deno-lint-ignore no-control-regex

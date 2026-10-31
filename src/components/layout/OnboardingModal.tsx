@@ -26,7 +26,7 @@ const steps = [
   {
     title: "Add your first lead",
     description:
-      "Click 'Add Lead' on the Leads page to start tracking your pipeline. Edit everything inline — no forms, no friction.",
+      "Click 'Add Lead' on the Leads page to start tracking your pipeline. Edit everything inline no forms, no friction.",
     icon: Table2,
     badge: "Step 2 of 3",
     cta: { label: "Go to Leads", to: "/leads" as const },
@@ -68,7 +68,12 @@ export function OnboardingModal() {
   const isLast = step === steps.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) finish(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) finish();
+      }}
+    >
       <DialogContent className="w-[calc(100vw-2rem)] max-w-2xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl gap-0">
         <div className="p-6 sm:p-8">
           {/* Header row */}
@@ -87,7 +92,7 @@ export function OnboardingModal() {
             </span>
           </div>
 
-          {/* Step cards row — all 3 visible on md+ */}
+          {/* Step cards row all 3 visible on md+ */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
             {steps.map((st, i) => {
               const StIcon = st.icon;
@@ -106,10 +111,14 @@ export function OnboardingModal() {
                         : "border-border bg-transparent opacity-50"
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${st.color}`}>
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${st.color}`}
+                  >
                     <StIcon className="h-4 w-4" />
                   </div>
-                  <div className="font-semibold text-sm text-foreground leading-snug">{st.title}</div>
+                  <div className="font-semibold text-sm text-foreground leading-snug">
+                    {st.title}
+                  </div>
                   {isActive && (
                     <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">
                       {st.description}
@@ -124,7 +133,9 @@ export function OnboardingModal() {
           <div className="sm:hidden mb-6">
             <DialogHeader>
               <DialogTitle className="text-lg">{s.title}</DialogTitle>
-              <DialogDescription className="text-sm leading-relaxed">{s.description}</DialogDescription>
+              <DialogDescription className="text-sm leading-relaxed">
+                {s.description}
+              </DialogDescription>
             </DialogHeader>
           </div>
 
@@ -138,21 +149,35 @@ export function OnboardingModal() {
                   onClick={() => setStep(i)}
                   aria-label={`Go to step ${i + 1}`}
                   className={`rounded-full transition-all duration-200 ${
-                    i === step ? "w-5 h-2 bg-foreground" : "w-2 h-2 bg-foreground/20 hover:bg-foreground/40"
+                    i === step
+                      ? "w-5 h-2 bg-foreground"
+                      : "w-2 h-2 bg-foreground/20 hover:bg-foreground/40"
                   }`}
                 />
               ))}
             </div>
 
             <div className="flex items-center gap-2">
-              <NeuButton variant="ghost" size="sm" onClick={finish} className="text-muted-foreground">
+              <NeuButton
+                variant="ghost"
+                size="sm"
+                onClick={finish}
+                className="text-muted-foreground"
+              >
                 Skip
               </NeuButton>
               {isLast ? (
                 <NeuButton
                   variant="primary"
                   size="sm"
-                  onClick={s.cta ? () => { finish(); nav({ to: s.cta!.to }); } : finish}
+                  onClick={
+                    s.cta
+                      ? () => {
+                          finish();
+                          nav({ to: s.cta!.to });
+                        }
+                      : finish
+                  }
                 >
                   {s.cta?.label ?? "Get started"}
                 </NeuButton>
@@ -162,7 +187,10 @@ export function OnboardingModal() {
                     <NeuButton
                       variant="ghost"
                       size="sm"
-                      onClick={() => { finish(); nav({ to: s.cta!.to }); }}
+                      onClick={() => {
+                        finish();
+                        nav({ to: s.cta!.to });
+                      }}
                     >
                       {s.cta.label}
                     </NeuButton>

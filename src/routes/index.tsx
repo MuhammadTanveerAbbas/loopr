@@ -276,10 +276,15 @@ function HeroPreview() {
               >
                 {/* Header row */}
                 <div className="flex items-center justify-between">
-                  <div className="text-xs font-extrabold uppercase tracking-wider opacity-80">{k.label}</div>
+                  <div className="text-xs font-extrabold uppercase tracking-wider opacity-80">
+                    {k.label}
+                  </div>
                   <span
                     className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-black shrink-0"
-                    style={{ background: "rgba(0,0,0,0.12)", boxShadow: "0 2px 0 rgba(0,0,0,0.22)" }}
+                    style={{
+                      background: "rgba(0,0,0,0.12)",
+                      boxShadow: "0 2px 0 rgba(0,0,0,0.22)",
+                    }}
                   >
                     <k.Icon className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                   </span>
@@ -362,7 +367,6 @@ function MiniBars() {
     </div>
   );
 }
-
 
 /* ============================== FEATURES ============================== */
 
@@ -571,7 +575,9 @@ function Donut({ label, value, sample }: { label: string; value: number; sample?
         <div className="text-base sm:text-lg font-extrabold text-black leading-none">
           {sample ? "-" : `${value}%`}
         </div>
-        <div className="text-[9px] sm:text-[10px] font-bold uppercase text-black/70 mt-1 truncate">{label}</div>
+        <div className="text-[9px] sm:text-[10px] font-bold uppercase text-black/70 mt-1 truncate">
+          {label}
+        </div>
       </div>
     </div>
   );
@@ -644,15 +650,21 @@ function Comparison() {
     hubspot: boolean | string;
     sheets: boolean | string;
   }[] = [
-    { label: "Setup time",            icon: Timer,       loopr: "Under 1 min",  hubspot: "Hours",       sheets: "Manual"   },
-    { label: "AI daily briefing",     icon: Bot,         loopr: true,           hubspot: false,         sheets: false      },
-    { label: "Signal score (0-100)",  icon: Gauge,       loopr: true,           hubspot: "Add-on",      sheets: false      },
-    { label: "Reply analyzer",        icon: MailSearch,  loopr: true,           hubspot: "Enterprise",  sheets: false      },
-    { label: "Sheet and Kanban views",icon: Columns2,    loopr: true,           hubspot: true,          sheets: false      },
-    { label: "Per-seat pricing",      icon: CreditCard,  loopr: false,          hubspot: true,          sheets: false      },
-    { label: "Bloat and nags",        icon: BellOff,     loopr: false,          hubspot: true,          sheets: false      },
-    { label: "Export your data",      icon: Download,    loopr: true,           hubspot: "Limited",     sheets: true       },
-    { label: "Built for solo ops",    icon: UserCheck,   loopr: true,           hubspot: false,         sheets: false      },
+    { label: "Setup time", icon: Timer, loopr: "Under 1 min", hubspot: "Hours", sheets: "Manual" },
+    { label: "AI daily briefing", icon: Bot, loopr: true, hubspot: false, sheets: false },
+    { label: "Signal score (0-100)", icon: Gauge, loopr: true, hubspot: "Add-on", sheets: false },
+    {
+      label: "Reply analyzer",
+      icon: MailSearch,
+      loopr: true,
+      hubspot: "Enterprise",
+      sheets: false,
+    },
+    { label: "Sheet and Kanban views", icon: Columns2, loopr: true, hubspot: true, sheets: false },
+    { label: "Per-seat pricing", icon: CreditCard, loopr: false, hubspot: true, sheets: false },
+    { label: "Bloat and nags", icon: BellOff, loopr: false, hubspot: true, sheets: false },
+    { label: "Export your data", icon: Download, loopr: true, hubspot: "Limited", sheets: true },
+    { label: "Built for solo ops", icon: UserCheck, loopr: true, hubspot: false, sheets: false },
   ];
 
   const Cell = ({ v, accent }: { v: boolean | string; accent?: boolean }) => {
@@ -674,7 +686,9 @@ function Comparison() {
       );
     }
     return (
-      <div className={`text-xs font-extrabold leading-tight ${accent ? "text-black" : "text-foreground/80"}`}>
+      <div
+        className={`text-xs font-extrabold leading-tight ${accent ? "text-black" : "text-foreground/80"}`}
+      >
         {v}
       </div>
     );
@@ -713,13 +727,18 @@ function Comparison() {
                   <div className="flex flex-col items-center gap-2">
                     <div
                       className="w-10 h-10 rounded-xl border-2 border-white/40 flex items-center justify-center"
-                      style={{ background: "rgba(0,0,0,0.18)", boxShadow: "0 3px 0 rgba(0,0,0,0.3)" }}
+                      style={{
+                        background: "rgba(0,0,0,0.18)",
+                        boxShadow: "0 3px 0 rgba(0,0,0,0.3)",
+                      }}
                     >
                       <LoopMark size={22} className="text-white" />
                     </div>
                     <div>
                       <div className="text-white font-extrabold text-base leading-tight">Loopr</div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-white/75 mt-0.5">Focused CRM</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-white/75 mt-0.5">
+                        Focused CRM
+                      </div>
                     </div>
                   </div>
                 </th>
@@ -732,8 +751,12 @@ function Comparison() {
                       <Building2 className="h-5 w-5 text-foreground" strokeWidth={2} />
                     </div>
                     <div>
-                      <div className="font-extrabold text-base text-foreground leading-tight">HubSpot</div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">Big CRM</div>
+                      <div className="font-extrabold text-base text-foreground leading-tight">
+                        HubSpot
+                      </div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">
+                        Big CRM
+                      </div>
                     </div>
                   </div>
                 </th>
@@ -746,8 +769,12 @@ function Comparison() {
                       <Table className="h-5 w-5 text-foreground" strokeWidth={2} />
                     </div>
                     <div>
-                      <div className="font-extrabold text-base text-foreground leading-tight">Spreadsheets</div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">DIY</div>
+                      <div className="font-extrabold text-base text-foreground leading-tight">
+                        Spreadsheets
+                      </div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">
+                        DIY
+                      </div>
                     </div>
                   </div>
                 </th>
@@ -765,7 +792,10 @@ function Comparison() {
                       <div className="flex items-center gap-3">
                         <div
                           className="w-8 h-8 rounded-lg border-2 border-black flex items-center justify-center shrink-0"
-                          style={{ background: "var(--brand-yellow)", boxShadow: "0 2px 0 #0a0a0a" }}
+                          style={{
+                            background: "var(--brand-yellow)",
+                            boxShadow: "0 2px 0 #0a0a0a",
+                          }}
                         >
                           <Icon className="h-4 w-4 text-foreground" strokeWidth={2.5} />
                         </div>
@@ -795,7 +825,9 @@ function Comparison() {
             <div className="bg-brand-orange px-5 py-4 flex items-center justify-between">
               <div>
                 <div className="text-white font-extrabold text-lg leading-tight">Loopr</div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Focused CRM</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">
+                  Focused CRM
+                </div>
               </div>
               <span className="text-xs font-extrabold uppercase tracking-wider bg-white/20 text-white px-2.5 py-1 rounded-md border border-white/30">
                 That is us
@@ -827,13 +859,18 @@ function Comparison() {
             <div key={c.key} className="brutal-card p-0 overflow-hidden">
               <div className="bg-foreground/5 border-b-3 border-black px-5 py-4">
                 <div className="font-extrabold text-base text-foreground">{c.label}</div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">{c.sub}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mt-0.5">
+                  {c.sub}
+                </div>
               </div>
               <div className="divide-y divide-black/10">
                 {rows.map((r) => {
                   const Icon = r.icon;
                   return (
-                    <div key={r.label} className="flex items-center justify-between px-4 py-3 gap-3">
+                    <div
+                      key={r.label}
+                      className="flex items-center justify-between px-4 py-3 gap-3"
+                    >
                       <div className="flex items-center gap-2.5 flex-1 min-w-0">
                         <div
                           className="w-7 h-7 rounded-lg border-2 border-black/30 flex items-center justify-center shrink-0"
@@ -841,7 +878,9 @@ function Comparison() {
                         >
                           <Icon className="h-3.5 w-3.5 text-foreground/60" strokeWidth={2} />
                         </div>
-                        <span className="text-sm font-semibold text-foreground/70 truncate">{r.label}</span>
+                        <span className="text-sm font-semibold text-foreground/70 truncate">
+                          {r.label}
+                        </span>
                       </div>
                       <Cell v={r[c.key]} />
                     </div>
@@ -1013,7 +1052,7 @@ function CTA() {
   return (
     <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
       <div className="brutal-card-orange p-8 sm:p-12 md:p-16 text-center relative overflow-hidden">
-        {/* Sticker decorations — hidden on very small screens so they don't overlap text */}
+        {/* Sticker decorations hidden on very small screens so they don't overlap text */}
         <div
           aria-hidden
           className="hidden xs:block absolute top-4 sm:top-6 left-4 sm:left-6 brutal-card-yellow px-2.5 py-1 text-[10px] sm:text-xs font-extrabold uppercase -rotate-6"
@@ -1087,7 +1126,7 @@ function Footer() {
     <footer className="bg-brand-yellow border-t-3 border-black mt-10">
       {/* ── Row 1: Brand + Nav cols ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-14 pb-10">
-        {/* Brand block — full width on mobile, 2/5 on desktop */}
+        {/* Brand block full width on mobile, 2/5 on desktop */}
         <div className="mb-10 md:hidden">
           <div className="flex items-center gap-3">
             <LoopMark size={44} />
@@ -1099,13 +1138,18 @@ function Footer() {
             </div>
           </div>
           <p className="mt-4 text-sm font-semibold text-foreground/80 max-w-sm">
-            A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just deals.
+            A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just
+            deals.
           </p>
           <div className="mt-4 flex items-center gap-3">
             {[
               { Icon: Twitter, href: "https://x.com/m_tanveerabbas", label: "Twitter" },
               { Icon: Github, href: "https://github.com/muhammadtanveerabbas", label: "GitHub" },
-              { Icon: Linkedin, href: "https://linkedin.com/in/muhammadtanveerabbas", label: "LinkedIn" },
+              {
+                Icon: Linkedin,
+                href: "https://linkedin.com/in/muhammadtanveerabbas",
+                label: "LinkedIn",
+              },
             ].map(({ Icon, href, label }) => (
               <a
                 key={label}
@@ -1120,9 +1164,9 @@ function Footer() {
           </div>
         </div>
 
-        {/* Nav cols — 3-col grid on mobile, 5-col on desktop */}
+        {/* Nav cols 3-col grid on mobile, 5-col on desktop */}
         <div className="grid grid-cols-3 md:grid-cols-5 gap-6 md:gap-10">
-          {/* Brand col — desktop only */}
+          {/* Brand col desktop only */}
           <div className="hidden md:block md:col-span-2">
             <div className="flex items-center gap-3">
               <LoopMark size={48} />
@@ -1134,13 +1178,18 @@ function Footer() {
               </div>
             </div>
             <p className="mt-5 text-sm font-semibold text-foreground/80 max-w-xs">
-              A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just deals.
+              A focused CRM for solo founders running high-touch outbound. No bloat. No nags. Just
+              deals.
             </p>
             <div className="mt-5 flex items-center gap-3">
               {[
                 { Icon: Twitter, href: "https://x.com/m_tanveerabbas", label: "Twitter" },
                 { Icon: Github, href: "https://github.com/muhammadtanveerabbas", label: "GitHub" },
-                { Icon: Linkedin, href: "https://linkedin.com/in/muhammadtanveerabbas", label: "LinkedIn" },
+                {
+                  Icon: Linkedin,
+                  href: "https://linkedin.com/in/muhammadtanveerabbas",
+                  label: "LinkedIn",
+                },
               ].map(({ Icon, href, label }) => (
                 <a
                   key={label}
@@ -1167,7 +1216,10 @@ function Footer() {
                       href={l.href}
                       className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-foreground/80 hover:text-foreground hover:underline underline-offset-4 decoration-2 min-h-[36px] sm:min-h-0"
                     >
-                      <l.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 opacity-70" strokeWidth={2.5} />
+                      <l.icon
+                        className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 opacity-70"
+                        strokeWidth={2.5}
+                      />
                       {l.label}
                     </a>
                   </li>
@@ -1204,8 +1256,7 @@ function Footer() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs font-bold text-foreground/80">
-              <LoopMark size={18} />
-              © {new Date().getFullYear()} Loopr. All rights reserved.
+              <LoopMark size={18} />© {new Date().getFullYear()} Loopr. All rights reserved.
             </div>
             <div className="text-xs font-bold text-foreground/80 flex items-center gap-1.5">
               Crafted with <Heart className="h-3.5 w-3.5 text-brand-orange fill-brand-orange" /> by{" "}

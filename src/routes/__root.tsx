@@ -77,7 +77,7 @@ function ErrorBoundary({ error }: { error: unknown }) {
         <p className="mt-2 text-foreground/70 text-sm">
           {isAuthError
             ? "Your session has expired. Please sign in again."
-            : err?.message ?? "An unexpected error occurred. Please try again."}
+            : (err?.message ?? "An unexpected error occurred. Please try again.")}
         </p>
         <button
           onClick={() => window.location.reload()}

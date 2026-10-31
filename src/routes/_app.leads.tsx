@@ -18,7 +18,6 @@ import { Plus, Search, Trash2, Download } from "lucide-react";
 import { LeadDrawer } from "@/components/leads/LeadDrawer";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -38,8 +37,9 @@ export const Route = createFileRoute("/_app/leads")({
 
 function LeadsPage() {
   const { user } = useAuth();
-  const { data, isLoading, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = useLeadsInfinite();
-  const leads = useMemo(() => data?.pages.flatMap(page => page.leads) ?? [], [data]);
+  const { data, isLoading, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useLeadsInfinite();
+  const leads = useMemo(() => data?.pages.flatMap((page) => page.leads) ?? [], [data]);
   const update = useUpdateLead();
   const create = useCreateLead();
   const del = useDeleteLead();
@@ -199,7 +199,7 @@ function LeadsPage() {
     <PageContainer className="max-w-[1400px]">
       <PageHeader
         title="Leads"
-        subtitle={`${filtered.length} of ${leads.length} leads${data?.pages[0]?.total ? ` (Total: ${data.pages[0].total})` : ''}`}
+        subtitle={`${filtered.length} of ${leads.length} leads${data?.pages[0]?.total ? ` (Total: ${data.pages[0].total})` : ""}`}
         actions={
           <div className="flex items-center gap-2">
             <div className="relative" ref={exportRef}>
@@ -260,11 +260,25 @@ function LeadsPage() {
             />
           </div>
           <div className="flex gap-2">
-            <NeuSelect value={stageFilter} onChange={(e) => setStageFilter(e.target.value)} className="flex-1 min-w-0">
+            <NeuSelect
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.target.value)}
+              className="flex-1 min-w-0"
+            >
               <option value="all">All stages</option>
-              {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
+              {STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </NeuSelect>
-            <NeuSelect value={sortBy} onChange={(e) => setSortBy(e.target.value as "signal" | "silent" | "value" | "contact")} className="flex-1 min-w-0">
+            <NeuSelect
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as "signal" | "silent" | "value" | "contact")
+              }
+              className="flex-1 min-w-0"
+            >
               <option value="signal">Sort: Signal</option>
               <option value="silent">Sort: Silent</option>
               <option value="value">Sort: Value</option>
@@ -321,21 +335,37 @@ function LeadsPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="font-bold text-sm text-foreground truncate">{l.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{l.company || "—"}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {l.company || "—"}
+                      </div>
                     </div>
-                    <NeuBadge color={sc === "red" ? "red" : sc === "amber" ? "amber" : "green"}>{l.signal_score}</NeuBadge>
+                    <NeuBadge color={sc === "red" ? "red" : sc === "amber" ? "amber" : "green"}>
+                      {l.signal_score}
+                    </NeuBadge>
                   </div>
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className="text-xs font-extrabold text-foreground">${Number(l.deal_value).toLocaleString()}</span>
-                    <span className="text-[10px] font-bold text-muted-foreground border border-black/20 px-1.5 py-0.5 rounded-full">{l.stage}</span>
-                    {ds !== null && <span className={`text-[10px] font-semibold ${ds >= 5 ? "text-destructive" : "text-muted-foreground"}`}>{ds}d silent</span>}
+                    <span className="text-xs font-extrabold text-foreground">
+                      ${Number(l.deal_value).toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-foreground border border-black/20 px-1.5 py-0.5 rounded-full">
+                      {l.stage}
+                    </span>
+                    {ds !== null && (
+                      <span
+                        className={`text-[10px] font-semibold ${ds >= 5 ? "text-destructive" : "text-muted-foreground"}`}
+                      >
+                        {ds}d silent
+                      </span>
+                    )}
                   </div>
                 </div>
               );
             })}
             {filtered.length === 0 && (
               <p className="text-center text-sm text-muted-foreground py-10">
-                {leads.length === 0 ? "No leads yet. Click Add Lead to start." : "No leads match your filters."}
+                {leads.length === 0
+                  ? "No leads yet. Click Add Lead to start."
+                  : "No leads match your filters."}
               </p>
             )}
           </div>

@@ -25,24 +25,24 @@ const sections = [
     label: "Main",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, shortcut: "G D" },
-      { to: "/leads",     label: "Leads",     icon: Table2,          shortcut: "G L" },
-      { to: "/pipeline",  label: "Pipeline",  icon: Kanban,          shortcut: "G P" },
-      { to: "/nurture",   label: "Nurture",   icon: Heart,           shortcut: "G N" },
-      { to: "/closed",    label: "Closed",    icon: CheckCircle2,    shortcut: "G C" },
+      { to: "/leads", label: "Leads", icon: Table2, shortcut: "G L" },
+      { to: "/pipeline", label: "Pipeline", icon: Kanban, shortcut: "G P" },
+      { to: "/nurture", label: "Nurture", icon: Heart, shortcut: "G N" },
+      { to: "/closed", label: "Closed", icon: CheckCircle2, shortcut: "G C" },
     ],
   },
   {
     label: "Tools",
     items: [
-      { to: "/import", label: "Import CSV",   icon: Upload, shortcut: "G I" },
-      { to: "/ai",     label: "AI Workspace", icon: Brain,  shortcut: "G A" },
+      { to: "/import", label: "Import CSV", icon: Upload, shortcut: "G I" },
+      { to: "/ai", label: "AI Workspace", icon: Brain, shortcut: "G A" },
     ],
   },
   {
     label: "Account",
     items: [
       { to: "/activity", label: "Activity", icon: Activity, shortcut: "G V" },
-      { to: "/trash",    label: "Trash",    icon: Trash2,   shortcut: "G T" },
+      { to: "/trash", label: "Trash", icon: Trash2, shortcut: "G T" },
       { to: "/settings", label: "Settings", icon: Settings, shortcut: "G S" },
     ],
   },
@@ -91,14 +91,14 @@ function SidebarNav({
           onClick={onNav}
           className={`relative flex items-center gap-2.5 rounded-xl text-sm font-bold transition-all duration-150
             ${collapsed ? "justify-center px-0 py-2.5 w-full" : "px-3 py-2"}
-            ${active
-              ? "bg-brand-yellow border-2 border-black shadow-[0_3px_0_#0a0a0a] text-foreground"
-              : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06]"
+            ${
+              active
+                ? "bg-brand-yellow border-2 border-black shadow-[0_3px_0_#0a0a0a] text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06]"
             }`}
         >
           <Icon className="h-4 w-4 shrink-0" strokeWidth={active ? 2.5 : 2} aria-hidden />
           {!collapsed && <span className="truncate">{label}</span>}
-
         </Link>
         {collapsed && <Tooltip label={label} shortcut={shortcut} />}
       </div>
@@ -117,7 +117,9 @@ function SidebarNav({
         {!collapsed && (
           <div className="leading-none">
             <div className="font-extrabold text-foreground text-sm tracking-tight">Loopr</div>
-            <div className="text-[8px] font-bold uppercase tracking-wider text-foreground/60 mt-0.5">CRM</div>
+            <div className="text-[8px] font-bold uppercase tracking-wider text-foreground/60 mt-0.5">
+              CRM
+            </div>
           </div>
         )}
       </Link>
@@ -152,10 +154,11 @@ function SidebarNav({
                 ${collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2"}`}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {collapsed
-                ? <PanelLeftOpen className="h-4 w-4 shrink-0" />
-                : <PanelLeftClose className="h-4 w-4 shrink-0" />
-              }
+              {collapsed ? (
+                <PanelLeftOpen className="h-4 w-4 shrink-0" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4 shrink-0" />
+              )}
               {!collapsed && <span>Collapse</span>}
             </button>
             {collapsed && <Tooltip label="Expand sidebar" />}
@@ -165,7 +168,10 @@ function SidebarNav({
         {/* Logout */}
         <div className="relative group/tip">
           <button
-            onClick={async () => { await signOut(); nav({ to: "/auth" }); }}
+            onClick={async () => {
+              await signOut();
+              nav({ to: "/auth" });
+            }}
             className={`flex items-center gap-2.5 w-full rounded-xl text-sm font-bold text-muted-foreground
               hover:text-destructive hover:bg-destructive/[0.06] transition-all
               ${collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2"}`}
@@ -180,7 +186,13 @@ function SidebarNav({
   );
 }
 
-export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobileClose?: () => void }) {
+export function Sidebar({
+  mobileOpen,
+  onMobileClose,
+}: {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const loc = useLocation();
   const nav = useNavigate();
@@ -197,7 +209,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; o
             onClick={onMobileClose}
           />
 
-          {/* Drawer panel — slides in from left, full height, sits at top */}
+          {/* Drawer panel slides in from left, full height, sits at top */}
           <div
             className="relative w-72 max-w-[85vw] h-full bg-background border-r-[3px] border-black flex flex-col animate-slide-in-left overflow-hidden"
             style={{ boxShadow: "6px 0 0 #0a0a0a" }}
@@ -208,7 +220,9 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; o
                 <LoopMark size={28} />
                 <div className="leading-none">
                   <div className="font-extrabold text-foreground text-sm tracking-tight">Loopr</div>
-                  <div className="text-[9px] font-bold uppercase tracking-widest text-foreground/45">CRM · v1.0</div>
+                  <div className="text-[9px] font-bold uppercase tracking-widest text-foreground/45">
+                    CRM · v1.0
+                  </div>
                 </div>
               </div>
               <button
@@ -220,7 +234,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; o
               </button>
             </div>
 
-            {/* Nav sections — full list rows */}
+            {/* Nav sections | full list rows */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-5">
               {sections.map((section) => (
                 <div key={section.label}>
@@ -230,19 +244,25 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; o
                   <div className="space-y-1">
                     {section.items.map((item) => {
                       const Icon = item.icon;
-                      const active = loc.pathname === item.to || loc.pathname.startsWith(item.to + "/");
+                      const active =
+                        loc.pathname === item.to || loc.pathname.startsWith(item.to + "/");
                       return (
                         <Link
                           key={item.to}
                           to={item.to}
                           onClick={onMobileClose}
                           className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all
-                            ${active
-                              ? "bg-brand-yellow border-2 border-black shadow-[0_3px_0_#0a0a0a] text-foreground"
-                              : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] border-2 border-transparent"
+                            ${
+                              active
+                                ? "bg-brand-yellow border-2 border-black shadow-[0_3px_0_#0a0a0a] text-foreground"
+                                : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] border-2 border-transparent"
                             }`}
                         >
-                          <Icon className="h-4 w-4 shrink-0" strokeWidth={active ? 2.5 : 2} aria-hidden />
+                          <Icon
+                            className="h-4 w-4 shrink-0"
+                            strokeWidth={active ? 2.5 : 2}
+                            aria-hidden
+                          />
                           <span>{item.label}</span>
                         </Link>
                       );
@@ -255,7 +275,11 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; o
             {/* Bottom: logout */}
             <div className="shrink-0 border-t-2 border-black/10 px-3 py-4">
               <button
-                onClick={async () => { await signOut(); nav({ to: "/auth" }); onMobileClose?.(); }}
+                onClick={async () => {
+                  await signOut();
+                  nav({ to: "/auth" });
+                  onMobileClose?.();
+                }}
                 className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border-2 border-black text-sm font-bold text-foreground bg-background shadow-[0_2px_0_#0a0a0a] hover:bg-foreground/5 transition-all"
               >
                 <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
@@ -271,10 +295,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; o
         className={`hidden md:flex flex-col h-screen sticky top-0 p-4 bg-background border-r-[3px] border-black shrink-0 transition-all duration-300
           ${collapsed ? "w-[68px]" : "w-[248px]"}`}
       >
-        <SidebarNav
-          collapsed={collapsed}
-          onCollapse={() => setCollapsed((v) => !v)}
-        />
+        <SidebarNav collapsed={collapsed} onCollapse={() => setCollapsed((v) => !v)} />
       </aside>
     </>
   );

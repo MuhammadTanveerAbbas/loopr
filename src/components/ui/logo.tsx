@@ -46,7 +46,6 @@ export function BrandLockup({
       <LoopMark size={size} className="transition-transform group-hover:rotate-[-6deg]" />
       <div className="flex flex-col leading-none">
         <span className="font-extrabold text-[22px] text-foreground tracking-tight">Loopr</span>
-
       </div>
     </Link>
   );

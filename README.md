@@ -1,11 +1,11 @@
 <div align="center">
 
   <img src="./public/favicon.svg" alt="Loopr Logo" width="80" height="80" />
-  
+
   # Loopr
-  
+
   **A focused CRM that thinks with you built for solo founders running high-touch outbound.**
-  
+
   [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://loopr-io.vercel.app/)
   [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
   [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
@@ -211,7 +211,7 @@ This project is deployed on **Vercel** using TanStack Start + Nitro.
 
 1. Push your code to GitHub
 2. Import your repository at [vercel.com/new](https://vercel.com/new)
-3. Vercel auto-detects TanStack Start — no extra config needed
+3. Vercel auto-detects TanStack Start no extra config needed
 4. Add environment variables in the Vercel dashboard
 5. Deploy
 
@@ -256,7 +256,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
 
-**Muhammad Tanveer Abbas**  
+**Muhammad Tanveer Abbas**
 SaaS Developer | Building production-ready MVPs in 14–21 days
 
 [![Twitter](https://img.shields.io/badge/Twitter-@m_tanveerabbas-1DA1F2?style=for-the-badge&logo=twitter)](https://x.com/m_tanveerabbas)
