@@ -217,23 +217,6 @@ This project is deployed on **Vercel** using TanStack Start + Nitro.
 
 ---
 
-## 🗺 Roadmap
-
-- [x] Sheet & Kanban pipeline views
-- [x] AI-powered daily briefings
-- [x] Signal Score for leads
-- [x] Reply analyzer
-- [x] CSV import & export
-- [x] Analytics: KPIs, funnel, at-risk alerts, monthly revenue with time range filtering
-- [x] Fully responsive landing + dashboard with WCAG compliance
-- [x] Performance optimizations (pagination, debounced search, retry logic)
-- [x] Enhanced security (improved sanitization, input validation)
-- [ ] Team/collaboration features
-- [ ] Email integration
-- [ ] Real-time updates with Supabase subscriptions
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
@@ -252,17 +235,16 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-## 👨💻 Built by Muhammad Tanveer Abbas
 
-<div align="center">
+## 👨‍💻 Built by Muhammad Tanveer Abbas
+
+<div>
 
 **Muhammad Tanveer Abbas**
-SaaS Developer | Building production-ready MVPs in 14–21 days
+Technical Product Partner for B2B SaaS & Internals Tools
 
 [![Twitter](https://img.shields.io/badge/Twitter-@m_tanveerabbas-1DA1F2?style=for-the-badge&logo=twitter)](https://x.com/m_tanveerabbas)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/muhammadtanveerabbas)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github)](https://github.com/MuhammadTanveerAbbas)
 
-*If this project helped you, please consider giving it a ⭐*
-
-</div>
+If this project helped you, please consider giving it a ⭐
